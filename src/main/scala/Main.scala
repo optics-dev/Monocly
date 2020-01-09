@@ -1,23 +1,26 @@
-import example.Foo.FooIS
-import example.{Bar, Foo, Id}
-import optics.{Lens, Prism}
+import example.Foo.{FooI, FooIS}
+import example.{Mono, Poly, Foo}
+import optics.PPrism
 
 object Main {
 
-  val bar = Bar(1, Id("xxx"), FooIS(8, "hey"), Some(0))
-
   def main(args: Array[String]): Unit = {
-    println((Bar.id compose Id.x).get(bar))
-    println((Bar.id compose (Id.x: Lens[Id, String])).get(bar))
-    println((Bar.foo compose Foo.fooIS).getOption(bar))
-    println((Bar.foo compose (Foo.fooIS compose FooIS.i)).getOption(bar))
+    val mono = Mono(1, FooIS(8, "hey"), Some(0))
+    println((Mono.foo andThen Foo.fooIS).getOption(mono))
+    println((Mono.foo andThen (Foo.fooIS andThen FooIS.i)).getOption(mono))
+    println((Mono.optI andThen PPrism.some).getOption(mono))
 
-    def some[A]: Prism[Option[A], A] = Prism[Option[A], A](identity)(Some(_))
+    val poly1 = Poly(1, FooIS(8, "hey"), Some(0), Option(3))
+    // change a Poly[Option[Int]] to  Poly[Option[String]]
+    println((Poly.param andThen PPrism.some).set("hello")(poly1))
 
-    println((Bar.optI compose some).getOption(bar))
+    val poly2 = Poly(1, FooIS(8, "hey"), Some(0), Some(3))
+    // change a Poly[Some[Int]] to  Poly[Some[String]]
+    println((Poly.param andThen PPrism.some).set("hello")(poly1))
+
+    // combine poly and monomorphic optics
+    val poly3 = Poly(1, FooIS(8, "hey"), Some(0), Some(FooI(4)))
+    println((Poly.param andThen PPrism.some andThen Foo.fooI).set(FooI(7))(poly3))
   }
-
-
-
 
 }
