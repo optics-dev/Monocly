@@ -1,6 +1,7 @@
 package optics
 
 import scala.annotation.alpha
+import scala.quoted._
 
 trait PLens[-S, +T, +A, -B] extends EPOptional[Nothing, S, T, A, B] { self =>
   def get(from: S): A
@@ -26,4 +27,38 @@ object PLens {
 
 object Lens {
   def apply[A, B](_get: A => B)(_set: B => A => A): Lens[A, B] = PLens(_get)(_set)
+
+  def impl[A: Type, B: Type](getter: Expr[A => B])(given qctx: QuoteContext): Expr[Lens[A, B]] = {
+    implicit val toolbox: scala.quoted.staging.Toolbox = scala.quoted.staging.Toolbox.make(this.getClass.getClassLoader)
+    import qctx.tasty.{_, given}
+    import util._
+    // obj.copy(field = value)
+    def setterBody(obj: Expr[A], value: Expr[B], field: String): Expr[A] =
+      Select.overloaded(obj.unseal, "copy", Nil, NamedArg(field, value.unseal) :: Nil).seal.cast[A]
+
+    // exception: getter.unseal.underlyingArgument
+    getter.unseal match {
+      case Inlined(
+        None, Nil,
+        Block(
+          DefDef(_, Nil, (param :: Nil) :: Nil, _, Some(Select(o, field))) :: Nil,
+          Lambda(meth, _)
+        )
+      ) if o.symbol == param.symbol =>
+        '{
+         val setter = (to: B) => (from: A) => ${ setterBody('s, 't, field) }
+         apply($getter)(setter)
+        }
+      case _ =>
+        qctx.error("Unsupported syntax. Example: `GenLens[Address](_.streetNumber)`")
+        '{???}
+    }
+  }
+}
+
+object GenLens {
+  def apply[A] = new MkGenLens[A]
+  class MkGenLens[A] {
+    inline def apply[B](get: => (A => B)): Lens[A, B] = ${ Lens.impl('get) }
+  }
 }
