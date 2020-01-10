@@ -1,5 +1,7 @@
 package optics
 
+import scala.annotation.alpha
+
 trait POptional[-S, +T, +A, -B] { self =>
   def getOrModify(from: S): Either[T, A]
 
@@ -11,7 +13,8 @@ trait POptional[-S, +T, +A, -B] { self =>
   def modify(f: A => B): S => T = from =>
     getOrModify(from).fold(identity, a => set(f(a))(from))
 
-  def andThen[C, D](other: POptional[A, B, C, D]): POptional[S, T, C, D] = new POptional[S, T, C, D] {
+  @alpha("andThen")
+  def >>>[C, D](other: POptional[A, B, C, D]): POptional[S, T, C, D] = new POptional[S, T, C, D] {
     def getOrModify(from: S): Either[T, C] = self.getOrModify(from).flatMap(other.getOrModify(_).left.map(self.set(_)(from)))
     def set(to: D): S => T = self.modify(other.set(to))
     override def modify(f: C => D): S => T = self.modify(other.modify(f))

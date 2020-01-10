@@ -1,5 +1,7 @@
 package optics
 
+import scala.annotation.alpha
+
 trait PLens[-S, +T, +A, -B] extends POptional[S, T, A, B] { self =>
   def get(from: S): A
 
@@ -7,7 +9,8 @@ trait PLens[-S, +T, +A, -B] extends POptional[S, T, A, B] { self =>
 
   override def modify(f: A => B): S => T = from => set(f(get(from)))(from)
 
-  def andThen[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] = new PLens[S, T, C, D] {
+  @alpha("andThen")
+  def >>>[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] = new PLens[S, T, C, D] {
     def get(from: S): C = other.get(self.get(from))
     def set(to: D): S => T = self.modify(other.set(to))
     override def modify(f: C => D): S => T = self.modify(other.modify(f))

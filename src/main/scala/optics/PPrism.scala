@@ -1,5 +1,7 @@
 package optics
 
+import scala.annotation.alpha
+
 trait PPrism[-S, +T, +A, -B] extends POptional[S, T, A, B] { self =>
   def reverseGet(to: B): T
 
@@ -8,7 +10,8 @@ trait PPrism[-S, +T, +A, -B] extends POptional[S, T, A, B] { self =>
   override def modify(f: A => B): S => T = from =>
     getOrModify(from).fold(identity, a => reverseGet(f(a)))
 
-  def andThen[C, D](other: PPrism[A, B, C, D]): PPrism[S, T, C, D] = new PPrism[S, T, C, D] {
+  @alpha("andThen")
+  def >>>[C, D](other: PPrism[A, B, C, D]): PPrism[S, T, C, D] = new PPrism[S, T, C, D] {
     def getOrModify(from: S): Either[T, C] = self.getOrModify(from).flatMap(other.getOrModify(_).left.map(self.set(_)(from)))
     def reverseGet(to: D): T = self.reverseGet(other.reverseGet(to))
   }
