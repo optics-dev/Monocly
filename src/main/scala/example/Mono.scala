@@ -37,10 +37,12 @@ object Foo {
   case class FooIS(i: Int, s: String) extends Foo
   case object FooU extends Foo
 
-  val fooI: Prism[Foo, FooI] = Prism.partial[Foo, FooI]{ case x: FooI => x }(identity)
-  val fooS: Prism[Foo, FooS] = Prism.partial[Foo, FooS]{ case x: FooS => x }(identity)
-  val fooIS: Prism[Foo, FooIS] = Prism.partial[Foo, FooIS]{ case x: FooIS => x }(identity)
-  val fooU: Prism[Foo, FooU.type] = Prism.partial[Foo, FooU.type]{ case FooU => FooU }(identity)
+  def mkError[A](expected: String): A => String = a => s"Expected $expected but got $a"
+
+  val fooI: EPrism[String, Foo, FooI] = EPrism.partial[String, Foo, FooI]{ case x: FooI => x }(mkError("FooI"))(identity)
+  val fooS: EPrism[String, Foo, FooS] = EPrism.partial[String, Foo, FooS]{ case x: FooS => x }(mkError("FooS"))(identity)
+  val fooIS: EPrism[String, Foo, FooIS] = EPrism.partial[String, Foo, FooIS]{ case x: FooIS => x }(mkError("FooIS"))(identity)
+  val fooU: EPrism[String, Foo, FooU.type] = EPrism.partial[String, Foo, FooU.type]{ case FooU => FooU }(mkError("FooU"))(identity)
 
   object FooIS {
     val i: Lens[FooIS, Int] = Lens[FooIS, Int](_.i)((newI, foo) => foo.copy(i = newI))

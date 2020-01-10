@@ -2,10 +2,10 @@ package optics
 
 import scala.annotation.alpha
 
-trait PLens[-S, +T, +A, -B] extends POptional[S, T, A, B] { self =>
+trait PLens[-S, +T, +A, -B] extends EPOptional[Nothing, S, T, A, B] { self =>
   def get(from: S): A
 
-  def getOrModify(from: S): Either[T, A] = Right(get(from))
+  def getOrModify(from: S): Either[(Nothing, T), A] = Right(get(from))
 
   override def modify(f: A => B): S => T = from => set(f(get(from)))(from)
 
