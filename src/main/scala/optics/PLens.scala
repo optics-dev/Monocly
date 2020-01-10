@@ -18,12 +18,12 @@ trait PLens[-S, +T, +A, -B] extends EPOptional[Nothing, S, T, A, B] { self =>
 }
 
 object PLens {
-  def apply[S, T, A, B](_get: S => A)(_set: (B, S) => T): PLens[S, T, A, B] = new PLens[S, T, A, B] {
+  def apply[S, T, A, B](_get: S => A)(_set: B => S => T): PLens[S, T, A, B] = new PLens[S, T, A, B] {
     def get(from: S): A = _get(from)
-    def set(to: B): S => T = _set(to, _)
+    def set(to: B): S => T = _set(to)
   }
 }
 
 object Lens {
-  def apply[A, B](_get: A => B)(_set: (B, A) => A): Lens[A, B] = PLens(_get)(_set)
+  def apply[A, B](_get: A => B)(_set: B => A => A): Lens[A, B] = PLens(_get)(_set)
 }

@@ -30,18 +30,18 @@ trait EPOptional[+E, -S, +T, +A, -B] { self =>
 }
 
 object EPOptional {
-  def apply[E, S, T, A, B](_getOrModify: S => Either[(E, T), A])(_set: (B, S) => T): EPOptional[E, S, T, A, B] = new EPOptional[E, S, T, A, B] {
+  def apply[E, S, T, A, B](_getOrModify: S => Either[(E, T), A])(_set: B => S => T): EPOptional[E, S, T, A, B] = new EPOptional[E, S, T, A, B] {
     def getOrModify(from: S): Either[(E, T), A] = _getOrModify(from)
-    def set(to: B): S => T = _set(to, _)
+    def set(to: B): S => T = _set(to)
   }
 }
 
 object POptional {
-  def apply[S, T, A, B](_getOrModify: S => Either[T, A])(_set: (B, S) => T): POptional[S, T, A, B] =
+  def apply[S, T, A, B](_getOrModify: S => Either[T, A])(_set: B => S => T): POptional[S, T, A, B] =
     EPOptional[Unit, S, T, A, B](_getOrModify(_).left.map(() -> _))(_set)
 }
 
 object Optional {
-  def apply[A, B](_getOption: A => Option[B])(_set: (B, A) => A): Optional[A, B] =
+  def apply[A, B](_getOption: A => Option[B])(_set: B => A => A): Optional[A, B] =
     POptional[A, A, B, B](from => _getOption(from).toRight(from))(_set)
 }
