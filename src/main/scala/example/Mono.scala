@@ -19,17 +19,7 @@ object Poly {
   def param[A, B]: PLens[Poly[A], Poly[B], A, B] = PLens[Poly[A], Poly[B], A, B](_.param)((newVal, bar) => bar.copy(param = newVal))
 }
 
-sealed trait Foo {
-  def asFooI: Option[Foo.FooI] = this match {
-    case x: Foo.FooI => Some(x)
-    case _ => None
-  }
-
-  def asFooIS: Option[Foo.FooIS] = this match {
-    case x: Foo.FooIS => Some(x)
-    case _ => None
-  }
-}
+sealed trait Foo
 
 object Foo {
   case class FooI(i: Int) extends Foo
