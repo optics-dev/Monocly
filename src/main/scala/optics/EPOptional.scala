@@ -16,6 +16,15 @@ trait EPOptional[+E, -S, +T, +A, -B] { self =>
   def modify(f: A => B): S => T = from =>
     getOrModify(from).fold(_._2, a => set(f(a))(from))
 
+  def modifyOrError(f: A => B): S => Either[E, T] = from =>
+    getOrModify(from) match {
+      case Left((e, _)) => Left(e)
+      case Right(to)    => Right(set(f(to))(from))
+    }
+
+  def setOrError(to: B): S => Either[E, T] =
+    modifyOrError(_ => to)
+
   @alpha("andThen")
   def >>>[E1 >: E, C, D](other: EPOptional[E1, A, B, C, D]): EPOptional[E1, S, T, C, D] = new EPOptional[E1, S, T, C, D] {
     def getOrModify(from: S): Either[(E1, T), C] =
