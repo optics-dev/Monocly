@@ -19,15 +19,15 @@ object Main {
 
     val poly1 = Poly(1, FooIS(8, "hey"), Some(0), Option(3))
     // change a Poly[Option[Int]] to  Poly[Option[String]]
-    println((Poly.param >>> some).setOrError("hello")(poly1))
+    println((Poly.param >>> some).replaceOrError("hello")(poly1))
 
     val poly2 = Poly(1, FooIS(8, "hey"), Some(0), Some(3))
     // change a Poly[Some[Int]] to  Poly[Some[String]]
-    println((Poly.param >>> some).setOrError("hello")(poly2))
+    println((Poly.param >>> some).replaceOrError("hello")(poly2))
 
     // combine poly and monomorphic optics
     val poly3 = Poly(1, FooIS(8, "hey"), Some(0), Some(FooI(4)))
-    println((Poly.param >>> some >>> Foo.fooI).setOrError(FooI(7))(poly3))
+    println((Poly.param >>> some >>> Foo.fooI).replaceOrError(FooI(7))(poly3))
 
     // Left(Expected FooIS but got FooI(4))
     println((Poly.param >>> some >>> Foo.fooIS).getOrError(poly3))
