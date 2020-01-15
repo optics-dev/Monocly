@@ -1,6 +1,6 @@
 import example.Foo.{FooI, FooIS}
 import example.{Foo, Mono, Poly}
-import optics.{EPPrism, PPrism}
+import optics.{EPPrism, PPrism, PTraversal}
 
 object Main {
 
@@ -33,6 +33,9 @@ object Main {
     println((Poly.param >>> some >>> Foo.fooIS).getOrError(poly3))
     // Left(it is none)
     println((Poly.param >>> some >>> Foo.fooIS).getOrError(poly3.copy(param = None)))
+
+
+    println(PTraversal.pair.modify((_: Int) % 2 == 0)((10, 7)))
 
   }
 
