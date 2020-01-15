@@ -1,6 +1,14 @@
 package optics.internal
 
-case class TraversalRes[F[+ _], +E, +A](optError: Option[E], effect: F[A])
+case class TraversalRes[F[+ _], +E, +A](optError: Option[E], effect: F[A]){
+  def flatten[G[+_], E1 >: E, B](implicit ev: F[A] <:< TraversalRes[G, E1, B]): TraversalRes[G, E1, B] = {
+    val self = ev(effect)
+    TraversalRes(
+      optError = optError.orElse(self.optError),
+      effect   = self.effect
+    )
+  }
+}
 
 object TraversalRes {
   implicit def applicative[F[+_]: Applicative, E]: Applicative[[+X] =>> TraversalRes[F, E, X]] =
