@@ -53,6 +53,20 @@ trait EPTraversal[+E, -S, +T, +A, -B] { self =>
         )
       }
     }
+
+  @alpha("andThenDiscardRight")
+  def >>>?[E1, C, D](other: EPTraversal[E1, A, B, C, D]): EPTraversal[E, S, T, C, D] =
+    new EPTraversal[E, S, T, C, D] {
+      def modifyFAndOptError[F[+ _] : Applicative](f: C => F[D])(from: S): TraversalRes[F, E, T] =
+        self.modifyFAndOptError(other.modifyF(f)(_))(from)
+    }
+
+  @alpha("andThenDiscardLeft")
+  def ?>>>[E1, C, D](other: EPTraversal[E1, A, B, C, D]): EPTraversal[E1, S, T, C, D] =
+    new EPTraversal[E1, S, T, C, D] {
+      def modifyFAndOptError[F[+ _] : Applicative](f: C => F[D])(from: S): TraversalRes[F, E1, T] =
+        self.modifyF[[+X] =>> TraversalRes[F, E1, X]](other.modifyFAndOptError(f)(_))(from)
+    }
 }
 
 
@@ -66,6 +80,19 @@ object PTraversal {
 
   def pair[A, B]: PTraversal[(A, A), (B, B), A, B] =
     field2[(A, A), (B, B), A, B](_._1, _._2)((b1, b2) => _ => (b1, b2))
+
+  def list[A, B]: PTraversal[List[A], List[B], A, B] =
+    new PTraversal[List[A], List[B], A, B] {
+      def modifyFAndOptError[F[+ _] : Applicative](f: A => F[B])(from: List[A]): TraversalRes[F, Nothing, List[B]] =
+        TraversalRes(
+          None,
+          Applicative[F].map(
+            from.foldLeft(Applicative[F].pure(List.empty[B]))((acc, a) =>
+              Applicative[F].map2(acc, f(a))((tail, head) => head :: tail)
+            )
+          )(_.reverse)
+        )
+    }
 }
 
 object Traversal {

@@ -25,6 +25,7 @@ object Foo {
   case class FooI(i: Int) extends Foo
   case class FooS(s: String) extends Foo
   case class FooIS(i: Int, s: String) extends Foo
+  case class FooList(l: List[Int]) extends Foo
   case object FooU extends Foo
 
   def mkError[A](expected: String): A => String = a => s"Expected $expected but got $a"
@@ -33,6 +34,8 @@ object Foo {
   val fooS: EPrism[String, Foo, FooS] = EPrism.partial[String, Foo, FooS]{ case x: FooS => x }(mkError("FooS"))(identity)
   val fooIS: EPrism[String, Foo, FooIS] = EPrism.partial[String, Foo, FooIS]{ case x: FooIS => x }(mkError("FooIS"))(identity)
   val fooU: EPrism[String, Foo, FooU.type] = EPrism.partial[String, Foo, FooU.type]{ case FooU => FooU }(mkError("FooU"))(identity)
+
+  val fooL: EPrism[String, Foo, List[Int]] = EPrism.partial[String, Foo, List[Int]]{ case FooList(x) => x }(mkError("FooList"))(FooList(_))
 
   object FooIS {
     val i: Lens[FooIS, Int] = Lens[FooIS, Int](_.i)(newVal => _.copy(i = newVal))
