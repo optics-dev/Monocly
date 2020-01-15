@@ -5,10 +5,8 @@ import scala.annotation.alpha
 trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>
   def reverseGet(to: B): T
 
-  def replace(to: B): S => T = _ => reverseGet(to)
-
-  override def modify(f: A => B): S => T = from =>
-    getOrModify(from).fold(_._2, a => reverseGet(f(a)))
+  override def replace(to: B): S => T =
+    _ => reverseGet(to)
 
   @alpha("andThen")
   def >>>[E1 >: E, C, D](other: EPPrism[E1, A, B, C, D]): EPPrism[E1, S, T, C, D] = new EPPrism[E1, S, T, C, D] {
@@ -17,7 +15,6 @@ trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>
         a <- self.getOrModify(from)
         t <- other.getOrModify(a).left.map{ case (e1, b) => (e1, self.replace(b)(from)) }
       } yield t
-
     def reverseGet(to: D): T = self.reverseGet(other.reverseGet(to))
   }
 }

@@ -1,6 +1,6 @@
-import example.Foo.{FooI, FooIS}
+import example.Foo.{FooI, FooIS, FooList, FooS}
 import example.{Foo, Mono, Poly}
-import optics.{EPPrism, PPrism}
+import optics.{EPPrism, PPrism, PTraversal}
 
 object Main {
 
@@ -33,6 +33,26 @@ object Main {
     println((Poly.param >>> some >>> Foo.fooIS).getOrError(poly3))
     // Left(it is none)
     println((Poly.param >>> some >>> Foo.fooIS).getOrError(poly3.copy(param = None)))
+
+
+    // (true,false)
+    println(PTraversal.pair.modify((_: Int) % 2 == 0)((10, 7)))
+    // List(1, 3, 6, 10)
+    println((PTraversal.pair >>> PTraversal.pair).toList(((1, 3), (6, 10))))
+
+    // Right(List(FooI(10), FooI(4)))
+    println((PTraversal.list >>>  Foo.fooI).toListOrError(List(FooI(10), FooI(4))))
+    // Left(Expected FooI but got FooS(hello))
+    println((PTraversal.list >>>  Foo.fooI).toListOrError(List(FooI(10), FooS("hello"), FooI(0), FooIS(3, "world"))))
+    // Right(List(FooI(10), FooI(0)))
+    println((PTraversal.list >>>? Foo.fooI).toListOrError(List(FooI(10), FooS("hello"), FooI(0), FooIS(3, "world"))))
+
+    // Right(List(1, 2, 3, 4))
+    println((Foo.fooL >>>  PTraversal.list).toListOrError(FooList(List(1,2,3,4))))
+    // Left(Expected FooList but got FooI(10))
+    println((Foo.fooL >>>  PTraversal.list).toListOrError(FooI(10)))
+    // Right(List())
+    println((Foo.fooL ?>>> PTraversal.list).toListOrError(FooI(10)))
 
   }
 
