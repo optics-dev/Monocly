@@ -36,7 +36,7 @@ object Main {
 
 
     println(PTraversal.pair.modify((_: Int) % 2 == 0)((10, 7)))
-
+    println((PTraversal.pair >>> PTraversal.pair).toList(((1, 3), (6, 10))))
   }
 
 }

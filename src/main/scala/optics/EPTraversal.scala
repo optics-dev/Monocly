@@ -36,6 +36,9 @@ trait EPTraversal[+E, -S, +T, +A, -B] { self =>
     }(from).map(_ => acc.reverse)
   }
 
+  def toList(from: S): List[A] =
+    toListOrError(from).getOrElse(Nil)
+
   def iterator(from: S): Iterator[A] =
     toListOrError(from).fold(_ => Iterator.empty, _.iterator)
 
