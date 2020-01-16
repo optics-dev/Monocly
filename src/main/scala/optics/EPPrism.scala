@@ -35,7 +35,8 @@ object PPrism {
     def reverseGet(to: B): T = _reverseGet(to)
   }
 
-  def some[A, B]: PPrism[Option[A], Option[B], A, B] = EPPrism.some("None is not a Some")
+  def some[A, B]: PPrism[Option[A], Option[B], A, B] =
+    EPPrism.some("None is not a Some")
 }
 
 object EPrism {
@@ -45,12 +46,14 @@ object EPrism {
   def partial[E, A, B](get: PartialFunction[A, B])(mismatch: A => E)(reverseGet: B => A): EPrism[E, A, B] =
     apply[E, A, B](from => get.lift(from).toRight(mismatch(from)))(reverseGet)
 
-  def some[E, A](error: E): EPrism[E, Option[A], A] = EPPrism.some(error)
+  def some[E, A](error: E): EPrism[E, Option[A], A] =
+    EPPrism.some(error)
 }
 
 object Prism {
   def apply[A, B](_getOError: A => Either[BasicError, B])(_reverseGet: B => A): Prism[A, B] =
     EPrism(_getOError)(_reverseGet)
 
-  def some[A]: Prism[Option[A], A] = PPrism.some[A, A]
+  def some[A]: Prism[Option[A], A] =
+    PPrism.some[A, A]
 }
