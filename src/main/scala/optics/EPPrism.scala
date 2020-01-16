@@ -30,12 +30,12 @@ object EPPrism {
 }
 
 object PPrism {
-  def apply[S, T, A, B](_getOrModify: S => Either[T, A])(_reverseGet: B => T): PPrism[S, T, A, B] = new PPrism[S, T, A, B] {
-    def getOrModify(from: S): Either[(Unit, T), A] = _getOrModify(from).left.map(() -> _)
+  def apply[S, T, A, B](_getOrModify: S => Either[(BasicError, T), A])(_reverseGet: B => T): PPrism[S, T, A, B] = new PPrism[S, T, A, B] {
+    def getOrModify(from: S): Either[(BasicError, T), A] = _getOrModify(from)
     def reverseGet(to: B): T = _reverseGet(to)
   }
 
-  def some[A, B]: PPrism[Option[A], Option[B], A, B] = EPPrism.some(())
+  def some[A, B]: PPrism[Option[A], Option[B], A, B] = EPPrism.some("None is not a Some")
 }
 
 object EPrism {
@@ -49,11 +49,8 @@ object EPrism {
 }
 
 object Prism {
-  def apply[A, B](_getOption: A => Option[B])(_reverseGet: B => A): Prism[A, B] =
-    PPrism[A, A, B, B](from => _getOption(from).toRight(from))(_reverseGet)
-
-  def partial[A, B](get: PartialFunction[A, B])(reverseGet: B => A): Prism[A, B] =
-    apply(get.lift)(reverseGet)
+  def apply[A, B](_getOError: A => Either[BasicError, B])(_reverseGet: B => A): Prism[A, B] =
+    EPrism(_getOError)(_reverseGet)
 
   def some[A]: Prism[Option[A], A] = PPrism.some[A, A]
 }

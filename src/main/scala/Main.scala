@@ -51,7 +51,7 @@ object Main {
     println((Foo.fooL >>>  PTraversal.list).toListOrError(FooList(List(1,2,3,4))))
     // Left(Expected FooList but got FooI(10))
     println((Foo.fooL >>>  PTraversal.list).toListOrError(FooI(10)))
-    // Right(List())
+    // Right(List()) TODO It should be a Left if there is no item matching
     println((Foo.fooL ?>>> PTraversal.list).toListOrError(FooI(10)))
 
   }

@@ -9,8 +9,8 @@ trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =
 
   def traversal[F[+ _] : Applicative](f: A => F[B])(from: S): TraversalRes[F, E, T] =
     getOrModify(from) match {
-      case Left((e, t)) => TraversalRes(Some(e), Applicative[F].pure(t))
-      case Right(to)    => TraversalRes(None   , Applicative[F].map(f(to))(replace(_)(from)))
+      case Left((e, t)) => TraversalRes.Failure(e, Applicative[F].pure(t))
+      case Right(to)    => TraversalRes.Success(Applicative[F].map(f(to))(replace(_)(from)))
     }
 
   def getOrError(from: S): Either[E, A] =
@@ -18,6 +18,9 @@ trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =
 
   def getOption(from: S): Option[A] =
     getOrModify(from).toOption
+
+  def get(from: S)(implicit ev: E <:< Nothing): A =
+    getOrModify(from).getOrElse(???)
 
   @alpha("andThen")
   def >>>[E1 >: E, C, D](other: EPOptional[E1, A, B, C, D]): EPOptional[E1, S, T, C, D] = new EPOptional[E1, S, T, C, D] {
@@ -38,11 +41,11 @@ object EPOptional {
 }
 
 object POptional {
-  def apply[S, T, A, B](_getOrModify: S => Either[T, A])(_replace: B => S => T): POptional[S, T, A, B] =
-    EPOptional[Unit, S, T, A, B](_getOrModify(_).left.map(() -> _))(_replace)
+  def apply[S, T, A, B](_getOrModify: S => Either[(BasicError, T), A])(_replace: B => S => T): POptional[S, T, A, B] =
+    EPOptional(_getOrModify)(_replace)
 }
 
 object Optional {
-  def apply[A, B](_getOption: A => Option[B])(_replace: B => A => A): Optional[A, B] =
-    POptional[A, A, B, B](from => _getOption(from).toRight(from))(_replace)
+  def apply[A, B](_getOrError: A => Either[BasicError, B])(_replace: B => A => A): Optional[A, B] =
+    POptional[A, A, B, B](from => _getOrError(from).left.map(_ -> from))(_replace)
 }

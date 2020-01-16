@@ -9,8 +9,8 @@ trait EPTraversal[+E, -S, +T, +A, -B] { self =>
 
   def modifyFOrError[F[+_]: Applicative](f: A => F[B])(from: S): Either[E, F[T]] =
     traversal(f)(from) match {
-      case TraversalRes(Some(e), _  ) => Left(e)
-      case TraversalRes(_      , res) => Right(res)
+      case TraversalRes.Failure(e, _) => Left(e)
+      case TraversalRes.Success(res) => Right(res)
     }
 
   def modifyOrError(f: A => B): S => Either[E, T] =
@@ -70,7 +70,7 @@ object PTraversal {
   def field2[S, T, A, B](get1: S => A, get2: S => A)(_replace: (B, B) => S => T): PTraversal[S, T, A, B] =
     new PTraversal[S, T, A, B] {
       def traversal[F[+ _] : Applicative](f: A => F[B])(from: S): TraversalRes[F, Nothing, T] =
-        TraversalRes(None, Applicative[F].map2(f(get1(from)), f(get2(from)))(_replace(_, _)(from)))
+        TraversalRes.Success(Applicative[F].map2(f(get1(from)), f(get2(from)))(_replace(_, _)(from)))
     }
 
   def pair[A, B]: PTraversal[(A, A), (B, B), A, B] =
@@ -79,8 +79,7 @@ object PTraversal {
   def list[A, B]: PTraversal[List[A], List[B], A, B] =
     new PTraversal[List[A], List[B], A, B] {
       def traversal[F[+ _] : Applicative](f: A => F[B])(from: List[A]): TraversalRes[F, Nothing, List[B]] =
-        TraversalRes(
-          None,
+        TraversalRes.Success(
           Applicative[F].map(
             from.foldLeft(Applicative[F].pure(List.empty[B]))((acc, a) =>
               Applicative[F].map2(acc, f(a))((tail, head) => head :: tail)
