@@ -1,6 +1,6 @@
 import example.Foo.{FooI, FooIS, FooList, FooS}
 import example.{Foo, Mono, Poly}
-import optics.{EPPrism, PPrism, PTraversal}
+import optics.{PPrism, PTraversal}
 
 object Main {
 
