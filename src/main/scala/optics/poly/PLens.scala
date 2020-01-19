@@ -1,4 +1,4 @@
-package optics
+package optics.poly
 
 object PLens {
   def apply[S, T, A, B](_get: S => A)(_replace: B => S => T): PLens[S, T, A, B] = new PLens[S, T, A, B] {
@@ -7,6 +7,3 @@ object PLens {
   }
 }
 
-object Lens {
-  def apply[A, B](_get: A => B)(_replace: B => A => A): Lens[A, B] = PLens(_get)(_replace)
-}

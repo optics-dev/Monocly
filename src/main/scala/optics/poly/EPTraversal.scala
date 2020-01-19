@@ -1,5 +1,6 @@
-package optics
+package optics.poly
 
+import optics.BasicError
 import optics.internal.{Applicative, Id, Proxy, TraversalRes}
 
 import scala.annotation.alpha
@@ -64,21 +65,23 @@ trait EPTraversal[+E, -S, +T, +A, -B] { self =>
     }
 }
 
-
-
-object PTraversal {
-  def field2[S, T, A, B](get1: S => A, get2: S => A)(_replace: (B, B) => S => T): PTraversal[S, T, A, B] =
-    new PTraversal[S, T, A, B] {
+object NonEmptyPTraversal {
+  def field2[S, T, A, B](get1: S => A, get2: S => A)(_replace: (B, B) => S => T): NonEmptyPTraversal[S, T, A, B] =
+    new NonEmptyPTraversal[S, T, A, B] {
       def traversal[F[+ _] : Applicative](f: A => F[B])(from: S): TraversalRes[F, Nothing, T] =
         TraversalRes.Success(Applicative[F].map2(f(get1(from)), f(get2(from)))(_replace(_, _)(from)))
     }
 
-  def pair[A, B]: PTraversal[(A, A), (B, B), A, B] =
+  def pair[A, B]: NonEmptyPTraversal[(A, A), (B, B), A, B] =
     field2[(A, A), (B, B), A, B](_._1, _._2)((b1, b2) => _ => (b1, b2))
+}
+
+
+object PTraversal {
 
   def list[A, B]: PTraversal[List[A], List[B], A, B] =
     new PTraversal[List[A], List[B], A, B] {
-      def traversal[F[+ _] : Applicative](f: A => F[B])(from: List[A]): TraversalRes[F, Nothing, List[B]] =
+      def traversal[F[+ _] : Applicative](f: A => F[B])(from: List[A]): TraversalRes[F, BasicError, List[B]] =
         TraversalRes.Success(
           Applicative[F].map(
             from.foldLeft(Applicative[F].pure(List.empty[B]))((acc, a) =>
@@ -87,9 +90,4 @@ object PTraversal {
           )(_.reverse)
         )
     }
-}
-
-object Traversal {
-  def field2[A, B](get1: A => B, get2: A => B)(_replace: (B, B) => A => A): Traversal[A, B] =
-    PTraversal.field2(get1, get2)(_replace)
 }

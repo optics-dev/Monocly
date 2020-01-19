@@ -1,6 +1,6 @@
 import example.Foo.{FooI, FooIS, FooList, FooS}
 import example.{Foo, Mono, Poly}
-import optics.{PPrism, PTraversal}
+import optics.poly.{NonEmptyPTraversal, PPrism, PTraversal}
 
 object Main {
 
@@ -35,9 +35,9 @@ object Main {
 
 
     // (true,false)
-    println(PTraversal.pair.modify((_: Int) % 2 == 0)((10, 7)))
+    println(NonEmptyPTraversal.pair.modify((_: Int) % 2 == 0)((10, 7)))
     // List(1, 3, 6, 10)
-    println((PTraversal.pair >>> PTraversal.pair).toList(((1, 3), (6, 10))))
+    println((NonEmptyPTraversal.pair >>> NonEmptyPTraversal.pair).toList(((1, 3), (6, 10))))
 
     // Right(List(FooI(10), FooI(4)))
     println((PTraversal.list >>>  Foo.fooI).toListOrError(List(FooI(10), FooI(4))))
