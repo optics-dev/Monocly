@@ -1,15 +1,15 @@
 package optics
 
-import optics.poly.EPPrism
-
 import scala.annotation.alpha
 
 /**
  * Minimum implementation: `getOrError` and `reverseGet`
  */
-trait EPrism[+Error, From, To] extends EPPrism[Error, From, From, To, To] with EOptional[Error, From, To] { self =>
-  override def getOrModify(from: From): Either[(Error, From), To] =
-    getOrError(from).left.map(_ -> from)
+trait EPrism[+Error, From, To] extends EOptional[Error, From, To] { self =>
+  def reverseGet(next: To): From
+
+  override def replace(to: To): From => From =
+    _ => reverseGet(to)
 
   @alpha("andThen")
   def >>>[NewError >: Error, Next](other: EPrism[NewError, To, Next]): EPrism[NewError, From, Next] =
@@ -32,8 +32,8 @@ object EPrism {
   def partial[Error, From, To](get: PartialFunction[From, To])(mismatch: From => Error)(reverseGet: To => From): EPrism[Error, From, To] =
     apply(from => get.lift(from).toRight(mismatch(from)), reverseGet)
 
-  def some[E, A](error: E): EPrism[E, Option[A], A] =
-    EPrism.some(error)
+  def some[Error, A](error: Error): EPrism[Error, Option[A], A] =
+    partial[Error, Option[A], A]{ case Some(a) => a }(_ => error)(Some(_))
 }
 
 object Prism {

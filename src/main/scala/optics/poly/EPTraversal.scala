@@ -82,12 +82,13 @@ object PTraversal {
   def list[A, B]: PTraversal[List[A], List[B], A, B] =
     new PTraversal[List[A], List[B], A, B] {
       def traversal[F[+ _] : Applicative](f: A => F[B])(from: List[A]): TraversalRes[F, BasicError, List[B]] =
-        TraversalRes.Success(
-          Applicative[F].map(
+        from match {
+          case Nil => TraversalRes.Failure("List is empty", Applicative[F].pure(Nil))
+          case _   => TraversalRes.Success(Applicative[F].map(
             from.foldLeft(Applicative[F].pure(List.empty[B]))((acc, a) =>
               Applicative[F].map2(acc, f(a))((tail, head) => head :: tail)
             )
-          )(_.reverse)
-        )
+          )(_.reverse))
+        }
     }
 }

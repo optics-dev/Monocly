@@ -1,22 +1,26 @@
 package optics
 
 import optics.internal.{Applicative, TraversalRes}
-import optics.poly.EPOptional
 
 import scala.annotation.alpha
 
 /**
  * Minimum implementation: `getOrError` and `replace`
  */
-trait EOptional[+Error, From, To] extends EPOptional[Error, From, From, To, To] with ETraversal[Error, From, To] { self =>
-  def getOrModify(from: From): Either[(Error, From), To] =
-    getOrError(from).left.map(_ -> from)
+trait EOptional[+Error, From, To] extends ETraversal[Error, From, To] { self =>
+  def getOrError(from: From): Either[Error, To]
 
-  override def traversal[F[+ _] : Applicative](f: To => F[To])(from: From): TraversalRes[F, Error, From] =
+  def traversal[F[+_] : Applicative, NewError >: Error](f: To => TraversalRes[F, NewError, To])(from: From): TraversalRes[F, NewError, From] =
     getOrError(from) match {
       case Left(e)   => TraversalRes.Failure(e, Applicative[F].pure(from))
-      case Right(to) => TraversalRes.Success(Applicative[F].map(f(to))(replace(_)(from)))
+      case Right(to) => f(to).map(replace(_)(from))
     }
+
+  def getOption(from: From): Option[To] =
+    getOrError(from).toOption
+
+  def get(from: From)(implicit ev: Error <:< Nothing): To =
+    getOrError(from).getOrElse(???)
 
   @alpha("andThen")
   def >>>[NewError >: Error, Next](other: EOptional[NewError, To, Next]): EOptional[NewError, From, Next] =

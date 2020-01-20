@@ -1,6 +1,7 @@
 import example.Foo.{FooI, FooIS, FooList, FooS}
 import example.{Foo, Mono, Poly}
-import optics.poly.{NonEmptyPTraversal, PPrism, PTraversal}
+import optics.poly.{NonEmptyPTraversal, PPrism}
+import optics.{NonEmptyTraversal, Prism, Traversal}
 
 object Main {
 
@@ -11,9 +12,9 @@ object Main {
 
     println((Mono.foo >>> Foo.fooIS).getOption(monoSome))
     println((Mono.foo >>> Foo.fooIS >>> FooIS.i).getOption(monoSome))
-    println((Mono.optI >>> PPrism.some).getOption(monoSome))
+    println((Mono.optI >>> Prism.some).getOption(monoSome))
     // return error message
-    println((Mono.optI >>> PPrism.some).getOrError(monoNone))
+    println((Mono.optI >>> Prism.some).getOrError(monoNone))
 
 
     val poly1 = Poly(1, FooIS(8, "hey"), Some(0), Option(3))
@@ -26,32 +27,36 @@ object Main {
 
     // combine poly and monomorphic optics
     val poly3 = Poly(1, FooIS(8, "hey"), Some(0), Some(FooI(4)))
-    println((Poly.param >>> PPrism.some >>> Foo.fooI).replaceOrError(FooI(7))(poly3))
+//    println((Poly.param >>> PPrism.some >>> Foo.fooI).replaceOrError(FooI(7))(poly3))
 
     // Left(Expected FooIS but got FooI(4))
-    println((Poly.param >>> PPrism.some >>> Foo.fooIS).getOrError(poly3))
+//    println((Poly.param >>> PPrism.some >>> Foo.fooIS).getOrError(poly3))
     // Left(it is none)
-    println((Poly.param >>> PPrism.some >>> Foo.fooIS).getOrError(poly3.copy(param = None)))
+//    println((Poly.param >>> PPrism.some >>> Foo.fooIS).getOrError(poly3.copy(param = None)))
 
 
     // (true,false)
     println(NonEmptyPTraversal.pair.modify((_: Int) % 2 == 0)((10, 7)))
     // List(1, 3, 6, 10)
-    println((NonEmptyPTraversal.pair >>> NonEmptyPTraversal.pair).toList(((1, 3), (6, 10))))
+    println((NonEmptyPTraversal.pair >>> NonEmptyPTraversal.pair).toListOrError(((1, 3), (6, 10))))
+    // List(1, 3, 6, 10)
+    println((NonEmptyTraversal.pair >>> NonEmptyTraversal.pair).toListOrError(((1, 3), (6, 10))))
 
-    // Right(List(FooI(10), FooI(4)))
-    println((PTraversal.list >>>  Foo.fooI).toListOrError(List(FooI(10), FooI(4))))
     // Left(Expected FooI but got FooS(hello))
-    println((PTraversal.list >>>  Foo.fooI).toListOrError(List(FooI(10), FooS("hello"), FooI(0), FooIS(3, "world"))))
+    println((Traversal.list >>>  Foo.fooI).toListOrError(List(FooI(10), FooS("hello"), FooI(0), FooIS(3, "world"))))
+    // Left(List is empty)x
+    println((Traversal.list >>>  Foo.fooI).toListOrError(Nil))
     // Right(List(FooI(10), FooI(0)))
-    println((PTraversal.list >>>? Foo.fooI).toListOrError(List(FooI(10), FooS("hello"), FooI(0), FooIS(3, "world"))))
+//    println((PTraversal.list >>>? Foo.fooI).toListOrError(List(FooI(10), FooS("hello"), FooI(0), FooIS(3, "world"))))
 
     // Right(List(1, 2, 3, 4))
-    println((Foo.fooL >>>  PTraversal.list).toListOrError(FooList(List(1,2,3,4))))
+    println((Foo.fooL >>>  Traversal.list).toListOrError(FooList(List(1,2,3,4))))
+    // Left(List is empty)
+    println((Foo.fooL >>>  Traversal.list).toListOrError(FooList(Nil)))
     // Left(Expected FooList but got FooI(10))
-    println((Foo.fooL >>>  PTraversal.list).toListOrError(FooI(10)))
+    println((Foo.fooL >>>  Traversal.list).toListOrError(FooI(10)))
     // Right(List()) TODO It should be a Left if there is no item matching
-    println((Foo.fooL ?>>> PTraversal.list).toListOrError(FooI(10)))
+//    println((Foo.fooL ?>>> PTraversal.list).toListOrError(FooI(10)))
 
   }
 

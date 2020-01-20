@@ -29,6 +29,14 @@ enum TraversalRes[F[+ _], +E, +A] {
       case (Success(fa)   , Success(fb)   ) => Success(Applicative[G].map2(fa, fb)(f))
     }
 
+  def map2Permissive[G[+x] >: F[x] : Applicative, E1 >: E, B, C](other: TraversalRes[G, E1, B])(f: (A, B) => C): TraversalRes[G, E1, C] =
+    (this, other) match {
+      case (Failure(e, fa), Failure(_, fb)) => Failure(e, Applicative[G].map2(fa, fb)(f))
+      case (Failure(e, fa), Success(fb)   ) => Success(Applicative[G].map2(fa, fb)(f))
+      case (Success(fa)   , Failure(e, fb)) => Success(Applicative[G].map2(fa, fb)(f))
+      case (Success(fa)   , Success(fb)   ) => Success(Applicative[G].map2(fa, fb)(f))
+    }
+
 }
 
 object TraversalRes {
