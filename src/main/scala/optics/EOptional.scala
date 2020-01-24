@@ -42,7 +42,7 @@ object EOptional {
 }
 
 object Optional {
-  def apply[A, B](_getOrError: A => Either[Any, B], _replace: B => A => A): Optional[A, B] =
-    EOptional(_getOrError, _replace)
+  def apply[A, B](_getOption: A => Option[B], _replace: B => A => A): Optional[A, B] =
+    EOptional(_getOption(_).toRight(defaultError), _replace)
 }
 

@@ -8,4 +8,6 @@ package object optics {
   type Prism[From, To]             = EPrism[Any, From, To]
   type Iso[From, To]               = EPrism[Nothing, From, To]
 
+  val defaultError: Unit = ()
+
 }

@@ -1,5 +1,6 @@
 package optics.poly
 
+import optics.defaultError
 import scala.annotation.alpha
 
 trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>
@@ -30,8 +31,8 @@ object EPPrism {
 }
 
 object PPrism {
-  def apply[S, T, A, B](_getOrModify: S => Either[(Any, T), A])(_reverseGet: B => T): PPrism[S, T, A, B] = new PPrism[S, T, A, B] {
-    def getOrModify(from: S): Either[(Any, T), A] = _getOrModify(from)
+  def apply[S, T, A, B](_getOrModify: S => Either[T, A])(_reverseGet: B => T): PPrism[S, T, A, B] = new PPrism[S, T, A, B] {
+    def getOrModify(from: S): Either[(Any, T), A] = _getOrModify(from).left.map(defaultError -> _)
     def reverseGet(to: B): T = _reverseGet(to)
   }
 

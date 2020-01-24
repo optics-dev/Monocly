@@ -37,8 +37,8 @@ object EPrism {
 }
 
 object Prism {
-  def apply[A, B](_getOError: A => Either[Any, B], _reverseGet: B => A): Prism[A, B] =
-    EPrism(_getOError, _reverseGet)
+  def apply[A, B](_getOption: A => Option[B], _reverseGet: B => A): Prism[A, B] =
+    EPrism(_getOption(_).toRight(defaultError), _reverseGet)
 
   def some[A]: Prism[Option[A], A] =
     EPrism.some("None is not a Some")

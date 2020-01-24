@@ -1,5 +1,6 @@
 package optics.poly
 
+import optics.defaultError
 import optics.internal.{Applicative, TraversalRes}
 
 import scala.annotation.alpha
@@ -41,6 +42,6 @@ object EPOptional {
 }
 
 object POptional {
-  def apply[S, T, A, B](_getOrModify: S => Either[(Any, T), A])(_replace: B => S => T): POptional[S, T, A, B] =
-    EPOptional(_getOrModify)(_replace)
+  def apply[S, T, A, B](_getOrModify: S => Either[T, A])(_replace: B => S => T): POptional[S, T, A, B] =
+    EPOptional[Any, S, T, A, B](_getOrModify(_).left.map(defaultError -> _))(_replace)
 }
