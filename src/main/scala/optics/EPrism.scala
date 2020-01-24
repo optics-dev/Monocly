@@ -37,7 +37,7 @@ object EPrism {
 }
 
 object Prism {
-  def apply[A, B](_getOError: A => Either[BasicError, B], _reverseGet: B => A): Prism[A, B] =
+  def apply[A, B](_getOError: A => Either[Any, B], _reverseGet: B => A): Prism[A, B] =
     EPrism(_getOError, _reverseGet)
 
   def some[A]: Prism[Option[A], A] =

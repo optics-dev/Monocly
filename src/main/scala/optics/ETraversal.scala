@@ -50,7 +50,7 @@ trait ETraversal[+Error, From, To] { self =>
 object Traversal {
   def list[A, B]: Traversal[List[A], A] =
     new Traversal[List[A],  A] {
-      def traversal[F[+_]: Applicative, NewError >: BasicError](f: A => TraversalRes[F, NewError, A])(from: List[A]): TraversalRes[F, NewError, List[A]] =
+      def traversal[F[+_]: Applicative, NewError >: Any](f: A => TraversalRes[F, NewError, A])(from: List[A]): TraversalRes[F, NewError, List[A]] =
         from.foldLeft[TraversalRes[F, NewError, List[A]]](TraversalRes.Failure("List is empty", Applicative[F].pure(Nil)))((acc, a) =>
           acc.map2Permissive(f(a))((tail, head) => head :: tail)
         ).map(_.reverse)

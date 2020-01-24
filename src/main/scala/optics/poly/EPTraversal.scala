@@ -1,6 +1,5 @@
 package optics.poly
 
-import optics.BasicError
 import optics.internal.{Applicative, Id, Proxy, TraversalRes}
 
 import scala.annotation.alpha
@@ -81,7 +80,7 @@ object PTraversal {
 
   def list[A, B]: PTraversal[List[A], List[B], A, B] =
     new PTraversal[List[A], List[B], A, B] {
-      def traversal[F[+ _] : Applicative](f: A => F[B])(from: List[A]): TraversalRes[F, BasicError, List[B]] =
+      def traversal[F[+ _] : Applicative](f: A => F[B])(from: List[A]): TraversalRes[F, Any, List[B]] =
         from match {
           case Nil => TraversalRes.Failure("List is empty", Applicative[F].pure(Nil))
           case _   => TraversalRes.Success(Applicative[F].map(
