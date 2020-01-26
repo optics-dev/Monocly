@@ -17,7 +17,8 @@ object Poly {
   def i[A]: Lens[Poly[A], Int] = Lens[Poly[A], Int](_.i, newVal => _.copy(i = newVal))
   def foo[A]: Lens[Poly[A], Foo] = Lens[Poly[A], Foo](_.foo, newVal => _.copy(foo = newVal))
   def optI[A]: Lens[Poly[A], Option[Int]] = Lens[Poly[A], Option[Int]](_.optI, newVal => _.copy(optI = newVal))
-  def param[A, B]: PLens[Poly[A], Poly[B], A, B] = PLens[Poly[A], Poly[B], A, B](_.param)(newVal => _.copy(param = newVal))
+  def param[A]: Lens[Poly[A], A] = Lens[Poly[A], A](_.param, newVal => _.copy(param = newVal))
+  def pparam[A, B]: PLens[Poly[A], Poly[B], A, B] = PLens[Poly[A], Poly[B], A, B](_.param)(newVal => _.copy(param = newVal))
 }
 
 sealed trait Foo

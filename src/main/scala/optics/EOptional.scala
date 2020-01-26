@@ -24,8 +24,11 @@ trait EOptional[+Error, From, To] extends ETraversal[Error, From, To] { self =>
 
   @alpha("andThen")
   def >>>[NewError >: Error, Next](other: EOptional[NewError, To, Next]): EOptional[NewError, From, Next] =
-    new EOptional[NewError, From, Next] {
-      override def getOrError(from: From): Either[NewError, Next] =
+    |>>(other)
+
+  def |>>[NewError, Next](other: EOptional[NewError, To, Next]): EOptional[Error | NewError, From, Next] =
+    new EOptional[Error | NewError, From, Next] {
+      override def getOrError(from: From): Either[Error | NewError, Next] =
         self.getOrError(from).flatMap(other.getOrError)
 
       override def replace(to: Next): From => From =
