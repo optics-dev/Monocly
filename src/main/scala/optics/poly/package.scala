@@ -11,7 +11,11 @@ package object poly {
   type PIso[-S, +T, +A, -B]  = EPPrism[Nothing, S, T, A, B]
 
   type EOptional[+Error, From, To] = EPOptional[Error, From, From, To, To]
-  
-  type Optional[From, To] = EOptional[Any, From, To] 
+  type EPrism[+Error, From, To]    = EPPrism[Error, From, From, To, To]
+
+  type Optional[From, To] = EOptional[Any, From, To]
+  type Prism[From, To]    = EPrism[Any, From, To]
+
+  val defaultError: Unit = ()
 
 }

@@ -24,10 +24,7 @@ trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =
     getOrModify(from).getOrElse(???)
 
   @alpha("andThen")
-  def >>>[E1 >: E, C, D](other: EPOptional[E1, A, B, C, D]): EPOptional[E1, S, T, C, D] =
-    |>>(other)
-
-  def |>>[E1, C, D](other: EPOptional[E1, A, B, C, D]): EPOptional[E | E1, S, T, C, D] = new EPOptional[E | E1, S, T, C, D] {
+  def >>>[E1, C, D](other: EPOptional[E1, A, B, C, D]): EPOptional[E | E1, S, T, C, D] = new EPOptional[E | E1, S, T, C, D] {
     def getOrModify(from: S): Either[(E | E1, T), C] =
       for {
         a <- self.getOrModify(from)
