@@ -15,6 +15,7 @@ package object poly {
 
   type Optional[From, To] = EOptional[Any, From, To]
   type Prism[From, To]    = EPrism[Any, From, To]
+  type Lens[From, To]     = PLens[From, From, To, To]
 
   val defaultError: Unit = ()
 
