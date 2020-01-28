@@ -8,10 +8,10 @@ import scala.annotation.alpha
 trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =>
   def getOrModify(from: S): Either[(E, T), A]
 
-  def traversal[F[+ _] : Applicative](f: A => F[B])(from: S): TraversalRes[F, E, T] =
+  def traversal[F[+_] : Applicative, E1](f: A => TraversalRes[F, E1, B])(from: S): TraversalRes[F, E | E1, T] =
     getOrModify(from) match {
       case Left((e, t)) => TraversalRes.Failure(e, Applicative[F].pure(t))
-      case Right(to)    => TraversalRes.Success(Applicative[F].map(f(to))(replace(_)(from)))
+      case Right(a)     => f(a).map(replace(_)(from))
     }
 
   def getOrError(from: S): Either[E, A] =

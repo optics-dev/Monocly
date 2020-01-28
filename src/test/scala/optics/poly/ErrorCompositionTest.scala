@@ -23,8 +23,9 @@ class ErrorCompositionTest extends AnyFunSuite with Matchers {
 
   test("traversal errors level 2") {
     (EPTraversal.list >>> PPrism.some).toListOrError(List(Some(1), Some(2))) shouldEqual Right(List(1, 2))
-    // TODO should be Right(List(2))
-    (EPTraversal.list >>> PPrism.some).toListOrError(List(None, Some(2))) shouldEqual Left("None is not a Some")
+    (EPTraversal.list >>> PPrism.some).toListOrError(List(None, Some(2))) shouldEqual Right(List(2))
+
+    (EPTraversal.list >>> PPrism.some).replace(true)(List(None, Some(2))) shouldEqual List(None, Some(true))
   }
 
 }

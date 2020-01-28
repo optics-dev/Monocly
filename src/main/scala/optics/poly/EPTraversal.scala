@@ -5,10 +5,10 @@ import optics.internal.{Applicative, Id, Proxy, TraversalRes}
 import scala.annotation.alpha
 
 trait EPTraversal[+E, -S, +T, +A, -B] { self =>
-  def traversal[F[+_]: Applicative](f: A => F[B])(from: S): TraversalRes[F, E, T]
+  def traversal[F[+_]: Applicative, E1](f: A => TraversalRes[F, E1, B])(from: S): TraversalRes[F, E | E1, T]
 
   def modifyFOrError[F[+_]: Applicative](f: A => F[B])(from: S): Either[E, F[T]] =
-    traversal(f)(from) match {
+    traversal(a => TraversalRes.Success(f(a)))(from) match {
       case TraversalRes.Failure(e, _) => Left(e)
       case TraversalRes.Success(res) => Right(res)
     }
@@ -20,7 +20,7 @@ trait EPTraversal[+E, -S, +T, +A, -B] { self =>
     modifyOrError(_ => to)
 
   def modifyF[F[+_]: Applicative](f: A => F[B])(from: S): F[T] =
-    traversal(f)(from).effect
+    traversal(a => TraversalRes.Success(f(a)))(from).effect
 
   def modify(f: A => B): S => T =
     modifyF[Id](f)
@@ -43,32 +43,18 @@ trait EPTraversal[+E, -S, +T, +A, -B] { self =>
     toListOrError(from).fold(_ => Iterator.empty, _.iterator)
 
   @alpha("andThen")
-  def >>>[E1 >: E, C, D](other: EPTraversal[E1, A, B, C, D]): EPTraversal[E1, S, T, C, D] =
-    new EPTraversal[E1, S, T, C, D] {
-      def traversal[F[+ _] : Applicative](f: C => F[D])(from: S): TraversalRes[F, E1, T] =
-        self.traversal[[+X] =>> TraversalRes[F, E1, X]](other.traversal(f)(_))(from).flatten
-    }
-
-  @alpha("andThenDiscardRight")
-  def >>>?[E1, C, D](other: EPTraversal[E1, A, B, C, D]): EPTraversal[E, S, T, C, D] =
-    new EPTraversal[E, S, T, C, D] {
-      def traversal[F[+ _] : Applicative](f: C => F[D])(from: S): TraversalRes[F, E, T] =
-        self.traversal(other.modifyF(f)(_))(from)
-    }
-
-  @alpha("andThenDiscardLeft")
-  def ?>>>[E1, C, D](other: EPTraversal[E1, A, B, C, D]): EPTraversal[E1, S, T, C, D] =
-    new EPTraversal[E1, S, T, C, D] {
-      def traversal[F[+ _] : Applicative](f: C => F[D])(from: S): TraversalRes[F, E1, T] =
-        self.modifyF[[+X] =>> TraversalRes[F, E1, X]](other.traversal(f)(_))(from)
+  def >>>[E1, C, D](other: EPTraversal[E1, A, B, C, D]): EPTraversal[E | E1, S, T, C, D] =
+    new EPTraversal[E | E1, S, T, C, D] {
+      def traversal[F[+ _] : Applicative, E2](f: C => TraversalRes[F, E2, D])(from: S): TraversalRes[F, E | E1 | E2, T] =
+        self.traversal(other.traversal(f)(_))(from)
     }
 }
 
 object NonEmptyPTraversal {
   def field2[S, T, A, B](get1: S => A, get2: S => A)(_replace: (B, B) => S => T): NonEmptyPTraversal[S, T, A, B] =
     new NonEmptyPTraversal[S, T, A, B] {
-      def traversal[F[+ _] : Applicative](f: A => F[B])(from: S): TraversalRes[F, Nothing, T] =
-        TraversalRes.Success(Applicative[F].map2(f(get1(from)), f(get2(from)))(_replace(_, _)(from)))
+      def traversal[F[+_] : Applicative, E1](f: A => TraversalRes[F, E1, B])(from: S): TraversalRes[F, E1, T] =
+        f(get1(from)).map2(f(get2(from)))(_replace(_, _)(from))
     }
 
   def pair[A, B]: NonEmptyPTraversal[(A, A), (B, B), A, B] =
@@ -80,14 +66,9 @@ object EPTraversal {
 
   def list[A, B]: EPTraversal[String, List[A], List[B], A, B] =
     new EPTraversal[String, List[A], List[B], A, B] {
-      def traversal[F[+ _] : Applicative](f: A => F[B])(from: List[A]): TraversalRes[F, String, List[B]] =
-        from match {
-          case Nil => TraversalRes.Failure("List is empty", Applicative[F].pure(Nil))
-          case _   => TraversalRes.Success(Applicative[F].map(
-            from.foldLeft(Applicative[F].pure(List.empty[B]))((acc, a) =>
-              Applicative[F].map2(acc, f(a))((tail, head) => head :: tail)
-            )
-          )(_.reverse))
-        }
+      def traversal[F[+ _] : Applicative, E1](f: A => TraversalRes[F, E1, B])(from: List[A]): TraversalRes[F, String | E1, List[B]] =
+        from.foldLeft[TraversalRes[F, String | E1, List[B]]](TraversalRes.Failure("List is empty", Applicative[F].pure(Nil)))((acc, a) =>
+          acc.map2Permissive(f(a))((tail, head) => head :: tail)
+        ).map(_.reverse)
     }
 }
