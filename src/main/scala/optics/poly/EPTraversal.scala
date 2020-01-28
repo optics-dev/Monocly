@@ -76,11 +76,11 @@ object NonEmptyPTraversal {
 }
 
 
-object PTraversal {
+object EPTraversal {
 
-  def list[A, B]: PTraversal[List[A], List[B], A, B] =
-    new PTraversal[List[A], List[B], A, B] {
-      def traversal[F[+ _] : Applicative](f: A => F[B])(from: List[A]): TraversalRes[F, Any, List[B]] =
+  def list[A, B]: EPTraversal[String, List[A], List[B], A, B] =
+    new EPTraversal[String, List[A], List[B], A, B] {
+      def traversal[F[+ _] : Applicative](f: A => F[B])(from: List[A]): TraversalRes[F, String, List[B]] =
         from match {
           case Nil => TraversalRes.Failure("List is empty", Applicative[F].pure(Nil))
           case _   => TraversalRes.Success(Applicative[F].map(
