@@ -1,4 +1,4 @@
-val dottyVersion = "0.21.0-RC1"
+val dottyVersion = "0.22.0-bin-20200123-9982f0d-NIGHTLY"
 
 lazy val root = project
   .in(file("."))
@@ -7,6 +7,10 @@ lazy val root = project
     version := "0.1.0",
 
     scalaVersion := dottyVersion,
+    resolvers ++= Seq(
+      Resolver.sonatypeRepo("releases"),
+      Resolver.sonatypeRepo("snapshots")
+    ),
 
-    libraryDependencies += "com.novocode" % "junit-interface" % "0.11" % "test"
+    libraryDependencies += "dev.travisbrown" %% "scalatest" % ("3.1.0" + "-20200123-9982f0d-NIGHTLY")
   )

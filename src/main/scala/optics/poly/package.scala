@@ -10,4 +10,8 @@ package object poly {
   type PLens[-S, +T, +A, -B] = EPOptional[Nothing, S, T, A, B]
   type PIso[-S, +T, +A, -B]  = EPPrism[Nothing, S, T, A, B]
 
+  type EOptional[+Error, From, To] = EPOptional[Error, From, From, To, To]
+  
+  type Optional[From, To] = EOptional[Any, From, To] 
+
 }

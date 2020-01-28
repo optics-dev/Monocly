@@ -38,13 +38,23 @@ trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =
 }
 
 object EPOptional {
-  def apply[E, S, T, A, B](_getOrModify: S => Either[(E, T), A])(_replace: B => S => T): EPOptional[E, S, T, A, B] = new EPOptional[E, S, T, A, B] {
+  def apply[E, S, T, A, B](_getOrModify: S => Either[(E, T), A], _replace: B => S => T): EPOptional[E, S, T, A, B] = new EPOptional[E, S, T, A, B] {
     def getOrModify(from: S): Either[(E, T), A] = _getOrModify(from)
     override def replace(to: B): S => T = _replace(to)
   }
 }
 
 object POptional {
-  def apply[S, T, A, B](_getOrModify: S => Either[T, A])(_replace: B => S => T): POptional[S, T, A, B] =
-    EPOptional[Any, S, T, A, B](_getOrModify(_).left.map(defaultError -> _))(_replace)
+  def apply[S, T, A, B](_getOrModify: S => Either[T, A], _replace: B => S => T): POptional[S, T, A, B] =
+    EPOptional[Any, S, T, A, B](_getOrModify(_).left.map(defaultError -> _), _replace)
+}
+
+object EOptional {
+  def apply[Error, From, To](_getOrError: From => Either[Error, To], _replace: To => From => From): EOptional[Error, From, To] =
+    EPOptional(from => _getOrError(from).left.map(_ -> from), _replace)
+}
+
+object Optional {
+  def apply[From, To](_getOption: From => Option[To], _replace: To => From => From): Optional[From, To] =
+    EOptional(_getOption(_).toRight(()), _replace)
 }
