@@ -3,7 +3,6 @@ package optics.poly
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import scala.language.implicitConversions
-import optics.poly.Optional
 
 class OptionalTest extends AnyFunSuite with Matchers {
 

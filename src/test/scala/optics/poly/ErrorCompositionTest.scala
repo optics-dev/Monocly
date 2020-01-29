@@ -3,7 +3,6 @@ package optics.poly
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import scala.language.implicitConversions
-import optics.poly.Optional
 
 class ErrorCompositionTest extends AnyFunSuite with Matchers {
 
@@ -24,8 +23,7 @@ class ErrorCompositionTest extends AnyFunSuite with Matchers {
   test("traversal errors level 2") {
     (EPTraversal.list >>> PPrism.some).toListOrError(List(Some(1), Some(2))) shouldEqual Right(List(1, 2))
     (EPTraversal.list >>> PPrism.some).toListOrError(List(None, Some(2))) shouldEqual Right(List(2))
-
-    (EPTraversal.list >>> PPrism.some).replace(true)(List(None, Some(2))) shouldEqual List(None, Some(true))
+    (EPTraversal.list >>> PPrism.some).toListOrError(List(None, None)) shouldEqual Left("List is empty")
   }
 
 }
