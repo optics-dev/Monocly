@@ -1,4 +1,4 @@
-package optics
+package optics.mono
 
 import scala.annotation.alpha
 

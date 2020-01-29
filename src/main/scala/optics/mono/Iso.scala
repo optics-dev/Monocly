@@ -1,4 +1,4 @@
-package optics
+package optics.mono
 
 object Iso {
   def apply[From, To](_get: From => To, _reverseGet: To => From): Iso[From, To] =

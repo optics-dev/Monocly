@@ -1,4 +1,4 @@
-package optics
+package optics.mono
 
 import optics.internal.{Applicative, Id, TraversalRes}
 

@@ -1,6 +1,5 @@
 package optics.poly
 
-import optics.defaultError
 import optics.internal.{Applicative, TraversalRes}
 
 import scala.annotation.alpha

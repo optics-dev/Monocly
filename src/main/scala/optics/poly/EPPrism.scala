@@ -1,6 +1,5 @@
 package optics.poly
 
-import optics.defaultError
 import scala.annotation.alpha
 
 trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>

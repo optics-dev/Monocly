@@ -1,5 +1,7 @@
+package optics
 
-package object optics {
+
+package object mono {
 
   type NonEmptyTraversal[From, To] = ETraversal[Nothing, From, To]
   type Traversal[From, To]         = ETraversal[Any, From, To]
