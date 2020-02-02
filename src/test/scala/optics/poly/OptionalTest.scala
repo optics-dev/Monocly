@@ -1,6 +1,7 @@
 package optics.poly
 
 import scala.language.implicitConversions
+import EOptional.indexMap
 
 class OptionalTest extends munit.FunSuite {
 
@@ -20,6 +21,16 @@ class OptionalTest extends munit.FunSuite {
 
     assert(opt.replace(List(1,2))(pos) == Foo(4, Some(List(1,2))))
     assert(opt.replace(List(1,2))(neg) == neg)
+  }
+
+  test("indexMap") {
+    val map = Map("foo" -> Map(1 -> true, 2 -> false), "bar" -> Map(0 -> true))
+
+    assert((indexMap("foo") >>> indexMap(1)).getOrError(map) == Right(true))
+    assert((indexMap("foo") >>> indexMap(0)).getOrError(map) == Left("Key 0 is missing"))
+    assert((indexMap("zzz") >>> indexMap(1)).getOrError(map) == Left("Key zzz is missing"))
+
+    assert((indexMap("foo") >>> indexMap(1)).replace(false)(map) ==  Map("foo" -> Map(1 -> false, 2 -> false), "bar" -> Map(0 -> true)))
   }
 
 }
