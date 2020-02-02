@@ -1,10 +1,8 @@
 package optics.poly
 
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.matchers.should.Matchers
 import scala.language.implicitConversions
 
-class OptionalTest extends AnyFunSuite with Matchers {
+class OptionalTest extends munit.FunSuite {
 
   case class Foo[A](i: Int, opt: Option[A])
 
@@ -17,11 +15,11 @@ class OptionalTest extends AnyFunSuite with Matchers {
     val pos = Foo(4, Some(true))
     val neg = Foo(4, None)
 
-    opt.getOrError(pos) shouldEqual Right(true)
-    opt.getOrError(neg) shouldEqual Left("Missing opt")
+    assert(opt.getOrError(pos) == Right(true))
+    assert(opt.getOrError(neg) == Left("Missing opt"))
 
-    opt.replace(List(1,2))(pos) shouldEqual Foo(4, Some(List(1,2)))
-    opt.replace(List(1,2))(neg) shouldEqual neg
+    assert(opt.replace(List(1,2))(pos) == Foo(4, Some(List(1,2))))
+    assert(opt.replace(List(1,2))(neg) == neg)
   }
 
 }
