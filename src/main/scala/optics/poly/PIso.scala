@@ -13,4 +13,7 @@ object PIso {
 object Iso {
   def apply[From, To](_get: From => To, _reverseGet: To => From): Iso[From, To] =
     PIso(_get, _reverseGet)
+
+  def id[A]: Iso[A, A] =
+    PIso.id
 }

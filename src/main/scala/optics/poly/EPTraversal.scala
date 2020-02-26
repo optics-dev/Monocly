@@ -61,9 +61,7 @@ object NonEmptyPTraversal {
     field2[(A, A), (B, B), A, B](_._1, _._2)((b1, b2) => _ => (b1, b2))
 }
 
-
 object EPTraversal {
-
   def list[A, B]: EPTraversal[String, List[A], List[B], A, B] =
     new EPTraversal[String, List[A], List[B], A, B] {
       def traversal[F[+ _] : Applicative, E1](f: A => TraversalRes[F, E1, B])(from: List[A]): TraversalRes[F, String | E1, List[B]] =
@@ -71,4 +69,12 @@ object EPTraversal {
           acc.map2Permissive(f(a))((tail, head) => head :: tail)
         ).map(_.reverse)
     }
+}
+
+object NonEmptyTraversal {
+  def field2[From, To](get1: From => To, get2: From => To)(_replace: (To, To) => From => From): NonEmptyTraversal[From, To] =
+    NonEmptyPTraversal.field2(get1, get2)(_replace)
+
+  def pair[A, B]: NonEmptyTraversal[(A, A), A] =
+    NonEmptyPTraversal.pair
 }

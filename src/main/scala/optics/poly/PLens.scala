@@ -17,4 +17,10 @@ object PLens {
 object Lens {
   def apply[From, To](_get: From => To, _replace: To => From => From): Lens[From, To] =
     PLens(_get, _replace)
+
+  def _1[A1, A2]: Lens[(A1, A2), A1] =
+    PLens._1
+
+  def _2[A1, A2]: Lens[(A1, A2), A2] =
+    PLens._2
 }

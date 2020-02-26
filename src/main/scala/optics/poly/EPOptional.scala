@@ -48,6 +48,12 @@ object POptional {
 object EOptional {
   def apply[Error, From, To](_getOrError: From => Either[Error, To], _replace: To => From => From): EOptional[Error, From, To] =
     EPOptional(from => _getOrError(from).left.map(_ -> from), _replace)
+
+  def indexMap[K, V](key: K): EOptional[String, Map[K, V], V] =
+    apply[String, Map[K, V], V](
+      _.get(key).toRight(s"Key $key is missing"),
+      newValue => map => if(map.contains(key)) map + (key -> newValue) else map
+    )
 }
 
 object Optional {
