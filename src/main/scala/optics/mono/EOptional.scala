@@ -47,5 +47,14 @@ object EOptional {
 object Optional {
   def apply[A, B](_getOption: A => Option[B], _replace: B => A => A): Optional[A, B] =
     EOptional(_getOption(_).toRight(defaultError), _replace)
+
+  def indexMap[K, V](key: K): EOptional[String, Map[K, V], V] =
+    EOptional[String, Map[K, V], V](
+      _.get(key).toRight(s"Key $key is missing"),
+      newValue => map => if(map.contains(key)) map + (key -> newValue) else map
+    )
+
+  def void[From, To]: EOptional[String, From, To] =
+    EOptional[String, From, To](_ => Left("Always fail"), _ => identity)
 }
 

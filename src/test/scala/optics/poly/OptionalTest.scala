@@ -1,7 +1,7 @@
 package optics.poly
 
 import scala.language.implicitConversions
-import EOptional.indexMap
+import Optional.indexMap
 
 class OptionalTest extends munit.FunSuite {
 
