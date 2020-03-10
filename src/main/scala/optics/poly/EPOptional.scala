@@ -31,6 +31,15 @@ trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =
       } yield t
     override def replace(to: D): S => T = self.modify(other.replace(to))
   }
+
+  def some[A1, B1](implicit ev1: A <:< Option[A1], ev2: Option[B1] <:< B): EPOptional[E | String, S, T, A1, B1] =
+    adapt >>> PPrism.some
+
+  def adapt[A1, B1](implicit evA: A <:< A1, evB: B1 <:< B): EPOptional[E, S, T, A1, B1] =
+    evB.substituteContra[[X] =>> EPOptional[E, S, T, A1, X]](
+      evA.substituteCo[[X] =>> EPOptional[E, S, T, X, B]](this)
+    )
+
 }
 
 object EPOptional {

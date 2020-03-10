@@ -7,6 +7,9 @@ class OptionalTest extends munit.FunSuite {
 
   case class Foo[A](i: Int, opt: Option[A])
 
+  def optLens[A, B]: PLens[Foo[A], Foo[B], Option[A], Option[B]] =
+    PLens(_.opt, optB => _.copy(opt = optB))
+
   def opt[A,  B] = EPOptional[String, Foo[A], Foo[B], A, B](
     from => from.opt.toRight(("Missing opt", from.copy(opt = None))),
     newValue => from => from.copy(opt = from.opt.map(_ => newValue))
@@ -21,6 +24,14 @@ class OptionalTest extends munit.FunSuite {
 
     assert(opt.replace(List(1,2))(pos) == Foo(4, Some(List(1,2))))
     assert(opt.replace(List(1,2))(neg) == neg)
+  }
+
+  test("some") {
+    val pos = Foo(4, Some(true))
+    val neg = Foo(4, None)
+
+    assert(optLens.some.getOrError(pos) == Right(true))
+    assert(optLens.some.getOrError(neg) == Left("None is not a Some"))
   }
 
   test("indexMap") {

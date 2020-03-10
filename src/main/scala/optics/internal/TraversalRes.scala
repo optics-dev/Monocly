@@ -43,8 +43,8 @@ object TraversalRes {
   def pure[F[+_]: Applicative, A](value: A): TraversalRes[F, Nothing, A] =
     TraversalRes.Success(Applicative[F].pure(value))
 
-  implicit def applicative[F[+_]: Applicative, E]: Applicative[[+X] =>> TraversalRes[F, E, X]] =
-    new Applicative[[+X] =>> TraversalRes[F, E, X]]{
+  implicit def applicative[F[+_]: Applicative, E]: Applicative[[X] =>> TraversalRes[F, E, X]] =
+    new Applicative[[X] =>> TraversalRes[F, E, X]]{
       def pure[A](value: A): TraversalRes[F, E, A] =
         TraversalRes.pure(value)
 
