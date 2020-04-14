@@ -35,7 +35,5 @@ case class JsonPath(path: List[PathElement], json: EOptional[JsonPathError, Json
 
 object JsonPath {
   val root: JsonPath = JsonPath(Nil, Iso.id)
-
-
 }
 
