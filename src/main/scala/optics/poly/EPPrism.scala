@@ -8,6 +8,9 @@ trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>
   override def replace(to: B): S => T =
     _ => reverseGet(to)
 
+  override def mapError[E1](update: E => E1): EPPrism[E1, S, T, A, B] =
+    EPPrism[E1, S, T, A, B](getOrModify(_).left.map{ case (e, t) => (update(e), t)}, reverseGet)
+
   @alpha("andThen")
   def >>>[E1, C, D](other: EPPrism[E1, A, B, C, D]): EPPrism[E | E1, S, T, C, D] = new EPPrism[E | E1, S, T, C, D] {
     def getOrModify(from: S): Either[(E | E1, T), C] =

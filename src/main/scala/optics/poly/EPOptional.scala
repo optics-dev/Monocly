@@ -3,6 +3,7 @@ package optics.poly
 import optics.internal.{Applicative, TraversalRes}
 
 import scala.annotation.alpha
+import scala.util.Try
 
 trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =>
   def getOrModify(from: S): Either[(E, T), A]
@@ -21,6 +22,9 @@ trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =
 
   def get(from: S)(implicit ev: E <:< Nothing): A =
     getOrModify(from).getOrElse(???)
+
+  def mapError[E1](update: E => E1): EPOptional[E1, S, T, A, B] =
+    EPOptional[E1, S, T, A, B](getOrModify(_).left.map{ case (e, t) => (update(e), t)}, replace)
 
   @alpha("andThen")
   def >>>[E1, C, D](other: EPOptional[E1, A, B, C, D]): EPOptional[E | E1, S, T, C, D] = new EPOptional[E | E1, S, T, C, D] {
@@ -62,6 +66,12 @@ object EOptional {
     apply[String, Map[K, V], V](
       _.get(key).toRight(s"Key $key is missing"),
       newValue => map => if(map.contains(key)) map + (key -> newValue) else map
+    )
+
+  def indexList[A](key: Int): EOptional[String, List[A], A] =
+    apply[String, List[A], A](
+      list => Try(list(key)).toOption.toRight(s"No value at index $key"),
+      newValue => list => Try(list.updated(key, newValue)).getOrElse(list)
     )
 }
 
