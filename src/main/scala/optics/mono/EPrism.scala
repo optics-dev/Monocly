@@ -43,5 +43,3 @@ object Prism {
   def some[A]: Prism[Option[A], A] =
     EPrism.some("None is not a Some")
 }
-
-

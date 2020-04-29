@@ -2,17 +2,19 @@ import example.Foo.{FooI, FooIS, FooList, FooS}
 import example.{Foo, Mono, Poly}
 import optics.mono.{NonEmptyTraversal, Prism, Traversal}
 import optics.poly.{NonEmptyPTraversal, PPrism}
+import optics.poly.ops._
 
 object Main {
 
   def main(args: Array[String]): Unit = {
 
-    val monoSome = Mono(1, FooIS(8, "hey"), Some(0))
-    val monoNone = Mono(1, FooIS(8, "hey"), None)
+    val monoSome = Mono(1, FooIS(8, "hey"), Some(0), List(), Map())
+    val monoNone = Mono(1, FooIS(8, "hey"), None, List(), Map())
 
     println((Mono.foo >>> Foo.fooIS).getOption(monoSome))
     println((Mono.foo >>> Foo.fooIS >>> FooIS.i).getOption(monoSome))
     println((Mono.optI >>> Prism.some).getOption(monoSome))
+
     // return error message
     println((Mono.optI >>> Prism.some).getOrError(monoNone))
 

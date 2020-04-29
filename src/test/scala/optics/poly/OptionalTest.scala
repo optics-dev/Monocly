@@ -1,7 +1,8 @@
 package optics.poly
 
 import scala.language.implicitConversions
-import EOptional.indexMap
+import ops._
+import functions.Index
 
 class OptionalTest extends munit.FunSuite {
 
@@ -12,7 +13,7 @@ class OptionalTest extends munit.FunSuite {
 
   def opt[A,  B] = EPOptional[String, Foo[A], Foo[B], A, B](
     from => from.opt.toRight(("Missing opt", from.copy(opt = None))),
-    newValue => from => from.copy(opt = from.opt.map(_ => newValue))
+    newValue => from => Right(from.copy(opt = from.opt.map(_ => newValue)))
   )
 
   test("opt") {
@@ -34,14 +35,19 @@ class OptionalTest extends munit.FunSuite {
     assertEquals(optLens.some.getOrError(neg), Left("None is not a Some"))
   }
 
-  test("indexMap") {
+  case class Bar(listI: List[Int])
+
+  val listI: Lens[Bar, List[Int]] = ???
+
+  test("map") {
     val map = Map("foo" -> Map(1 -> true, 2 -> false), "bar" -> Map(0 -> true))
 
-    assertEquals((indexMap("foo") >>> indexMap(1)).getOrError(map), Right(true))
-    assertEquals((indexMap("foo") >>> indexMap(0)).getOrError(map), Left("Key 0 is missing"))
-    assertEquals((indexMap("zzz") >>> indexMap(1)).getOrError(map), Left("Key zzz is missing"))
+    (listI >>> Index(1)).replace(3)
 
-    assertEquals((indexMap("foo") >>> indexMap(1)).replace(false)(map),  Map("foo" -> Map(1 -> false, 2 -> false), "bar" -> Map(0 -> true)))
+    assertEquals((Index.map("foo") >>> Index.map(1)).getOrError(map), Right(true))
+    // assertEquals((Index.map("foo") >>> indexMap(0)).getOrError(map), Left("Key 0 is missing"))
+    // assertEquals((Index.map("zzz") >>> indexMap(1)).getOrError(map), Left("Key zzz is missing"))
+    assertEquals((Index.map("foo") >>> Index.map(1)).replace(false)(map),  Map("foo" -> Map(1 -> false, 2 -> false), "bar" -> Map(0 -> true)))
   }
 
 }
