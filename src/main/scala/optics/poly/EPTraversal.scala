@@ -42,12 +42,6 @@ trait EPTraversal[+E, -S, +T, +A, -B] { self =>
   def iterator(from: S): Iterator[A] =
     toListOrError(from).fold(_ => Iterator.empty, _.iterator)
 
-  // @alpha("andThen")
-  // def >>>[E1, C, D](other: EPTraversal[E1, A, B, C, D]): EPTraversal[E | E1, S, T, C, D] =
-  //   new EPTraversal[E | E1, S, T, C, D] {
-  //     def traversal[F[+ _] : Applicative, E2](f: C => TraversalRes[F, E2, D])(from: S): TraversalRes[F, E | E1 | E2, T] =
-  //       self.traversal(other.traversal(f)(_))(from)
-  //   }
 }
 
 object NonEmptyPTraversal {

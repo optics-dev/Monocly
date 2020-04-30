@@ -34,14 +34,7 @@ object Index {
               Left(err)
           }
         },
-        (to) => (from) => {
-          try {
-            Right(from.updated(i, to))
-          } catch {
-            case err: IndexOutOfBoundsException =>
-              Left(err)
-          }
-        }
+        (to) => (from) => from.updated(i, to)
       )
   }
 
@@ -56,13 +49,7 @@ object Index {
               Left(err)
           }
         },
-        (to) => (from) => {
-          if(from.contains(k)) {
-            Right(from + (k -> to))
-          } else {
-            Left(new NoSuchElementException(s"key $k not found"))
-          }
-        }
+        (to) => (from) => from + (k -> to)
       )
   }
 }
