@@ -48,18 +48,18 @@ class JsonPathTest extends munit.FunSuite {
     )
   }
 
-  test("fail with missing index") {
-    assertEquals(
-      JsonPath.root.`http-server`.tokens.index(5).string.getOrError(json),
-      Left(JsonPathError(List(Index(5), Field("tokens"), Field("http-server")), "Index is missing"))
-    )
-  }
+  // test("fail with missing index") {
+  //   assertEquals(
+  //     JsonPath.root.`http-server`.tokens.index(5).string.getOrError(json),
+  //     Left(JsonPathError(List(Index(5), Field("tokens"), Field("http-server")), "Index is missing"))
+  //   )
+  // }
 
-  test("fail with wrong type") {
-    assertEquals(
-      JsonPath.root.db.connection.string.getOrError(json),
-      Left(JsonPathError(List(Field("connection"), Field("db")), "Expected JsonString but got JsonNumber(4)"))
-    )
-  }
+  // test("fail with wrong type") {
+  //   assertEquals(
+  //     JsonPath.root.db.connection.string.getOrError(json),
+  //     Left(JsonPathError(List(Field("connection"), Field("db")), "Expected JsonString but got JsonNumber(4)"))
+  //   )
+  // }
 
 }

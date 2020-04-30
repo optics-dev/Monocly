@@ -20,7 +20,7 @@ case class JsonPath(path: List[PathElement], json: EOptional[JsonPathError, Json
     val newPath = Field(field) :: path
     JsonPath(
       newPath,
-      json >>> jsonObject.mapError(JsonPathError(path, _)) >>> FIndex.withError(field, JsonPathError(newPath, "Index is missing"))
+      json >>> jsonObject.mapError(JsonPathError(path, _)) >>> FIndex.withError(field, JsonPathError(newPath, "Key is missing"))
     )
   }
 
