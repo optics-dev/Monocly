@@ -45,6 +45,24 @@ object EPOptional {
       override def replaceOrError(to: B): S => Either[E, T] =
        s => _getOrModify(s).left.map(_._1).map(_ => replace(to)(s))
     }
+
+  extension {
+    @alpha("andThen")
+    def [
+      G[_, _, _, _, _],
+      H[_, _, _, _, _],
+      E1,
+      E,
+      S,
+      T,
+      A,
+      B,
+      C,
+      D
+    ](x: EPOptional[E, S, T, A, B]) >>> (y: G[E1, A, B, C, D])(using AndThen[EPOptional, G, H]): H[E | E1, S, T, C, D] =
+      summon[AndThen[EPOptional, G, H]].andThen[E, E1, S, T, A, B, C, D](x, y)
+  }
+
 }
 
 object POptional {

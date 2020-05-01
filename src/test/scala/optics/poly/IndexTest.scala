@@ -1,6 +1,5 @@
 package optics.poly
 
-import ops._
 import functions.Index
 
 class IndexTest extends munit.FunSuite {

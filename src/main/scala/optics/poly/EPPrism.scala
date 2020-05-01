@@ -13,6 +13,24 @@ trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>
 }
 
 object EPPrism {
+
+  extension {
+    @alpha("andThen")
+    def [
+      G[_, _, _, _, _],
+      H[_, _, _, _, _],
+      E1,
+      E,
+      S,
+      T,
+      A,
+      B,
+      C,
+      D
+    ](x: EPPrism[E, S, T, A, B]) >>> (y: G[E1, A, B, C, D])(using AndThen[EPPrism, G, H]): H[E | E1, S, T, C, D] =
+      summon[AndThen[EPPrism, G, H]].andThen[E, E1, S, T, A, B, C, D](x, y)
+  }
+
   def apply[E, S, T, A, B](_getOrModify: S => Either[(E, T), A], _reverseGet: B => T): EPPrism[E, S, T, A, B] = new EPPrism[E, S, T, A, B] {
     def getOrModify(from: S): Either[(E, T), A] = _getOrModify(from)
     def reverseGet(to: B): T = _reverseGet(to)

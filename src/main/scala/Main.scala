@@ -2,7 +2,6 @@ import example.Foo.{FooI, FooIS, FooList, FooS}
 import example.{Foo, Mono, Poly}
 import optics.mono.{NonEmptyTraversal, Prism, Traversal}
 import optics.poly.{NonEmptyPTraversal, PPrism}
-import optics.poly.ops._
 
 object Main {
 

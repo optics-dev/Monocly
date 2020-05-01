@@ -2,25 +2,6 @@ package optics.poly
 
 import scala.annotation.alpha
 
-extension ops {
-
-  @alpha("andThen")
-  def [
-    F[_, _, _, _, _],
-    G[_, _, _, _, _],
-    H[_, _, _, _, _],
-    E1,
-    E,
-    S,
-    T,
-    A,
-    B,
-    C,
-    D
-  ](x: F[E, S, T, A, B]) >>> (y: G[E1, A, B, C, D])(using AndThen[F, G, H]): H[E | E1, S, T, C, D] =
-    summon[AndThen[F, G, H]].andThen[E, E1, S, T, A, B, C, D](x, y)
-}
-
 trait AndThen[F[_, _, _, _, _], G[_, _, _, _, _], H[_, _, _, _, _]] {
   def andThen[E, E1, S, T, A, B, C, D](
     f: F[E, S, T, A, B],

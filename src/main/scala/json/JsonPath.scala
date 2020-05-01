@@ -4,7 +4,6 @@ import json.Json._
 import json.PathElement.{Field, Index}
 import optics.poly.{EOptional, Iso}
 import optics.poly.functions.{Index => FIndex}
-import optics.poly.ops._
 
 import scala.language.dynamics
 

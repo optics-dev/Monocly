@@ -56,6 +56,24 @@ object NonEmptyPTraversal {
 }
 
 object EPTraversal {
+
+  extension {
+    @alpha("andThen")
+    def [
+      G[_, _, _, _, _],
+      H[_, _, _, _, _],
+      E1,
+      E,
+      S,
+      T,
+      A,
+      B,
+      C,
+      D
+    ](x: EPTraversal[E, S, T, A, B]) >>> (y: G[E1, A, B, C, D])(using AndThen[EPTraversal, G, H]): H[E | E1, S, T, C, D] =
+      summon[AndThen[EPTraversal, G, H]].andThen[E, E1, S, T, A, B, C, D](x, y)
+  }
+
   def list[A, B]: EPTraversal[String, List[A], List[B], A, B] =
     new EPTraversal[String, List[A], List[B], A, B] {
       def traversal[F[+ _] : Applicative, E1](f: A => TraversalRes[F, E1, B])(from: List[A]): TraversalRes[F, String | E1, List[B]] =
