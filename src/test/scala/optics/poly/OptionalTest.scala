@@ -31,7 +31,7 @@ class OptionalTest extends munit.FunSuite {
     val neg = Foo(4, None)
 
     assertEquals(optLens.some.getOrError(pos), Right(true))
-    assertEquals(optLens.some.getOrError(neg), Left("None is not a Some"))
+    assertEquals(optLens.some.getOrError(neg).left.map(_.getMessage), Left("None is not a Some"))
   }
 
   test("map") {
