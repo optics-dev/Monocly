@@ -4,13 +4,18 @@ import optics.poly.{Iso, Lens, EOptional}
 import scala.annotation.implicitNotFound
 import scala.collection.immutable.{ListMap, SortedMap, Map}
 
-trait Index[Error, From, -Key, To] {
+trait Index[From, -Key] {
+
+  type Error
+  type To
+
   def index(i: Key): EOptional[Error, From, To]
+
 }
 
 object Index {
 
-  def apply[Key, Error, From, To](key: Key)(using idx: Index[Error, From, Key, To]): EOptional[Error, From, To] =
+  def apply[Key, From, Err, T](key: Key)(using idx: Index[From, Key] { type Error = Err; type To = T}): EOptional[Err, From, T] =
     idx.index(key)
 
   def map[K, V](key: K): EOptional[NoSuchElementException, Map[K, V], V] =
@@ -19,11 +24,14 @@ object Index {
   def list[A](i: Int): EOptional[IndexOutOfBoundsException, List[A], A] =
     apply(i)
 
-  def withError[Key, E1, Error, From, To](key: Key, error: E1)(using idx: Index[Error, From, Key, To]): EOptional[E1, From, To] =
+  def withError[Key, E1, From, T](key: Key, error: E1)(using idx: Index[From, Key] { type To = T}): EOptional[E1, From, T] =
     idx.index(key).mapError(_ => error)
 
 
-  given [A] as Index[IndexOutOfBoundsException, List[A], Int, A] {
+  given [A] as Index[List[A], Int] {
+    type Error = IndexOutOfBoundsException
+    type To = A
+
     def index(i: Int) =
       EOptional(
         (from) => {
@@ -38,7 +46,11 @@ object Index {
       )
   }
 
-  given [K, V] as Index[NoSuchElementException, Map[K, V], K, V] {
+  given [K, V] as Index[Map[K, V], K] {
+
+    type Error = NoSuchElementException
+    type To = V
+
     def index(k: K) =
       EOptional(
         (from) => {
