@@ -1,7 +1,7 @@
 package optics.poly
 
 import scala.language.implicitConversions
-import EOptional.indexMap
+import functions.Index
 
 class OptionalTest extends munit.FunSuite {
 
@@ -34,14 +34,13 @@ class OptionalTest extends munit.FunSuite {
     assertEquals(optLens.some.getOrError(neg), Left("None is not a Some"))
   }
 
-  test("indexMap") {
+  test("map") {
     val map = Map("foo" -> Map(1 -> true, 2 -> false), "bar" -> Map(0 -> true))
 
-    assertEquals((indexMap("foo") >>> indexMap(1)).getOrError(map), Right(true))
-    assertEquals((indexMap("foo") >>> indexMap(0)).getOrError(map), Left("Key 0 is missing"))
-    assertEquals((indexMap("zzz") >>> indexMap(1)).getOrError(map), Left("Key zzz is missing"))
-
-    assertEquals((indexMap("foo") >>> indexMap(1)).replace(false)(map),  Map("foo" -> Map(1 -> false, 2 -> false), "bar" -> Map(0 -> true)))
+    assertEquals((Index.map("foo") >>> Index.map(1)).getOrError(map), Right(true))
+    assertEquals((Index.map("foo") >>> Index.map(0)).getOrError(map).left.map(_.getMessage), Left("key not found: 0"))
+    assertEquals((Index.map("zzz") >>> Index.map(1)).getOrError(map).left.map(_.getMessage), Left("key not found: zzz"))
+    assertEquals((Index.map("foo") >>> Index.map(1)).replace(false)(map),  Map("foo" -> Map(1 -> false, 2 -> false), "bar" -> Map(0 -> true)))
   }
 
 }

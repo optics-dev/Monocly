@@ -4,12 +4,14 @@ import optics._
 import optics.mono.{EPrism, Lens}
 import optics.poly.PLens
 
-case class Mono(i: Int, foo: Foo, optI: Option[Int])
+case class Mono(i: Int, foo: Foo, optI: Option[Int], listI: List[Int], mapI: Map[Int, Int])
 
 object Mono {
   val i: Lens[Mono, Int] = Lens[Mono, Int](_.i, newVal => _.copy(i = newVal))
   val foo: Lens[Mono, Foo] = Lens[Mono, Foo](_.foo, newVal => _.copy(foo = newVal))
   val optI: Lens[Mono, Option[Int]] = Lens[Mono, Option[Int]](_.optI, newVal => _.copy(optI = newVal))
+  val listI: Lens[Mono, List[Int]] = Lens[Mono, List[Int]](_.listI, newVal => _.copy(listI = newVal))
+  val mapI: Lens[Mono, Map[Int, Int]] = Lens[Mono, Map[Int, Int]](_.mapI, newVal => _.copy(mapI = newVal))
 }
 
 case class Poly[A](i: Int, foo: Foo, optI: Option[Int], param: A)

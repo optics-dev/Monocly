@@ -8,7 +8,7 @@ trait Applicative[F[+_]]{
 }
 
 object Applicative {
-  def apply[F[+_]](implicit ev: Applicative[F]): Applicative[F] = ev
+  def apply[F[+_]](using ev: Applicative[F]): Applicative[F] = ev
 
   implicit val id: Applicative[Id] = new Applicative[Id] {
     def pure[A](value: A): Id[A] = value
