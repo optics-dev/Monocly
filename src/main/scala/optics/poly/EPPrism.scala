@@ -44,8 +44,8 @@ object PPrism {
   def apply[S, T, A, B](_getOrModify: S => Either[T, A], _reverseGet: B => T): PPrism[S, T, A, B] =
     EPPrism(_getOrModify(_).left.map(defaultError -> _), _reverseGet)
 
-  def some[A, B]: EPPrism[String, Option[A], Option[B], A, B] =
-    EPPrism.some("None is not a Some")
+  def some[A, B]: EPPrism[NoSuchElementException, Option[A], Option[B], A, B] =
+    EPPrism.some(NoSuchElementException("None is not a Some"))
 }
 
 object EPrism {

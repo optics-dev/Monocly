@@ -27,7 +27,7 @@ trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =
   def mapError[E1](update: E => E1): EPOptional[E1, S, T, A, B] =
     EPOptional[E1, S, T, A, B](getOrModify(_).left.map{ case (e, t) => (update(e), t)}, replace)
 
-  def some[A1, B1](implicit ev1: A <:< Option[A1], ev2: Option[B1] <:< B): EPOptional[E | String, S, T, A1, B1] =
+  def some[A1, B1](implicit ev1: A <:< Option[A1], ev2: Option[B1] <:< B): EPOptional[E | NoSuchElementException, S, T, A1, B1] =
     adapt >>> PPrism.some
 
   def adapt[A1, B1](implicit evA: A <:< A1, evB: B1 <:< B): EPOptional[E, S, T, A1, B1] =
