@@ -89,13 +89,5 @@ john.focus(_.paymentMethods.index("Job").as[PayPal].email).getOrError
 
 ```scala
 john.focus(_.paymentMethods.*.as[DebitCard].expirationDate).getAll
-// res: Option[PaymentMethod] = Some(PayPal("john@gmail.com"))
-
-john.focus(_.paymentMethods.index("Personal")).replace(DebitCard(...))
-// res: User = ...
-
-With useful error message (error type?)
-
-john.focus(_.paymentMethods.index("Job")).getOrError
-// res: Either[String, PaymentMethod] = Left("No value at key 'Job' in paymentMethods Map")
+// res: List[YearMonth] = List(YearMonth.of(2021, 7))
 ```
