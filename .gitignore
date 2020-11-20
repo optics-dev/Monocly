@@ -8,6 +8,9 @@
 ## NetBeans files to ignore
 .*_nb
 
+## VS Code files to ignore
+.vscode/
+
 ## scala specific files to ignore
 *.class
 target/
@@ -19,6 +22,7 @@ fast.html
 ## Metals files to ignore
 .metals/
 .bloop/
+project/metals.sbt
 
 ## Mac
 .DS_Store
