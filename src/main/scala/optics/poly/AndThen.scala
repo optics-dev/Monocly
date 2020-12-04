@@ -13,7 +13,7 @@ import optics.internal.{Applicative, Id, Proxy, TraversalRes}
 
 object AndThen {
 
-  given as AndThen[
+  given AndThen[
     EPTraversal,
     EPTraversal,
     EPTraversal
@@ -28,7 +28,7 @@ object AndThen {
       }
   }
 
-  given as AndThen[
+  given AndThen[
     EPTraversal,
     EPPrism,
     EPTraversal
@@ -42,7 +42,7 @@ object AndThen {
   }
 
 
-  given as AndThen[
+  given AndThen[
     EPTraversal,
     EPOptional,
     EPTraversal
@@ -55,7 +55,7 @@ object AndThen {
         .andThen(x, y)
   }
 
-  given as AndThen[
+  given AndThen[
     EPOptional,
     EPOptional,
     EPOptional
@@ -74,7 +74,7 @@ object AndThen {
       }
   }
 
-  given as AndThen[
+  given AndThen[
     EPOptional,
     EPPrism,
     EPOptional
@@ -87,7 +87,7 @@ object AndThen {
         .andThen(x, y)
   }
 
-  given as AndThen[
+  given AndThen[
     EPPrism,
     EPPrism,
     EPPrism
@@ -107,7 +107,7 @@ object AndThen {
       }
   }
 
-  given as AndThen[
+  given AndThen[
     EPPrism,
     EPTraversal,
     EPTraversal
