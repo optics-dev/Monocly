@@ -15,6 +15,9 @@ object PLens {
 
 
 object Lens {
+
+  def id[A]: Lens[A,A] = apply(a => a, _ => a => a)
+
   def apply[From, To](_get: From => To, _replace: To => From => From): Lens[From, To] =
     PLens(_get, _replace)
 

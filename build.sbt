@@ -4,8 +4,8 @@ lazy val root = project
     name := "Monocly",
     version := "0.1.0",
     scalacOptions += "-language:implicitConversions",
-    scalaVersion := "3.0.0-M2",
+    scalaVersion := "3.0.0-M3",
     useScala3doc := true,
-    libraryDependencies += "org.scalameta" %% "munit" % "0.7.19" % "test",
+    libraryDependencies += "org.scalameta" %% "munit" % "0.7.20" % "test",
     testFrameworks += new TestFramework("munit.Framework")
   )

@@ -1,5 +1,6 @@
 package optics.poly
 
+import scala.NoSuchElementException
 import scala.annotation.alpha
 
 trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>
@@ -34,7 +35,7 @@ object PPrism {
     EPPrism(_getOrModify(_).left.map(defaultError -> _), _reverseGet)
 
   def some[A, B]: EPPrism[NoSuchElementException, Option[A], Option[B], A, B] =
-    EPPrism.some(NoSuchElementException("None is not a Some"))
+    EPPrism.some(new NoSuchElementException("None is not a Some"))
 }
 
 object EPrism {

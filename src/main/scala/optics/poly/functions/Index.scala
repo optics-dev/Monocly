@@ -28,7 +28,7 @@ object Index {
     idx.index(key).mapError(_ => error)
 
 
-  given [A] as Index[List[A], Int] {
+  given [A]: Index[List[A], Int] with {
     type Error = IndexOutOfBoundsException
     type To = A
 
@@ -46,7 +46,7 @@ object Index {
       )
   }
 
-  given [K, V] as Index[Map[K, V], K] {
+  given [K, V]: Index[Map[K, V], K] with {
 
     type Error = NoSuchElementException
     type To = V
