@@ -26,3 +26,6 @@ project/metals.sbt
 
 ## Mac
 .DS_Store
+
+## Build Server Protocol
+.bsp/
