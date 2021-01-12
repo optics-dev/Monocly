@@ -112,11 +112,12 @@ object Focus {
       case CouldntFindFieldType(fromType: String, fieldName: String)
       case ComposeMismatch(type1: String, type2: String)
 
-      def asResult: FocusResult = Left(this)
+      def asResult: FocusResult[Nothing] = Left(this)
     }
 
-    type FocusResult = Either[FocusError, List[FocusAction]]
 
+    type FocusResult[+A] = Either[FocusError, A]
+    type ParseResult = FocusResult[List[FocusAction]]
 
     ///////////// PARSING //////////////////
     def unwrap(term: Term): Term = {
@@ -154,10 +155,10 @@ object Focus {
         }
     }
 
-    def parseLambdaBody(params: ParseParams): FocusResult = {
-      def loop(remainingBody: Term, listSoFar: List[FocusAction]): FocusResult = {
+    def parseLambdaBody(params: ParseParams): ParseResult = {
+      def loop(remainingBody: Term, listSoFar: List[FocusAction]): ParseResult = {
 
-        def addFieldAction(fromType: TypeRepr, fieldName: String): FocusResult = {
+        def addFieldAction(fromType: TypeRepr, fieldName: String): ParseResult = {
           getFieldType(fromType, fieldName) match {
             case Some(toType) => Right(FocusAction.Field(fieldName, fromType, toType) :: listSoFar)
             case None => FocusError.CouldntFindFieldType(fromType.show, fieldName).asResult
@@ -176,7 +177,7 @@ object Focus {
           case Select(CaseClass(prefix), fieldName) => addFieldAction(prefix.tpe.widen, fieldName).flatMap(loop(prefix, _))
           case Select(prefix, _) => FocusError.NotACaseClass(prefix.tpe.toString).asResult
 
-          case unexpected => FocusError.UnexpectedCodeStructure(unexpected.toString).asResult
+          case unexpected => FocusError.UnexpectedCodeStructure(unexpected.show).asResult
         }
       }
       loop(params.lambdaBody, Nil)
@@ -212,22 +213,21 @@ object Focus {
         //case FocusAction.Index(idx) => '{ ??? }.asTerm
       }
 
-    def composeLensTerms(lens1: Term, lens2: Term): Term = {
+    def composeLensTerms(lens1: Term, lens2: Term): FocusResult[Term] = {
       (lens1.tpe.asType, lens2.tpe.asType) match {
         case ('[EOptional[err1, from1, to1]], '[EOptional[err2, from2, to2]]) => 
-          '{ 
+          Right('{ 
             ${lens1.asExprOf[EOptional[err1, from1, to1]]} >>> ${lens2.asExprOf[EOptional[err2, to1, to2]]}
-          }
-
-        case ('[a], '[b]) =>
-          report.error(s"unable to compose ${Type.show[a]} >>> ${Type.show[b]}")
-          '{???}
+          }.asTerm)
+        case ('[a], '[b]) => FocusError.ComposeMismatch(TypeRepr.of[a].show, TypeRepr.of[b].show).asResult
       }
-    }.asTerm
+    }
 
-    def generateCode(actions: List[FocusAction]): Term = {
-      actions.foldLeft('{Iso.id[From]}.asTerm) { (termSoFar, action) => 
-        composeLensTerms(termSoFar, generateActionCode(action))
+    def generateCode(actions: List[FocusAction]): FocusResult[Term] = {
+      val idLens: FocusResult[Term] = Right('{Iso.id[From]}.asTerm)
+      
+      actions.foldLeft(idLens) { (resultSoFar, action) => 
+        resultSoFar.flatMap(term => composeLensTerms(term, generateActionCode(action)))
       }
     }
 
@@ -243,19 +243,23 @@ object Focus {
     }
 
     val fromTypeIsConcrete = TypeRepr.of[From].classSymbol.isDefined
-    val result: FocusResult = 
+
+    val parseResult: ParseResult = 
       getterExpr.asTerm match {
         case ExpectedLambdaFunction(params) if fromTypeIsConcrete => parseLambdaBody(params)
         case ExpectedLambdaFunction(_) => FocusError.NotASimpleLambdaFunction.asResult
         case _ => FocusError.NotAConcreteClass(Type.show[Type[From]]).asResult
       }
 
-    result match {
-      case Right(list) => generateCode(list).asExprOf[Lens[From,To]]
+    val generatedCode: FocusResult[Term] = 
+      parseResult.flatMap(generateCode)
+      
+    generatedCode match {
+      case Right(code) => code.asExprOf[Lens[From,To]]
       case Left(error) => report.error(errorMessage(error)); '{???}
     }
   }
-
+ 
   def apply[S] = new MkFocus[S]
 
   class MkFocus[S] {
