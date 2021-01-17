@@ -1,5 +1,6 @@
 package optics.poly
 
+import scala.NoSuchElementException
 import scala.annotation.alpha
 
 trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>
@@ -12,25 +13,14 @@ trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>
     EPPrism[E1, S, T, A, B](getOrModify(_).left.map{ case (e, t) => (update(e), t)}, reverseGet)
 }
 
-object EPPrism {
 
-  extension {
+object EPPrism {
+  extension [G[_, _, _, _, _], H[_, _, _, _, _],E1,E,S,T,A,B,C,D] (x: EPPrism[E, S, T, A, B]) {
     @alpha("andThen")
-    def [
-      G[_, _, _, _, _],
-      H[_, _, _, _, _],
-      E1,
-      E,
-      S,
-      T,
-      A,
-      B,
-      C,
-      D
-    ](x: EPPrism[E, S, T, A, B]) >>> (y: G[E1, A, B, C, D])(using AndThen[EPPrism, G, H]): H[E | E1, S, T, C, D] =
+    def >>>(y: G[E1, A, B, C, D])(using AndThen[EPPrism, G, H]): H[E | E1, S, T, C, D] =
       summon[AndThen[EPPrism, G, H]].andThen[E, E1, S, T, A, B, C, D](x, y)
   }
-
+  
   def apply[E, S, T, A, B](_getOrModify: S => Either[(E, T), A], _reverseGet: B => T): EPPrism[E, S, T, A, B] = new EPPrism[E, S, T, A, B] {
     def getOrModify(from: S): Either[(E, T), A] = _getOrModify(from)
     def reverseGet(to: B): T = _reverseGet(to)
@@ -45,7 +35,7 @@ object PPrism {
     EPPrism(_getOrModify(_).left.map(defaultError -> _), _reverseGet)
 
   def some[A, B]: EPPrism[NoSuchElementException, Option[A], Option[B], A, B] =
-    EPPrism.some(NoSuchElementException("None is not a Some"))
+    EPPrism.some(new NoSuchElementException("None is not a Some"))
 }
 
 object EPrism {

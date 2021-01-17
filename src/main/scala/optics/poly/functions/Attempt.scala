@@ -17,20 +17,20 @@ object Attempt {
   def apply[From, Err, T](using attempt: Attempt[From] { type Error = Err; type To = T }): EOptional[Err, From, T] =
     attempt.attempt
 
-  given [A] as Attempt[Option[A]] {
+  given [A]: Attempt[Option[A]] with {
 
     type Error = NoSuchElementException
     type To = A
 
     def attempt = {
       EOptional(
-        _.map(Right(_)).getOrElse(Left(NoSuchElementException("None is not Some"))),
+        _.map(Right(_)).getOrElse(Left(new NoSuchElementException("None is not Some"))),
         to => const(Some(to))
       )
     }
   }
 
-  given [A, B] as Attempt[Either[A, B]] {
+  given [A, B]:  Attempt[Either[A, B]] with {
 
     type Error = A
     type To = B

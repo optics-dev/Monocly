@@ -9,6 +9,28 @@ final class FocusTest extends munit.FunSuite {
   case class Foo(bar: Option[Bar])
   case class Qux(foo: Either[String, Foo], moo: Map[Int, Fub])
 
+  case class Animal(name: String)
+  case class Owner(pet: Animal)
+  case class Shop(owner: Owner)
+
+  val fooLens: EOptional[NoSuchElementException, Shop, String] =
+    Focus[Shop](_.owner.pet.name)
+
+  test("Single field access") {
+    assertEquals(
+      Focus[Animal](_.name).getOrError(Animal("Bob")),
+      Right("Bob")
+    )
+  }
+
+  test("Nested field access") {
+    assertEquals(
+      Focus[Shop](_.owner.pet.name).getOrError(Shop(Owner(Animal("Fred")))),
+      Right("Fred")
+    )
+  }
+
+  /*
   val fooLens: EOptional[NoSuchElementException, Foo, Int] =
     Focus[Foo](_.bar.?.fub.bab)
 
@@ -44,6 +66,6 @@ final class FocusTest extends munit.FunSuite {
       lens.getOrError(Map("moo" -> Qux(Right(Foo(Some(Bar(Fub(21))))), Map()))),
       Right(Fub(21))
     )
-  }
+  }*/
 
 }

@@ -13,11 +13,11 @@ import optics.internal.{Applicative, Id, Proxy, TraversalRes}
 
 object AndThen {
 
-  given as AndThen[
+  given AndThen[
     EPTraversal,
     EPTraversal,
     EPTraversal
-  ] {
+  ] with {
     def andThen[E, E1, S, T, A, B, C, D](
       x: EPTraversal[E, S, T, A, B],
       y: EPTraversal[E1, A, B, C, D]
@@ -28,11 +28,11 @@ object AndThen {
       }
   }
 
-  given as AndThen[
+  given AndThen[
     EPTraversal,
     EPPrism,
     EPTraversal
-  ] {
+  ] with {
     def andThen[E, E1, S, T, A, B, C, D](
       x: EPTraversal[E, S, T, A, B],
       y: EPPrism[E1, A, B, C, D]
@@ -42,11 +42,11 @@ object AndThen {
   }
 
 
-  given as AndThen[
+  given AndThen[
     EPTraversal,
     EPOptional,
     EPTraversal
-  ] {
+  ] with {
     def andThen[E, E1, S, T, A, B, C, D](
       x: EPTraversal[E, S, T, A, B],
       y: EPOptional[E1, A, B, C, D]
@@ -55,11 +55,11 @@ object AndThen {
         .andThen(x, y)
   }
 
-  given as AndThen[
+  given AndThen[
     EPOptional,
     EPOptional,
     EPOptional
-  ] {
+  ] with {
     def andThen[E, E1, S, T, A, B, C, D](
       x: EPOptional[E, S, T, A, B],
       y: EPOptional[E1, A, B, C, D]
@@ -74,11 +74,11 @@ object AndThen {
       }
   }
 
-  given as AndThen[
+  given AndThen[
     EPOptional,
     EPPrism,
     EPOptional
-  ] {
+  ] with {
     def andThen[E, E1, S, T, A, B, C, D](
       x: EPOptional[E, S, T, A, B],
       y: EPPrism[E1, A, B, C, D]
@@ -87,11 +87,11 @@ object AndThen {
         .andThen(x, y)
   }
 
-  given as AndThen[
+  given AndThen[
     EPPrism,
     EPPrism,
     EPPrism
-  ] {
+  ] with {
 
     def andThen[E, E1, S, T, A, B, C, D](
       x: EPPrism[E, S, T, A, B],
@@ -107,11 +107,11 @@ object AndThen {
       }
   }
 
-  given as AndThen[
+  given AndThen[
     EPPrism,
     EPTraversal,
     EPTraversal
-  ] {
+  ] with {
     def andThen[E, E1, S, T, A, B, C, D](
       x: EPPrism[E, S, T, A, B],
       y: EPTraversal[E1, A, B, C, D]
