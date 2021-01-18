@@ -1,8 +1,7 @@
 package example
 
 import optics._
-import optics.mono.{EPrism, Lens}
-import optics.poly.PLens
+import optics.poly._
 
 case class Mono(i: Int, foo: Foo, optI: Option[Int], listI: List[Int], mapI: Map[Int, Int])
 

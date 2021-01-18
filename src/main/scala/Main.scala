@@ -1,7 +1,6 @@
 import example.Foo.{FooI, FooIS, FooList, FooS}
 import example.{Foo, Mono, Poly}
-import optics.mono.{NonEmptyTraversal, Prism, Traversal}
-import optics.poly.{NonEmptyPTraversal, PPrism}
+import optics.poly._
 
 object Main {
 
@@ -44,18 +43,18 @@ object Main {
     println((NonEmptyTraversal.pair >>> NonEmptyTraversal.pair).toListOrError(((1, 3), (6, 10))))
 
     // Left(Expected FooI but got FooS(hello))
-    println((Traversal.list >>>  Foo.fooI).toListOrError(List(FooI(10), FooS("hello"), FooI(0), FooIS(3, "world"))))
+    println((EPTraversal.list >>>  Foo.fooI).toListOrError(List(FooI(10), FooS("hello"), FooI(0), FooIS(3, "world"))))
     // Left(List is empty)x
-    println((Traversal.list >>>  Foo.fooI).toListOrError(Nil))
+    println((EPTraversal.list >>>  Foo.fooI).toListOrError(Nil))
     // Right(List(FooI(10), FooI(0)))
 //    println((PTraversal.list >>>? Foo.fooI).toListOrError(List(FooI(10), FooS("hello"), FooI(0), FooIS(3, "world"))))
 
     // Right(List(1, 2, 3, 4))
-    println((Foo.fooL >>>  Traversal.list).toListOrError(FooList(List(1,2,3,4))))
+    println((Foo.fooL >>>  EPTraversal.list).toListOrError(FooList(List(1,2,3,4))))
     // Left(List is empty)
-    println((Foo.fooL >>>  Traversal.list).toListOrError(FooList(Nil)))
+    println((Foo.fooL >>>  EPTraversal.list).toListOrError(FooList(Nil)))
     // Left(Expected FooList but got FooI(10))
-    println((Foo.fooL >>>  Traversal.list).toListOrError(FooI(10)))
+    println((Foo.fooL >>>  EPTraversal.list).toListOrError(FooI(10)))
     // Right(List()) TODO It should be a Left if there is no item matching
 //    println((Foo.fooL ?>>> PTraversal.list).toListOrError(FooI(10)))
 

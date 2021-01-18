@@ -41,9 +41,18 @@ object PPrism {
 object EPrism {
   def apply[Error, From, To](_getOrModify: From => Either[Error, To], _reverseGet: To => From): EPrism[Error, From, To] =
     EPPrism(from => _getOrModify(from).left.map(_ -> from), _reverseGet)
+
+  def partial[Error, From, To](get: PartialFunction[From, To])(mismatch: From => Error)(reverseGet: To => From): EPrism[Error, From, To] =
+    apply(from => get.lift(from).toRight(mismatch(from)), reverseGet)
+
+  def some[Error, A](error: Error): EPrism[Error, Option[A], A] =
+    partial[Error, Option[A], A]{ case Some(a) => a }(_ => error)(Some(_))
 }
 
 object Prism {
   def apply[From, To](_getOption: From => Option[To], _reverseGet: To => From): Prism[From, To] =
     EPrism(_getOption(_).toRight(defaultError), _reverseGet)
+
+  def some[A]: Prism[Option[A], A] =
+    EPrism.some("None is not a Some")
 }
