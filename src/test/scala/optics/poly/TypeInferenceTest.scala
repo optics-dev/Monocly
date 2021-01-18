@@ -10,8 +10,8 @@ class TypeInferenceTest extends munit.FunSuite {
   }
 
   test("some polymorphic update level 2") {
-    assertEquals((PPrism.some >>> PPrism.some).replace(2)(Some(Some(true))), Some(Some(2)))
-    assertEquals((PPrism.some >>> PPrism.some).replace(2)(Option(Option(true))), Some(Some(2)))
+    assertEquals(PPrism.some.andThen(PPrism.some).replace(2)(Some(Some(true))), Some(Some(2)))
+    assertEquals(PPrism.some.andThen(PPrism.some).replace(2)(Option(Option(true))), Some(Some(2)))
   }
 
   test("_1 polymorphic update level 1") {
@@ -19,11 +19,11 @@ class TypeInferenceTest extends munit.FunSuite {
   }
 
   test("_1 polymorphic update level 2") {
-    assertEquals((PLens._1 >>> PLens._1).replace(0)(((false, 7), "foo")), ((0, 7), "foo"))
+    assertEquals(PLens._1.andThen(PLens._1).replace(0)(((false, 7), "foo")), ((0, 7), "foo"))
   }
 
   test("compose Lens and Prism") {
-    assertEquals((PLens._1 >>> PPrism.some >>> PLens._2).replace(0)((Some((true, "foo")), 10L)), (Some((true, 0)), 10L))
+    assertEquals(PLens._1.andThen(PPrism.some).andThen(PLens._2).replace(0)((Some((true, "foo")), 10L)), (Some((true, 0)), 10L))
   }
 
 }

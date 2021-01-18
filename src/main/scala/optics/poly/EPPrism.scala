@@ -1,5 +1,7 @@
 package optics.poly
 
+import optics.poly.functions.Index
+
 trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>
   def reverseGet(to: B): T
 
@@ -9,12 +11,29 @@ trait EPPrism[+E, -S, +T, +A, -B] extends EPOptional[E, S, T, A, B] { self =>
   override def mapError[E1](update: E => E1): EPPrism[E1, S, T, A, B] =
     EPPrism[E1, S, T, A, B](getOrModify(_).left.map{ case (e, t) => (update(e), t)}, reverseGet)
 
-  def >>>[E1, C, D](other: EPPrism[E1, A, B, C, D]): EPPrism[E | E1, S, T, C, D] =
-    ???
+  def andThen[E1, C, D](other: EPPrism[E1, A, B, C, D]): EPPrism[E | E1, S, T, C, D] =
+    new EPPrism[E | E1, S, T, C, D] {
+      def getOrModify(from: S): Either[(E | E1, T), C] =
+        for {
+          a <- self.getOrModify(from)
+          t <- other.getOrModify(a).left.map{ case (e1, b) => (e1, self.replace(b)(from)) }
+        } yield t
+
+      def reverseGet(to: D): T =
+        self.reverseGet(other.reverseGet(to))
+    }
 }
 
 
 object EPPrism {
+  extension [Error, From, To, Key, E1, T] (self: EPrism[Error, From, To]) {
+    def index(key: Key)(using idx: Index[To, Key] { type To = T}): EOptional[Error | idx.Error, From, idx.To] =
+      self.andThen(idx.index(key))
+
+    def indexError(key: Key, error: E1)(using idx: Index[To, Key] { type To = T}): EOptional[Error | E1, From, idx.To] =
+      self.andThen(idx.index(key).mapError(_ => error))
+  }
+
   def apply[E, S, T, A, B](_getOrModify: S => Either[(E, T), A], _reverseGet: B => T): EPPrism[E, S, T, A, B] = new EPPrism[E, S, T, A, B] {
     def getOrModify(from: S): Either[(E, T), A] = _getOrModify(from)
     def reverseGet(to: B): T = _reverseGet(to)

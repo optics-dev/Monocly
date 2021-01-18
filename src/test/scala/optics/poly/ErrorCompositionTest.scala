@@ -5,7 +5,9 @@ import scala.language.implicitConversions
 class ErrorCompositionTest extends munit.FunSuite {
 
   test("compose with different errors") {
-    val some3 = EPPrism.some("err") >>> EPPrism.some(2) >>> EPPrism.some[Boolean, Int, String](true)
+    val some3 = EPPrism.some("err")
+      .andThen(EPPrism.some(2))
+      .andThen(EPPrism.some[Boolean, Int, String](true))
 
     assertEquals(some3.getOrError(Some(Some(Some(1)))), Right(1))
     assertEquals(some3.getOrError(Some(Some(None))), Left(true))
@@ -19,9 +21,9 @@ class ErrorCompositionTest extends munit.FunSuite {
   }
 
   test("traversal errors level 2") {
-    assertEquals((EPTraversal.list >>> PPrism.some).toListOrError(List(Some(1), Some(2))), Right(List(1, 2)))
-    assertEquals((EPTraversal.list >>> PPrism.some).toListOrError(List(None, Some(2))), Right(List(2)))
-    assertEquals((EPTraversal.list >>> PPrism.some).toListOrError(List(None, None)), Left("List is empty"))
+    assertEquals(EPTraversal.list.andThen(PPrism.some).toListOrError(List(Some(1), Some(2))), Right(List(1, 2)))
+    assertEquals(EPTraversal.list.andThen(PPrism.some).toListOrError(List(None, Some(2))), Right(List(2)))
+    assertEquals(EPTraversal.list.andThen(PPrism.some).toListOrError(List(None, None)), Left("List is empty"))
   }
 
 }
