@@ -10,24 +10,24 @@ import scala.language.dynamics
 case class JsonPath(path: List[PathElement], json: EOptional[JsonPathError, Json, Json]) extends Dynamic {
 
   val string: EOptional[JsonPathError, Json, String] =
-    json >>> jsonString.mapError(JsonPathError(path, _))
+    json.andThen(jsonString.mapError(JsonPathError(path, _)))
 
   val int: EOptional[JsonPathError, Json, Int] =
-    json >>> jsonInt.mapError(JsonPathError(path, _))
+    json.andThen(jsonInt.mapError(JsonPathError(path, _)))
 
   def selectDynamic(field: String): JsonPath = {
     val newPath = Field(field) :: path
     JsonPath(
       newPath,
-      json >>> jsonObject.mapError(JsonPathError(path, _)) >>> FIndex.withError(field, JsonPathError(newPath, "Key is missing"))
+      json.andThen(jsonObject.mapError(JsonPathError(path, _))).indexError(field, JsonPathError(newPath, "Key is missing"))
     )
   }
 
-  def index(index: Int): JsonPath = {
-    val newPath = Index(index) :: path
+  def index(key: Int): JsonPath = {
+    val newPath = Index(key) :: path
     JsonPath(
       newPath,
-      json >>> jsonArray.mapError(JsonPathError(path, _)) >>> FIndex.withError(index, JsonPathError(newPath, "Index is missing"))
+      json.andThen(jsonArray.mapError(JsonPathError(path, _))).indexError(key, JsonPathError(newPath, "Index is missing"))
     )
   }
 }

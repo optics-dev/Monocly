@@ -14,11 +14,11 @@ class IndexTest extends munit.FunSuite {
 
   test("inference") {
     assertEquals(
-      (lLens >>> Index(0) >>> iLens).getOrError(Bar(List(Foo(1)), Map())),
+      lLens.index(0).andThen(iLens).getOrError(Bar(List(Foo(1)), Map())),
       Right(1)
     )
     assertEquals(
-      (mLens >>> Index("moo") >>> iLens).getOrError(Bar(List(), Map("moo" -> Foo(1)))),
+      mLens.index("moo").andThen(iLens).getOrError(Bar(List(), Map("moo" -> Foo(1)))),
       Right(1)
     )
   }

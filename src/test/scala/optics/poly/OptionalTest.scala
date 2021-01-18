@@ -37,10 +37,10 @@ class OptionalTest extends munit.FunSuite {
   test("map") {
     val map = Map("foo" -> Map(1 -> true, 2 -> false), "bar" -> Map(0 -> true))
 
-    assertEquals((Index.map("foo") >>> Index.map(1)).getOrError(map), Right(true))
-    assertEquals((Index.map("foo") >>> Index.map(0)).getOrError(map).left.map(_.getMessage), Left("key not found: 0"))
-    assertEquals((Index.map("zzz") >>> Index.map(1)).getOrError(map).left.map(_.getMessage), Left("key not found: zzz"))
-    assertEquals((Index.map("foo") >>> Index.map(1)).replace(false)(map),  Map("foo" -> Map(1 -> false, 2 -> false), "bar" -> Map(0 -> true)))
+    assertEquals(Index.map("foo").andThen(Index.map(1)).getOrError(map), Right(true))
+    assertEquals(Index.map("foo").andThen(Index.map(0)).getOrError(map).left.map(_.getMessage), Left("key not found: 0"))
+    assertEquals(Index.map("zzz").andThen(Index.map(1)).getOrError(map).left.map(_.getMessage), Left("key not found: zzz"))
+    assertEquals(Index.map("foo").andThen(Index.map(1)).replace(false)(map),  Map("foo" -> Map(1 -> false, 2 -> false), "bar" -> Map(0 -> true)))
   }
 
 }

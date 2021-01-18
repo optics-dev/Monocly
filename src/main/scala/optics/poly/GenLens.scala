@@ -217,7 +217,7 @@ object Focus {
       (lens1.tpe.asType, lens2.tpe.asType) match {
         case ('[EOptional[err1, from1, to1]], '[EOptional[err2, from2, to2]]) => 
           Right('{ 
-            ${lens1.asExprOf[EOptional[err1, from1, to1]]} >>> ${lens2.asExprOf[EOptional[err2, to1, to2]]}
+            ${lens1.asExprOf[EOptional[err1, from1, to1]]}.andThen(${lens2.asExprOf[EOptional[err2, to1, to2]]})
           }.asTerm)
         case ('[a], '[b]) => FocusError.ComposeMismatch(TypeRepr.of[a].show, TypeRepr.of[b].show).asResult
       }

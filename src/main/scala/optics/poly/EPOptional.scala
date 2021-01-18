@@ -1,9 +1,7 @@
 package optics.poly
 
 import optics.internal.{Applicative, TraversalRes}
-
-import scala.annotation.alpha
-import scala.util.Try
+import optics.poly.functions.Index
 
 trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =>
   def getOrModify(from: S): Either[(E, T), A]
@@ -28,22 +26,35 @@ trait EPOptional[+E, -S, +T, +A, -B] extends EPTraversal[E, S, T, A, B] { self =
     EPOptional[E1, S, T, A, B](getOrModify(_).left.map{ case (e, t) => (update(e), t)}, replace)
 
   def some[A1, B1](implicit ev1: A <:< Option[A1], ev2: Option[B1] <:< B): EPOptional[E | NoSuchElementException, S, T, A1, B1] =
-    adapt >>> PPrism.some
+    adapt.andThen(PPrism.some)
 
   def adapt[A1, B1](implicit evA: A <:< A1, evB: B1 <:< B): EPOptional[E, S, T, A1, B1] =
     evB.substituteContra[[X] =>> EPOptional[E, S, T, A1, X]](
       evA.substituteCo[[X] =>> EPOptional[E, S, T, X, B]](this)
     )
 
+  def andThen[E1, C, D](other: EPOptional[E1, A, B, C, D]): EPOptional[E | E1, S, T, C, D] =
+    new EPOptional[E | E1, S, T, C, D] {
+      def getOrModify(from: S): Either[(E | E1, T), C] =
+        for {
+          a <- self.getOrModify(from)
+          t <- other.getOrModify(a).left.map{ case (e1, b) => (e1, self.replace(b)(from)) }
+        } yield t
+
+      override def replace(to: D): S => T =
+        self.modify(other.replace(to))
+    }
 }
 
 
 
 object EPOptional {
-  extension [G[_, _, _, _, _], H[_, _, _, _, _],E1,E,S,T,A,B,C,D] (x: EPOptional[E, S, T, A, B]) {
-    @alpha("andThen")
-    def >>>(y: G[E1, A, B, C, D])(using AndThen[EPOptional, G, H]): H[E | E1, S, T, C, D] =
-      summon[AndThen[EPOptional, G, H]].andThen[E, E1, S, T, A, B, C, D](x, y)
+  extension [Error, From, To, Key, E1, T] (self: EOptional[Error, From, To]) {
+    def index(key: Key)(using idx: Index[To, Key] { type To = T}): EOptional[Error | idx.Error, From, idx.To] =
+      self.andThen(idx.index(key))
+
+    def indexError(key: Key, error: E1)(using idx: Index[To, Key] { type To = T}): EOptional[Error | E1, From, idx.To] =
+      self.andThen(idx.index(key).mapError(_ => error))
   }
 
   def apply[E, S, T, A, B](_getOrModify: S => Either[(E, T), A], _replace: B => S => T): EPOptional[E, S, T, A, B] =

@@ -1,8 +1,7 @@
 package optics.poly
 
 import optics.internal.{Applicative, Id, Proxy, TraversalRes}
-
-import scala.annotation.alpha
+import optics.poly.functions.Index
 
 trait EPTraversal[+E, -S, +T, +A, -B] { self =>
   def traversal[F[+_]: Applicative, E1](f: A => TraversalRes[F, E1, B])(from: S): TraversalRes[F, E | E1, T]
@@ -42,6 +41,12 @@ trait EPTraversal[+E, -S, +T, +A, -B] { self =>
   def iterator(from: S): Iterator[A] =
     toListOrError(from).fold(_ => Iterator.empty, _.iterator)
 
+  def andThen[E1, C, D](other: EPTraversal[E1, A, B, C, D]): EPTraversal[E | E1, S, T, C, D] =
+    new EPTraversal[E | E1, S, T, C, D] {
+      def traversal[F[+ _] : Applicative, E2](f: C => TraversalRes[F, E2, D])(from: S): TraversalRes[F, E | E1 | E2, T] =
+        self.traversal(other.traversal(f)(_))(from)
+    }
+
 }
 
 object NonEmptyPTraversal {
@@ -56,10 +61,12 @@ object NonEmptyPTraversal {
 }
 
 object EPTraversal {
-  extension [G[_, _, _, _, _], H[_, _, _, _, _],E1,E,S,T,A,B,C,D] (x: EPTraversal[E, S, T, A, B]) {
-    @alpha("andThen")
-    def >>> (y: G[E1, A, B, C, D])(using AndThen[EPTraversal, G, H]): H[E | E1, S, T, C, D] =
-      summon[AndThen[EPTraversal, G, H]].andThen[E, E1, S, T, A, B, C, D](x, y)
+  extension [Error, From, To, Key, E1, T] (self: ETraversal[Error, From, To]) {
+    def index(key: Key)(using idx: Index[To, Key] { type To = T}): ETraversal[Error | idx.Error, From, idx.To] =
+      self.andThen(idx.index(key))
+
+    def indexError(key: Key, error: E1)(using idx: Index[To, Key] { type To = T}): ETraversal[Error | E1, From, idx.To] =
+      self.andThen(idx.index(key).mapError(_ => error))
   }
 
   def list[A, B]: EPTraversal[String, List[A], List[B], A, B] =
