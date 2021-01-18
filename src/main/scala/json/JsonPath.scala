@@ -23,11 +23,11 @@ case class JsonPath(path: List[PathElement], json: EOptional[JsonPathError, Json
     )
   }
 
-  def index(index: Int): JsonPath = {
-    val newPath = Index(index) :: path
+  def index(key: Int): JsonPath = {
+    val newPath = Index(key) :: path
     JsonPath(
       newPath,
-      json >>> jsonArray.mapError(JsonPathError(path, _)) >>> FIndex.withError(index, JsonPathError(newPath, "Index is missing"))
+      (json >>> jsonArray.mapError(JsonPathError(path, _))).indexError(key, JsonPathError(newPath, "Index is missing"))
     )
   }
 }
