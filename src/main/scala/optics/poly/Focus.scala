@@ -5,7 +5,6 @@ import scala.quoted.{Quotes, Expr, Type, quotes}
 import Function.const
 
 
-
 object dsl {
   extension [A, Err, B] (a: A) 
     def ?(using Attempt[A] { type To = B; type Error = Err }): B = ???
@@ -14,92 +13,29 @@ object dsl {
     def idx(k: K)(using Index[A, K] { type To = B; type Error = Err }): B = ???
 }
 
-object GenLens {
-
-  def impl[From: Type, To: Type](getterExpr: Expr[From => To])(using quotes: Quotes): Expr[Lens[From, To]] = {
-    import quotes.reflect._
-
-    def unwrap(term: Term): Term = {
-      term match {
-        case Block(List(), inner) => unwrap(inner)
-        case Inlined(_, _, inner) => unwrap(inner)
-        case x => x
-      }
-    }
-
-    object ExpectedLambdaFunction {
-      def unapply(term: Term): Option[String] = unwrap(term) match {
-        case Lambda(List(ValDef(argName, _, _)), Select(Ident(identifier), fieldName)) if argName == identifier => Some(fieldName)
-        case _ => None
-      }
-    }
-
-    def constructGetterBody(field: String, from: Term): Term = {
-      // o.copy(field = value)
-      Select.unique(from, field)
-    }
-
-    def constructSetterBody(field: String, from: Term, to: Term): Term = {
-      // o.copy(field = value)
-      Select.overloaded(from, "copy", Nil, NamedArg(field, to) :: Nil)
-    }
-
-    def constructLensExpr(field: String): Expr[Lens[From, To]] = 
-      '{
-        val setter = (to: To) => (from: From) => ${
-          constructSetterBody(field, '{from}.asTerm, '{to}.asTerm).asExprOf[From]
-        }
-        
-        val getter = (from: From) => ${ 
-          constructGetterBody(field, '{from}.asTerm).asExprOf[To] 
-        }
-        Lens.apply(getter, setter)
-      }
-
-    getterExpr.asTerm match {
-      case ExpectedLambdaFunction(fieldName) =>
-        TypeRepr.of[From].classSymbol match {
-          case Some(fromClass) if fromClass.flags.is(Flags.Case) => constructLensExpr(fieldName)
-          case Some(fromClass) => report.error(s"Expecting a case class in the 'From' position; found $fromClass"); '{???}
-          case None => report.error(s"Expecting a concrete case class in the 'From' position; cannot reify type ${summon[Type[From]]}"); '{???}
-        }
-      case term =>
-        report.error(s"Expecting a lambda function that directly accesses a field. Example: `GenLens[Address](_.streetNumber)`")
-        '{???}
-    }
-  }
-
-  def apply[From] = new MkGenLens[From]
-
-  inline def uncurried[From, To](inline get: (From => To)): Lens[From, To] = 
-    ${ GenLens.impl('get) }
-
-  class MkGenLens[From] {
-    inline def apply[To](inline get: (From => To)): Lens[From, To] = 
-      ${ GenLens.impl('get) }
-  }
-
-}
-
 object Focus {
 
-  def impl[From: Type, To: Type](getterExpr: Expr[From => To])(using quotes: Quotes): Expr[Lens[From, To]] = {
+  def impl[From: Type, To: Type](getterExpr: Expr[From => To])(using Quotes): Expr[Lens[From, To]] = {
     import quotes.reflect._
-  
 
     ///////////// DOMAIN //////////////////
     case class ParseParams(argName: String, argType: TypeRepr, lambdaBody: Term)
 
-    enum FocusAction {
-      case Field(name: String, from: TypeRepr, to: TypeRepr)
-      //case Attempt(from: TypeRepr, to: TypeRepr)
-      //case Index(i: Term, indexType: TypeRepr, from: TypeRepr, to: TypeRepr)
+    // Common type information that we record about every action in the DSL
+    case class TypeInfo(from: TypeRepr, fromTypeArgs: List[TypeRepr], to: TypeRepr) {
+      override def toString(): String = 
+        s"TypeInfo(${from.show}, ${fromTypeArgs.map(_.show).mkString("[", ",", "]")}, ${to.show})"
+    }
 
-      def from: TypeRepr
-      def to: TypeRepr
+    enum FocusAction {
+      case Field(name: String, typeInfo: TypeInfo)
+      //case Attempt(info: TypeInfo)
+      //case Index(i: Term, indexType: TypeRepr, info: TypeInfo)
+
+      def typeInfo: TypeInfo
 
       override def toString(): String = this match {
-        case Field(name, from, to) => s"Field($name, ${from.show}, ${to.show})"
+        case Field(name, info) => s"Field($name, $info)"
       }
     }
 
@@ -128,25 +64,6 @@ object Focus {
       }
     }
 
-    object CaseClass {
-      def unapply(term: Term): Option[Term] =
-        term.tpe.classSymbol.flatMap { sym => 
-          Option.when(sym.flags.is(Flags.Case))(term)
-        }
-    }
-
-    //  val ValDef(field, typeTree, _) = t.classSymbol.get.memberField(x).tree
-    def getFieldType(fromType: TypeRepr, fieldName: String): Option[TypeRepr] =
-      fromType.classSymbol.flatMap { 
-        _.memberField(fieldName) match {
-          case sym if sym.isNoSymbol => None
-          case sym => sym.tree match {
-            case ValDef(_, typeTree, _) => Some(typeTree.tpe)
-            case _ => None
-          }
-        }
-      }
-
     object ExpectedLambdaFunction {
       def unapply(term: Term): Option[ParseParams] = 
         unwrap(term) match {
@@ -155,12 +72,67 @@ object Focus {
         }
     }
 
+    object CaseClass {
+      def unapply(term: Term): Option[Term] =
+        term.tpe.classSymbol.flatMap { sym => 
+          Option.when(sym.flags.is(Flags.Case))(term)
+        }
+    }
+
+    object FieldType {
+      def unapply(fieldSymbol: Symbol): Option[TypeRepr] = fieldSymbol match {
+        case sym if sym.isNoSymbol => None
+        case sym => sym.tree match {
+          case ValDef(_, typeTree, _) => Some(typeTree.tpe)
+          case _ => None
+        }
+      }
+    }
+
+    def getDeclaredTypeArgs(classType: TypeRepr): List[Symbol] = {
+      classType.classSymbol.map(_.primaryConstructor.paramSymss) match {
+        case Some(typeParamList :: _) if typeParamList.exists(_.isTypeParam) => typeParamList
+        case _ => Nil
+      }
+    }
+    
+    def getSuppliedTypeArgs(fromType: TypeRepr): List[TypeRepr] = {
+      fromType match {
+        case AppliedType(_, argTypeReprs) => argTypeReprs 
+        case _ => Nil
+      }
+    }
+
+    def swapWithSuppliedType(fromType: TypeRepr, possiblyContainsTypeArgs: TypeRepr): TypeRepr = {
+      val declared = getDeclaredTypeArgs(fromType)
+      val supplied = getSuppliedTypeArgs(fromType)
+      val swapDict = declared.view.map(_.name).zip(supplied).toMap
+      
+      def swapInto(candidate: TypeRepr): TypeRepr = {
+        candidate match {
+          // Waiting until we can get an AppliedType constructor
+          //case AppliedType(typeCons, args) => AppliedType(swapInto(typeCons), args.map(swapInto))
+          case leafType => swapDict.getOrElse(leafType.typeSymbol.name, leafType)
+        }
+      }
+      swapInto(possiblyContainsTypeArgs)
+    }
+
+    def getFieldType(fromType: TypeRepr, fieldName: String): Option[TypeRepr] = {
+      fromType.classSymbol.flatMap { 
+        _.memberField(fieldName) match {
+          case FieldType(possiblyTypeArg) => Some(swapWithSuppliedType(fromType, possiblyTypeArg))
+          case _ => None
+        }
+      }
+    }
+
     def parseLambdaBody(params: ParseParams): ParseResult = {
       def loop(remainingBody: Term, listSoFar: List[FocusAction]): ParseResult = {
 
         def addFieldAction(fromType: TypeRepr, fieldName: String): ParseResult = {
           getFieldType(fromType, fieldName) match {
-            case Some(toType) => Right(FocusAction.Field(fieldName, fromType, toType) :: listSoFar)
+            case Some(toType) => Right(FocusAction.Field(fieldName, TypeInfo(fromType, getSuppliedTypeArgs(fromType), toType)) :: listSoFar)
             case None => FocusError.CouldntFindFieldType(fromType.show, fieldName).asResult
           }
         }
@@ -187,15 +159,16 @@ object Focus {
     def generateGetter(field: String, from: Term): Term = 
       Select.unique(from, field) // o.field
 
-    def generateSetter(field: String, from: Term, to: Term): Term = 
-      Select.overloaded(from, "copy", Nil, NamedArg(field, to) :: Nil) // o.copy(field = value)
+    def generateSetter(field: String, from: Term, to: Term, typeInfo: TypeInfo): Term = {
+      Select.overloaded(from, "copy", typeInfo.fromTypeArgs, NamedArg(field, to) :: Nil) // o.copy(field = value)
+    }
 
-    def generateLens(field: String, fromType: TypeRepr, toType: TypeRepr): Term = {
-      (fromType.asType, toType.asType) match {
+    def generateLens(field: String, typeInfo: TypeInfo): Term = {
+      (typeInfo.from.asType, typeInfo.to.asType) match {
         case ('[f], '[t]) => 
          '{
             val setter = (to: t) => (from: f) => ${
-              generateSetter(field, '{from}.asTerm, '{to}.asTerm).asExprOf[f]
+              generateSetter(field, '{from}.asTerm, '{to}.asTerm, typeInfo).asExprOf[f]
             }
             
             val getter = (from: f) => ${ 
@@ -208,7 +181,7 @@ object Focus {
 
     def generateActionCode(action: FocusAction): Term = 
       action match {
-        case FocusAction.Field(name, from, to) => generateLens(name, from, to)
+        case FocusAction.Field(name, typeInfo) => generateLens(name, typeInfo)
         //case FocusAction.Attempt => '{ ??? }.asTerm
         //case FocusAction.Index(idx) => '{ ??? }.asTerm
       }
