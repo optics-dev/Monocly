@@ -1,6 +1,6 @@
 package optics.internal
 
-trait Applicative[F[+_]]{
+trait Applicative[F[_]]{
   def pure[A](value: A): F[A]
   def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C]
 
@@ -8,7 +8,7 @@ trait Applicative[F[+_]]{
 }
 
 object Applicative {
-  def apply[F[+_]](using ev: Applicative[F]): Applicative[F] = ev
+  def apply[F[_]](using ev: Applicative[F]): Applicative[F] = ev
 
   implicit val id: Applicative[Id] = new Applicative[Id] {
     def pure[A](value: A): Id[A] = value
