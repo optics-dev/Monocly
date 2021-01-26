@@ -1,16 +1,16 @@
 package optics.poly
 
-import functions.{Attempt, Index}
+import functions.Index
 import scala.quoted.{Quotes, Expr, Type, quotes}
 import Function.const
 
 
 object dsl {
-  extension [A, Err, B] (a: A) 
-    def ?(using Attempt[A] { type To = B; type Error = Err }): B = ???
+  extension [A, B] (a: Option[A])
+    def ? : B = ???
 
-  extension [A, K, Err, B] (a: A)
-    def idx(k: K)(using Index[A, K] { type To = B; type Error = Err }): B = ???
+  extension [A, K, B] (a: A)
+    def idx(k: K)(using Index[A, K] { type To = B}): B = ???
 }
 
 object Focus {
@@ -188,9 +188,9 @@ object Focus {
 
     def composeLensTerms(lens1: Term, lens2: Term): FocusResult[Term] = {
       (lens1.tpe.asType, lens2.tpe.asType) match {
-        case ('[EOptional[err1, from1, to1]], '[EOptional[err2, from2, to2]]) => 
+        case ('[Optional[from1, to1]], '[Optional[from2, to2]]) =>
           Right('{ 
-            ${lens1.asExprOf[EOptional[err1, from1, to1]]}.andThen(${lens2.asExprOf[EOptional[err2, to1, to2]]})
+            ${lens1.asExprOf[Optional[from1, to1]]}.andThen(${lens2.asExprOf[Optional[to1, to2]]})
           }.asTerm)
         case ('[a], '[b]) => FocusError.ComposeMismatch(TypeRepr.of[a].show, TypeRepr.of[b].show).asResult
       }

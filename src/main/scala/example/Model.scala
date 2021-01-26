@@ -1,6 +1,5 @@
 package example
 
-import optics._
 import optics.poly._
 
 case class Mono(i: Int, foo: Foo, optI: Option[Int], listI: List[Int], mapI: Map[Int, Int])
@@ -34,12 +33,12 @@ object Foo {
 
   def mkError[A](expected: String): A => String = a => s"Expected $expected but got $a"
 
-  val fooI: EPrism[String, Foo, FooI] = EPrism.partial[String, Foo, FooI]{ case x: FooI => x }(mkError("FooI"))(identity)
-  val fooS: EPrism[String, Foo, FooS] = EPrism.partial[String, Foo, FooS]{ case x: FooS => x }(mkError("FooS"))(identity)
-  val fooIS: EPrism[String, Foo, FooIS] = EPrism.partial[String, Foo, FooIS]{ case x: FooIS => x }(mkError("FooIS"))(identity)
-  val fooU: EPrism[String, Foo, FooU.type] = EPrism.partial[String, Foo, FooU.type]{ case FooU => FooU }(mkError("FooU"))(identity)
+  val fooI: Prism[Foo, FooI] = Prism.partial[Foo, FooI]{ case x: FooI => x }(identity)
+  val fooS: Prism[Foo, FooS] = Prism.partial[Foo, FooS]{ case x: FooS => x }(identity)
+  val fooIS: Prism[Foo, FooIS] = Prism.partial[Foo, FooIS]{ case x: FooIS => x }(identity)
+  val fooU: Prism[Foo, FooU.type] = Prism.partial[Foo, FooU.type]{ case FooU => FooU }(identity)
 
-  val fooL: EPrism[String, Foo, List[Int]] = EPrism.partial[String, Foo, List[Int]]{ case FooList(x) => x }(mkError("FooList"))(FooList(_))
+  val fooL: Prism[Foo, List[Int]] = Prism.partial[Foo, List[Int]]{ case FooList(x) => x }(FooList(_))
 
   object FooIS {
     val i: Lens[FooIS, Int] = Lens[FooIS, Int](_.i, newVal => _.copy(i = newVal))

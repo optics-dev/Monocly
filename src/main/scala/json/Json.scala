@@ -1,6 +1,6 @@
 package json
 
-import optics.poly.EPrism
+import optics.poly.Prism
 
 sealed trait Json
 
@@ -11,35 +11,15 @@ object Json {
   case class JsonObject(value: Map[String, Json]) extends Json
   case class JsonArray(value: List[Json]) extends Json
 
-  val jsonString: EPrism[String, Json, String] =
-    EPrism[String, Json, String](
-      {
-        case JsonString(str) => Right(str)
-        case other           => Left(s"Expected JsonString but got $other")
-      }, JsonString.apply
-    )
+  val jsonString: Prism[Json, String] =
+    Prism.partial[Json, String]{case JsonString(str) => str}(JsonString.apply)
 
-  val jsonInt: EPrism[String, Json, Int] =
-    EPrism[String, Json, Int](
-      {
-        case JsonNumber(num) => Right(num)
-        case other           => Left(s"Expected JsonNumber but got $other")
-      }, JsonNumber.apply
-    )
+  val jsonInt: Prism[Json, Int] =
+    Prism.partial[Json, Int]{ case JsonNumber(x) => x}(JsonNumber.apply)
 
-  val jsonObject: EPrism[String, Json, Map[String, Json]] =
-    EPrism[String, Json, Map[String, Json]](
-      {
-        case JsonObject(map) => Right(map)
-        case other           => Left(s"Expected JsonObject but got $other")
-      }, JsonObject.apply
-    )
+  val jsonObject: Prism[Json, Map[String, Json]] =
+    Prism.partial[Json, Map[String, Json]]{case JsonObject(x) => x}(JsonObject.apply)
 
-  val jsonArray: EPrism[String, Json, List[Json]] =
-    EPrism[String, Json, List[Json]](
-      {
-        case JsonArray(list) => Right(list)
-        case other           => Left(s"Expected JsonArray but got $other")
-      }, JsonArray.apply
-    )
+  val jsonArray: Prism[Json, List[Json]] =
+    Prism.partial[Json, List[Json]]{case JsonArray(x) => x}(JsonArray.apply)
 }
