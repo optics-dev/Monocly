@@ -2,24 +2,24 @@ package json
 
 import json.Json._
 import json.PathElement.{Field, Index}
-import optics.poly.{EOptional, Iso}
+import optics.poly.{Iso, Optional}
 import optics.poly.functions.{Index => FIndex}
 
 import scala.language.dynamics
 
-case class JsonPath(path: List[PathElement], json: EOptional[JsonPathError, Json, Json]) extends Dynamic {
+case class JsonPath(path: List[PathElement], json: Optional[Json, Json]) extends Dynamic {
 
-  val string: EOptional[JsonPathError, Json, String] =
-    json.andThen(jsonString.mapError(JsonPathError(path, _)))
+  val string: Optional[Json, String] =
+    json.andThen(jsonString)
 
-  val int: EOptional[JsonPathError, Json, Int] =
-    json.andThen(jsonInt.mapError(JsonPathError(path, _)))
+  val int: Optional[Json, Int] =
+    json.andThen(jsonInt)
 
   def selectDynamic(field: String): JsonPath = {
     val newPath = Field(field) :: path
     JsonPath(
       newPath,
-      json.andThen(jsonObject.mapError(JsonPathError(path, _))).indexError(field, JsonPathError(newPath, "Key is missing"))
+      json.andThen(jsonObject).index(field)
     )
   }
 
@@ -27,11 +27,11 @@ case class JsonPath(path: List[PathElement], json: EOptional[JsonPathError, Json
     val newPath = Index(key) :: path
     JsonPath(
       newPath,
-      json.andThen(jsonArray.mapError(JsonPathError(path, _))).indexError(key, JsonPathError(newPath, "Index is missing"))
+      json.andThen(jsonArray).index(key)
     )
   }
 }
 
 object JsonPath {
-  val root: JsonPath = JsonPath(Nil, Iso.id)
+  val root: JsonPath = JsonPath(Nil, Iso.id[Json].asOptional)
 }

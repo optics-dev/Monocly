@@ -21,44 +21,44 @@ class JsonPathTest extends munit.FunSuite {
 
   test("success") {
     assertEquals(
-      JsonPath.root.`http-server`.hostname.string.getOrError(json),
-      Right("localhost")
+      JsonPath.root.`http-server`.hostname.string.getOption(json),
+      Some("localhost")
     )
 
     assertEquals(
-      JsonPath.root.`http-server`.tokens.index(1).string.getOrError(json),
-      Right("xxx")
+      JsonPath.root.`http-server`.tokens.index(1).string.getOption(json),
+      Some("xxx")
     )
 
     assertEquals(
-      JsonPath.root.db.connection.int.getOrError(json),
-      Right(4)
+      JsonPath.root.db.connection.int.getOption(json),
+      Some(4)
     )
   }
 
   test("fail with missing field") {
     assertEquals(
-      JsonPath.root.foo.bar.int.getOrError(json),
-      Left(JsonPathError(List(Field("foo")), "Key is missing"))
+      JsonPath.root.foo.bar.int.getOption(json),
+      None
     )
 
     assertEquals(
-      JsonPath.root.db.foo.bar.int.getOrError(json),
-      Left(JsonPathError(List(Field("foo"), Field("db")), "Key is missing"))
+      JsonPath.root.db.foo.bar.int.getOption(json),
+      None
     )
   }
 
   test("fail with missing index") {
     assertEquals(
-      JsonPath.root.`http-server`.tokens.index(5).string.getOrError(json),
-      Left(JsonPathError(List(Index(5), Field("tokens"), Field("http-server")), "Index is missing"))
+      JsonPath.root.`http-server`.tokens.index(5).string.getOption(json),
+      None
     )
   }
 
   test("fail with wrong type") {
     assertEquals(
-      JsonPath.root.db.connection.string.getOrError(json),
-      Left(JsonPathError(List(Field("connection"), Field("db")), "Expected JsonString but got JsonNumber(4)"))
+      JsonPath.root.db.connection.string.getOption(json),
+      None
     )
   }
 
