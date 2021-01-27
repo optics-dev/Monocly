@@ -1,10 +1,14 @@
 package optics.poly
 
 import optics.internal.Applicative
+import optics.poly.functions.Index
 
 trait PLens[S, T, A, B] { self =>
   def get(from: S): A
   def replace(to: B): S => T
+
+  def modify(f: A => B): S => T =
+    from => replace(f(get(from)))(from)
 
   def some[A1, B1](implicit ev1: A =:= Option[A1], ev2: Option[B1] =:= B): POptional[S, T, A1, B1] =
     adapt.andThen(PPrism.some[A1, B1])
@@ -15,8 +19,8 @@ trait PLens[S, T, A, B] { self =>
   )
 
   def andThen[C, D](other: PLens[A, B, C, D]): PLens[S, T, C, D] = new PLens[S, T, C, D] {
-    def get(from: S): C = ???
-    def replace(to: D): S => T = ???
+    def get(from: S): C = other.get(self.get(from))
+    def replace(to: D): S => T = self.modify(other.replace(to))
   }
 
   def andThen[C, D](other: PTraversal[A, B, C, D]): PTraversal[S, T, C, D] = asTraversal.andThen(other)
@@ -35,6 +39,11 @@ trait PLens[S, T, A, B] { self =>
 }
 
 object PLens {
+  extension [From, To, Key,  T] (self: Lens[From, To]) {
+    def index(key: Key)(using idx: Index[To, Key] { type To = T}): Optional[From, idx.To] =
+      self.andThen(idx.index(key))
+  }
+
   def apply[S, T, A, B](_get: S => A, _replace: B => S => T): PLens[S, T, A, B] = new PLens[S, T, A, B] {
     def get(from: S): A = _get(from)
     def replace(to: B): S => T = _replace(to)

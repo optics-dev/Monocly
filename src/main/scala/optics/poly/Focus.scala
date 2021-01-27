@@ -188,9 +188,13 @@ object Focus {
 
     def composeLensTerms(lens1: Term, lens2: Term): FocusResult[Term] = {
       (lens1.tpe.asType, lens2.tpe.asType) match {
-        case ('[Optional[from1, to1]], '[Optional[from2, to2]]) =>
+        case ('[Lens[from1, to1]], '[Lens[from2, to2]]) =>
           Right('{ 
-            ${lens1.asExprOf[Optional[from1, to1]]}.andThen(${lens2.asExprOf[Optional[to1, to2]]})
+            ${lens1.asExprOf[Lens[from1, to1]]}.andThen(${lens2.asExprOf[Lens[to1, to2]]})
+          }.asTerm)
+        case ('[Iso[from1, to1]], '[Lens[from2, to2]]) =>
+          Right('{
+            ${lens1.asExprOf[Iso[from1, to1]]}.andThen(${lens2.asExprOf[Lens[to1, to2]]})
           }.asTerm)
         case ('[a], '[b]) => FocusError.ComposeMismatch(TypeRepr.of[a].show, TypeRepr.of[b].show).asResult
       }

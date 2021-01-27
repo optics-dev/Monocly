@@ -22,22 +22,22 @@ final class FocusTest extends munit.FunSuite {
 
   test("Single field access") {
     assertEquals(
-      Focus[Animal](_.name).getOrError(Animal("Bob")),
-      Right("Bob")
+      Focus[Animal](_.name).get(Animal("Bob")),
+      "Bob"
     )
   }
 
   test("Nested field access") {
     assertEquals(
-      Focus[Shop](_.owner.pet.name).getOrError(Shop(Owner(Animal("Fred")))),
-      Right("Fred")
+      Focus[Shop](_.owner.pet.name).get(Shop(Owner(Animal("Fred")))),
+      "Fred"
     )
   }
 
   test("Type parameter field access") {
     assertEquals(
-      Focus[Box[String]](_.a).getOrError(Box("Hello")),
-      Right("Hello")
+      Focus[Box[String]](_.a).get(Box("Hello")),
+      "Hello"
     )
   }
 
