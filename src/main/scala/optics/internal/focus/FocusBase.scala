@@ -1,9 +1,15 @@
 package optics.internal.focus
+import scala.quoted.Quotes
 
-trait DomainObjects {
-  this: MacroContext =>  
+trait FocusBase {
+  val macroContext: Quotes 
 
-  // Common type information that we record about every action in the DSL
+  given Quotes = macroContext
+
+  type Term = macroContext.reflect.Term
+  type TypeRepr = macroContext.reflect.TypeRepr
+
+    // Common type information that we record about every action in the DSL
   case class TypeInfo(from: TypeRepr, fromTypeArgs: List[TypeRepr], to: TypeRepr) {
     override def toString(): String = 
       s"TypeInfo(${from.show}, ${fromTypeArgs.map(_.show).mkString("[", ",", "]")}, ${to.show})"
@@ -33,8 +39,6 @@ trait DomainObjects {
     def asResult: FocusResult[Nothing] = Left(this)
   }
 
-
   type FocusResult[+A] = Either[FocusError, A]
   type ParseResult = FocusResult[List[FocusAction]]
-
 }

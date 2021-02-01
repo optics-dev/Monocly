@@ -4,8 +4,7 @@ import optics.poly.Lens
 import scala.quoted.{Type, Expr, Quotes, quotes}
 
 private[focus] class FocusImpl(val macroContext: Quotes) 
-    extends MacroContext 
-    with DomainObjects 
+    extends FocusBase 
     with ErrorHandling
     with ParserLoop 
     with AllParsers 

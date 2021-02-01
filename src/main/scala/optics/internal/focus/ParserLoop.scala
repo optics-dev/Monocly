@@ -6,9 +6,7 @@ import optics.internal.focus.features.fieldselect.FieldSelectParser
 type AllParsers = FieldSelectParser // & ...
 
 trait ParserLoop {
-  this: MacroContext 
-      with DomainObjects
-      with AllParsers => 
+  this: FocusBase with AllParsers => 
 
   import macroContext.reflect._
   

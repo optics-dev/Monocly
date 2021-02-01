@@ -1,8 +1,7 @@
 package optics.internal.focus
 
 trait ErrorHandling {
-  this: MacroContext 
-    with DomainObjects => 
+  this: FocusBase => 
   
   def errorMessage(error: FocusError): String = error match {
     case FocusError.NotACaseClass(fromClass) => s"Expecting a case class in the 'From' position; found $fromClass"

@@ -8,9 +8,7 @@ import scala.quoted.Type
 type AllGenerators = FieldSelectGenerator // & ...
 
 trait GeneratorLoop {
-  this: MacroContext
-      with DomainObjects
-      with AllGenerators => 
+  this: FocusBase with AllGenerators => 
 
   import macroContext.reflect._
 

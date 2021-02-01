@@ -1,13 +1,12 @@
 package optics.internal.focus.features.fieldselect
 
-import optics.internal.focus.{MacroContext, DomainObjects}
+import optics.internal.focus.FocusBase
 import scala.quoted.Quotes
 import optics.poly.Lens
 
 
 trait FieldSelectGenerator {
-  this: MacroContext
-    with DomainObjects => 
+  this: FocusBase => 
 
   import macroContext.reflect._
 

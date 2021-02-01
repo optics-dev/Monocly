@@ -1,9 +1,9 @@
 package optics.internal.focus.features.fieldselect
 
-import optics.internal.focus.MacroContext
+import optics.internal.focus.FocusBase
 
 trait FieldSelectParser {
-  this: MacroContext => 
+  this: FocusBase => 
 
   import this.macroContext.reflect._
   
