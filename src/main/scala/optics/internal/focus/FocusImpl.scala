@@ -1,26 +1,25 @@
 package optics.internal.focus
 
 import optics.poly.Lens
-import optics.internal.focus.parse.AllParsers
-import optics.internal.focus.codegen.AllGenerators
 import scala.quoted.{Type, Expr, Quotes, quotes}
 
 private[focus] class FocusImpl(val macroContext: Quotes) 
     extends MacroContext 
-    with DomainModule 
-    with ErrorHandlingModule 
+    with DomainObjects 
+    with ErrorHandling
+    with ParserLoop 
     with AllParsers 
+    with GeneratorLoop 
     with AllGenerators {
 
-  given Quotes = macroContext
   import macroContext.reflect._
 
   def run[From: Type, To: Type](lambda: Expr[From => To]): Expr[Lens[From, To]] = {
     val parseResult: FocusResult[List[FocusAction]] = 
-      parseLambda(Term.of(lambda))
+      parseLambda[From](lambda.asTerm)
 
     val generatedCode: FocusResult[Term] = 
-      parseResult.flatMap(generateCode)
+      parseResult.flatMap(generateCode[From])
       
     generatedCode match {
       case Right(code) => code.asExprOf[Lens[From,To]]

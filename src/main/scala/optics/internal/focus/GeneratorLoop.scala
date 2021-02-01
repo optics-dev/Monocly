@@ -1,12 +1,20 @@
-package optics.internal.focus.codegen
-import optics.internal.focus.{MacroContext, DomainModule}
+package optics.internal.focus
 
-trait GeneratorLoopModule {
+import optics.internal.focus.features.fieldselect.FieldSelectGenerator
+import optics.poly.{Lens, Iso}
+import scala.quoted.Type
+
+
+type AllGenerators = FieldSelectGenerator // & ...
+
+trait GeneratorLoop {
   this: MacroContext
-      with DomainModule
-      with FieldSelectionGeneratorModule => 
+      with DomainObjects
+      with AllGenerators => 
 
-  def generateCode(actions: List[FocusAction]): FocusResult[Term] = {
+  import macroContext.reflect._
+
+  def generateCode[From: Type](actions: List[FocusAction]): FocusResult[Term] = {
     val idOptic: FocusResult[Term] = Right('{Iso.id[From]}.asTerm)
     
     actions.foldLeft(idOptic) { (resultSoFar, action) => 

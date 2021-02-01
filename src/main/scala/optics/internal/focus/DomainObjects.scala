@@ -1,6 +1,6 @@
 package optics.internal.focus
 
-trait DomainModule {
+trait DomainObjects {
   this: MacroContext =>  
 
   // Common type information that we record about every action in the DSL

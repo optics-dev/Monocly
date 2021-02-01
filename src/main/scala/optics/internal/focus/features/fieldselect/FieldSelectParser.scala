@@ -1,8 +1,8 @@
-package optics.internal.focus.parse
+package optics.internal.focus.features.fieldselect
 
 import optics.internal.focus.MacroContext
 
-trait FieldSelectionParserModule {
+trait FieldSelectParser {
   this: MacroContext => 
 
   import this.macroContext.reflect._

@@ -1,24 +1,27 @@
-package optics.internal.focus.codegen
+package optics.internal.focus.features.fieldselect
 
-import optics.internal.focus.{MacroContext, DomainModule}
+import optics.internal.focus.{MacroContext, DomainObjects}
 import scala.quoted.Quotes
+import optics.poly.Lens
 
 
-trait FieldSelectionGeneratorModule {
+trait FieldSelectGenerator {
   this: MacroContext
-      with DomainModule => 
+    with DomainObjects => 
 
-  def generateLens(field: String, typeInfo: TypeInfo)(using Quotes): Term = {
+  import macroContext.reflect._
+
+  def generateLens(field: String, typeInfo: TypeInfo): Term = {
     (typeInfo.from.asType, typeInfo.to.asType) match {
       case ('[f], '[t]) => 
         '{
-          val setter = (to: t) => (from: f) => 
+          val setter: t => f => f = (to: t) => (from: f) => 
             ${ generateSetter(field, '{from}.asTerm, '{to}.asTerm, typeInfo).asExprOf[f] }
 
-          val getter = (from: f) => 
+          val getter: f => t = (from: f) => 
             ${ generateGetter(field, '{from}.asTerm).asExprOf[t] }
 
-          Lens.apply(getter, setter)
+          Lens.apply[f, t](getter, setter)
         }.asTerm
     }
   }

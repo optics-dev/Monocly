@@ -1,18 +1,18 @@
-package optics.internal.focus.parse
+package optics.internal.focus
 
 import scala.quoted.Type
-import optics.internal.focus.{MacroContext, DomainModule}
+import optics.internal.focus.features.fieldselect.FieldSelectParser
 
+type AllParsers = FieldSelectParser // & ...
 
-
-trait ParserLoopModule {
+trait ParserLoop {
   this: MacroContext 
-      with DomainModule
-      with FieldSelectionParserModule => 
+      with DomainObjects
+      with AllParsers => 
 
   import macroContext.reflect._
   
-  def parseLambda[From](lambda: Term): ParseResult = {
+  def parseLambda[From: Type](lambda: Term): ParseResult = {
     val fromTypeIsConcrete = TypeRepr.of[From].classSymbol.isDefined
 
     lambda match {
