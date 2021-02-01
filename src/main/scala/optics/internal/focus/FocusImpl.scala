@@ -6,10 +6,8 @@ import scala.quoted.{Type, Expr, Quotes, quotes}
 private[focus] class FocusImpl(val macroContext: Quotes) 
     extends FocusBase 
     with ErrorHandling
-    with ParserLoop 
-    with AllParsers 
-    with GeneratorLoop 
-    with AllGenerators {
+    with ParserLoop with AllParsers 
+    with GeneratorLoop with AllGenerators {
 
   import macroContext.reflect._
 

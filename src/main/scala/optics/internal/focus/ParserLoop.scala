@@ -49,7 +49,7 @@ trait ParserLoop {
     loop(params.lambdaBody, Nil)
   }
 
-  def unwrap(term: Term): Term = {
+  private def unwrap(term: Term): Term = {
     term match {
       case Block(List(), inner) => unwrap(inner)
       case Inlined(_, _, inner) => unwrap(inner)
