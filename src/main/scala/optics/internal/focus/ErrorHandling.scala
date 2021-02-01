@@ -1,6 +1,6 @@
 package optics.internal.focus
 
-trait ErrorHandling {
+private[focus] trait ErrorHandling {
   this: FocusBase => 
   
   def errorMessage(error: FocusError): String = error match {

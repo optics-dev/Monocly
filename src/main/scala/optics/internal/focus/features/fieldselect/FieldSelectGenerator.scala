@@ -5,7 +5,7 @@ import scala.quoted.Quotes
 import optics.poly.Lens
 
 
-trait FieldSelectGenerator {
+private[focus] trait FieldSelectGenerator {
   this: FocusBase => 
 
   import macroContext.reflect._

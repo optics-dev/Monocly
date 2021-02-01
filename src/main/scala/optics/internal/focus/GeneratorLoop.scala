@@ -5,9 +5,9 @@ import optics.poly.{Lens, Iso}
 import scala.quoted.Type
 
 
-type AllGenerators = FieldSelectGenerator // & ...
+private[focus] type AllGenerators = FieldSelectGenerator // & ...
 
-trait GeneratorLoop {
+private[focus] trait GeneratorLoop {
   this: FocusBase with AllGenerators => 
 
   import macroContext.reflect._

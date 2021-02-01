@@ -2,7 +2,7 @@ package optics.internal.focus.features.fieldselect
 
 import optics.internal.focus.FocusBase
 
-trait FieldSelectParser {
+private[focus] trait FieldSelectParser {
   this: FocusBase => 
 
   import this.macroContext.reflect._

@@ -1,7 +1,7 @@
 package optics.internal.focus
 import scala.quoted.Quotes
 
-trait FocusBase {
+private[focus] trait FocusBase {
   val macroContext: Quotes 
 
   given Quotes = macroContext

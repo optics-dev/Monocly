@@ -3,9 +3,9 @@ package optics.internal.focus
 import scala.quoted.Type
 import optics.internal.focus.features.fieldselect.FieldSelectParser
 
-type AllParsers = FieldSelectParser // & ...
+private[focus] type AllParsers = FieldSelectParser // & ...
 
-trait ParserLoop {
+private[focus] trait ParserLoop {
   this: FocusBase with AllParsers => 
 
   import macroContext.reflect._
