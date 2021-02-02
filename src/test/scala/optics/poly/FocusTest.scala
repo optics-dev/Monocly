@@ -1,7 +1,5 @@
 package optics.poly
 
-import dsl._
-
 final class FocusTest extends munit.FunSuite {
 
   case class Fub(bab: Int)
