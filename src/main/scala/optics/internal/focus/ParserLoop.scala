@@ -2,8 +2,12 @@ package optics.internal.focus
 
 import scala.quoted.Type
 import optics.internal.focus.features.fieldselect.FieldSelectParser
+import optics.internal.focus.features.optionsome.OptionSomeParser
 
-private[focus] type AllParsers = FieldSelectParser // & ...
+private[focus] trait AllParsers 
+  extends FocusBase
+  with FieldSelectParser 
+  with OptionSomeParser
 
 private[focus] trait ParserLoop {
   this: FocusBase with AllParsers => 
@@ -20,28 +24,27 @@ private[focus] trait ParserLoop {
     }
   }
 
-  case class ParseParams(argName: String, argType: TypeRepr, lambdaBody: Term)
+  private case class ParseParams(argName: String, argType: TypeRepr, lambdaBody: Term)
+
+  private object LambdaArgument {
+    def unapply(term: Term): Option[String] = term match {
+      case Ident(idName) => Some(idName)
+      case _ => None
+    }
+  }
 
   private def parseLambdaBody(params: ParseParams): ParseResult = {
     def loop(remainingBody: Term, listSoFar: List[FocusAction]): ParseResult = {
 
-      def addFieldAction(fromType: TypeRepr, fieldName: String): ParseResult = {
-        getFieldType(fromType, fieldName) match {
-          case Some(toType) => Right(FocusAction.Field(fieldName, TypeInfo(fromType, getSuppliedTypeArgs(fromType), toType)) :: listSoFar)
-          case None => FocusError.CouldntFindFieldType(fromType.show, fieldName).asResult
-        }
-      }
-
       remainingBody match {
-        case Select(Ident(idName), fieldName) if idName == params.argName => addFieldAction(params.argType, fieldName)
-        case Select(Ident(idName), fieldName) => FocusError.DidNotDirectlyAccessArgument.asResult
+        case LambdaArgument(idName) if idName == params.argName => Right(listSoFar)
+        case LambdaArgument(idName) => FocusError.DidNotDirectlyAccessArgument(idName).asResult
 
-        // ? symbol to navigate the happy path of an Attempt
-        //case Select(prefix, "?") => loop(prefix, FocusAction.Attempt(prefix.tpe, ) :: listSoFar)
+        case OptionSome(Right(remainingCode, action)) => loop(remainingCode, action :: listSoFar)
+        case OptionSome(Left(error)) => Left(error)
 
-        // Subsequent selects on field names
-        case Select(CaseClass(prefix), fieldName) => addFieldAction(prefix.tpe.widen, fieldName).flatMap(loop(prefix, _))
-        case Select(prefix, _) => FocusError.NotACaseClass(prefix.tpe.toString).asResult
+        case FieldSelect(Right(remainingCode, action)) => loop(remainingCode, action :: listSoFar)
+        case FieldSelect(Left(error)) => Left(error)
 
         case unexpected => FocusError.UnexpectedCodeStructure(unexpected.show).asResult
       }
