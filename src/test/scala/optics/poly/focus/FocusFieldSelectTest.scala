@@ -1,6 +1,6 @@
 package optics.poly
 
-final class FocusTest extends munit.FunSuite {
+final class FocusFieldSelectTest extends munit.FunSuite {
 
   case class Fub(bab: Int)
   case class Bar(fub: Fub)
@@ -13,7 +13,7 @@ final class FocusTest extends munit.FunSuite {
   case class Box[A](a: A) 
   case class MultiBox[A,B](a: A, b: B)
   case class HigherBox[F[_], A](fa: F[A])
-  case class RefinedBox[A](a: A) {type Banana}
+  trait RefinedBox { type A; def a: A }
   case class UnionBox[A,B](aOrB: A | B)
   case class ConstraintBox[A <: AnyVal](a: A)
   case class Varargs[A](a: A*)
@@ -67,51 +67,18 @@ final class FocusTest extends munit.FunSuite {
     )
   }
 
-  /*
-  // We can't support this yet, because we don't know how to replace the type variables inside the `fa` value.
   test("Higher kinded type parameter get field") {
     assertEquals(
       Focus[HigherBox[Option, Int]](_.fa).get(HigherBox(Some(23))),
       Some(23)
     )
-  }*/
-
-/*
-  val fooLens: EOptional[NoSuchElementException, Foo, Int] =
-    Focus[Foo](_.bar.?.fub.bab)
-
-  test("compose focus with `?`") {
-    assertEquals(
-      fooLens.getOrError(Foo(Some(Bar(Fub(1))))),
-      Right(1)
-    )
   }
 
-  val quxLens: EOptional[NoSuchElementException | String, Qux, Int] =
-    Focus[Qux](_.foo.?.bar.?.fub.bab)
-
-  test("compose focus with nested `?`") {
+  /*
+  test("Refined type field accessss") {
     assertEquals(
-      quxLens.getOrError(Qux(Right(Foo(Some(Bar(Fub(1))))), Map())),
-      Right(1)
-    )
-  }
-
-
-  test("compose focus with index") {
-    val lens: EOptional[NoSuchElementException, Qux, Int] = Focus[Qux](_.moo.idx(32).bab)
-    assertEquals(
-      lens.getOrError(Qux(Left("moo"), Map(32 -> Fub(32)))),
-      Right(32)
-    )
-  }
-
-  test("mixture of operators") {
-    val lens = Focus[Map[String, Qux]](_.idx("moo").foo.?.bar.?.fub)
-    assertEquals(
-      lens.getOrError(Map("moo" -> Qux(Right(Foo(Some(Bar(Fub(21))))), Map()))),
-      Right(Fub(21))
+      Focus[RefinedBox { type A = String }](_.a).get(new RefinedBox { type A = String; def a = "Bob" }),
+      "Bob"
     )
   }*/
-
 }
