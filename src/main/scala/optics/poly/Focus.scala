@@ -45,7 +45,7 @@ object Focus {
     def some: A = scala.sys.error("Extension method 'some' should only be used within the optics.poly.Focus macro.")
 
   extension [A, B, O](a: A)
-    def embed(o: EmbeddedOptic[A, B, O]): B = scala.sys.error("Extension method 'some' should only be used within the optics.poly.Focus macro.")
+    def embed(o: EmbeddedOptic[A, B, O]): B = scala.sys.error("Extension method 'embed' should only be used within the optics.poly.Focus macro.")
 
   // Phase-1
   extension [A, B] (a: A)
