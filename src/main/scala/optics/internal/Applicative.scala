@@ -1,5 +1,7 @@
 package optics.internal
 
+type Id[A] = A
+
 trait Applicative[F[_]]{
   def pure[A](value: A): F[A]
   def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C]
