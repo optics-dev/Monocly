@@ -26,7 +26,7 @@ class NewOpticsTest extends munit.FunSuite {
 
   test("GetOption andThen GetOne") {
     val printerOptic: Optic[GetOption, Desk, Desk, Printer, Printer] = 
-      Optic.withGetOption(_.printer)
+      Optic.withGetOption[Desk, Printer](_.printer)
 
     val pcLoadLetterOptic: Optic[GetOne, Printer, Printer, Boolean, Boolean] = 
       Optic.withGetOne[Printer, Boolean](_.pcLoadLetter)

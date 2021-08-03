@@ -6,31 +6,23 @@ type Prism[From, To]     = PPrism[From, From, To, To]
 type Lens[From, To]      = PLens[From, From, To, To]
 type Iso[From, To]       = PIso[From, From, To, To]
 
-
-sealed class OpticCanGet
-class GetNone extends OpticCanGet
-class GetMany extends GetNone
+sealed trait OpticCan
+class GetMany extends OpticCan
 class GetOption extends GetMany
 class GetOne extends GetOption
-
-sealed trait OpticCanSet
-class ReplaceNone extends OpticCanSet
-class Replace extends ReplaceNone
+class Replace extends OpticCan
 class ReplaceAll extends Replace
 
+//type AllowedByBoth[+ThisCan <: OpticCan, +ThatCan <: OpticCan] >: (ThisCan | ThatCan) <: OpticCan
 
-abstract class Optic[+ThisCan <: OpticCanGet, S, T, A, B]: 
-  self => 
 
-  protected[optics] def getterImpl: GetImpl[ThisCan, S, A]
-  //protected def setterImpl: OpticImpl.Replace[S,T,B]
+final class Optic[+ThisCan <: OpticCan, S, T, A, B] protected[optics](
+  protected[optics] val getterImpl: GetImpl[ThisCan, S, A],
+  protected[optics] val setterImpl: SetImpl[ThisCan, S, T, A, B]):
 
-  def andThen[ThatCan <: OpticCanGet, C, D](o: Optic[ThatCan, A, B, C, D]): Optic[ThisCan | ThatCan, S, T, C, D] = 
-    new Optic:
-      override protected[optics] val getterImpl: GetImpl[ThisCan | ThatCan, S, C] = 
-        self.getterImpl.andThen(o.getterImpl)
-    end new
-    
+  def andThen[ThatCan <: OpticCan, AllowedByBoth[+ThisCan <: OpticCan, +ThatCan <: OpticCan] >: (ThisCan | ThatCan) <: OpticCan, C, D](o: Optic[ThatCan, A, B, C, D]): Optic[AllowedByBoth[ThisCan, ThatCan], S, T, C, D] = 
+    Optic(getterImpl.andThen(o.getterImpl), setterImpl.andThen(o.setterImpl))
+
 end Optic
 
 extension [S, T, A, B] (optic: Optic[GetOne, S, T, A, B])
@@ -40,18 +32,13 @@ extension [S, T, A, B] (optic: Optic[GetOption, S, T, A, B])
  inline def getOption: S => Option[A] = optic.getterImpl.doGetOption
 
 object Optic: 
-
   def withGetOne[S,A](f: S => A): Optic[GetOne, S, S, A, A] = 
-    new Optic: 
-      override protected[optics] val getterImpl: GetOneImpl[S, A] = 
-        new GetOneImpl:
-          val get = f
-  end withGetOne
+    Optic(GetOneImpl(f), ReplaceNoneImpl)
 
   def withGetOption[S,A](f: S => Option[A]): Optic[GetOption, S, S, A, A] = 
-    new Optic: 
-      override protected[optics] val getterImpl: GetOptionImpl[S, A] = 
-        new GetOptionImpl:
-          val getOption = f
-  end withGetOption
+    Optic(GetOptionImpl(f), ReplaceNoneImpl)
+
+  def withGetMany[S,A](f: S => List[A]): Optic[GetMany, S, S, A, A] = 
+    Optic(GetManyImpl(f), ReplaceNoneImpl)
+
 end Optic
