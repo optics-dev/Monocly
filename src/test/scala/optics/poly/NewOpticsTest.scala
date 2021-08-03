@@ -9,12 +9,12 @@ class NewOpticsTest extends munit.FunSuite {
   case class Desk(numPens: Int, printer: Option[Printer])
 
 
-  test("GetOne composition") {
+  test("GetOne andThen GetOne") {
     val deskOptic: Optic[GetOne, Office, Office, Desk, Desk] = 
-      Optic.buildGetOne(_.desk)
+      Optic.withGetOne(_.desk)
 
     val pensOptic: Optic[GetOne, Desk, Desk, Int, Int] = 
-      Optic.buildGetOne(_.numPens)
+      Optic.withGetOne(_.numPens)
 
     val composed: Optic[GetOne, Office, Office, Int, Int] = 
       deskOptic.andThen(pensOptic)
@@ -24,12 +24,12 @@ class NewOpticsTest extends munit.FunSuite {
     assertEquals(composed.get(office), 5)
   }
 
-  test("GetOption composition") {
+  test("GetOption andThen GetOne") {
     val printerOptic: Optic[GetOption, Desk, Desk, Printer, Printer] = 
-      Optic.buildGetOption(_.printer)
+      Optic.withGetOption(_.printer)
 
     val pcLoadLetterOptic: Optic[GetOne, Printer, Printer, Boolean, Boolean] = 
-      Optic.buildGetOne(_.pcLoadLetter)
+      Optic.withGetOne[Printer, Boolean](_.pcLoadLetter)
 
     val composed: Optic[GetOption, Desk, Desk, Boolean, Boolean] = 
       printerOptic.andThen(pcLoadLetterOptic)
