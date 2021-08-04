@@ -31,7 +31,7 @@ class NewOpticsTest extends munit.FunSuite {
     val pcLoadLetterOptic: Optic[GetOne, Printer, Printer, Boolean, Boolean] = 
       Optic.withGetOne[Printer, Boolean](_.pcLoadLetter)
 
-    val composed: Optic[GetOption, Desk, Desk, Boolean, Boolean] = 
+    val composed = //: Optic[GetOption, Desk, Desk, Boolean, Boolean] = 
       printerOptic.andThen(pcLoadLetterOptic)
 
     val desk = Desk(5, Some(Printer(true)))

@@ -1,11 +1,5 @@
 package optics.poly
 
-type Traversal[From, To] = PTraversal[From, From, To, To]
-type Optional[From, To]  = POptional[From, From, To, To]
-type Prism[From, To]     = PPrism[From, From, To, To]
-type Lens[From, To]      = PLens[From, From, To, To]
-type Iso[From, To]       = PIso[From, From, To, To]
-
 sealed trait OpticCan
 class GetMany extends OpticCan
 class GetOption extends GetMany
@@ -13,14 +7,12 @@ class GetOne extends GetOption
 class Replace extends OpticCan
 class ReplaceAll extends Replace
 
-//type AllowedByBoth[+ThisCan <: OpticCan, +ThatCan <: OpticCan] >: (ThisCan | ThatCan) <: OpticCan
-
 
 final class Optic[+ThisCan <: OpticCan, S, T, A, B] protected[optics](
   protected[optics] val getterImpl: GetImpl[ThisCan, S, A],
   protected[optics] val setterImpl: SetImpl[ThisCan, S, T, A, B]):
 
-  def andThen[ThatCan <: OpticCan, AllowedByBoth[+ThisCan <: OpticCan, +ThatCan <: OpticCan] >: (ThisCan | ThatCan) <: OpticCan, C, D](o: Optic[ThatCan, A, B, C, D]): Optic[AllowedByBoth[ThisCan, ThatCan], S, T, C, D] = 
+  def andThen[ThatCan <: OpticCan, AllowedByBoth >: (ThisCan | ThatCan) <: OpticCan, C, D](o: Optic[ThatCan, A, B, C, D]): Optic[AllowedByBoth, S, T, C, D] = 
     Optic(getterImpl.andThen(o.getterImpl), setterImpl.andThen(o.setterImpl))
 
 end Optic

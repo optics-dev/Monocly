@@ -23,7 +23,7 @@ end ReplaceNoneImpl
 
 class ReplaceImpl[-S, +T, +A, -B](val modify: (A => B) => S => T) extends SetImpl[Replace, S, T, A, B]:
 
-  // def replace(b: B): S => Ts
+  // def replace(b: B): S => T
 
   def preComposeReplace[S0, T0](impl1: ReplaceImpl[S0, T0, S, T]): ReplaceImpl[S0, T0, A, B] = 
     ReplaceImpl(f => s0 => impl1.modify(s => modify(f)(s))(s0))
