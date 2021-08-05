@@ -1,61 +1,55 @@
 package optics.poly
 
-sealed trait SetImpl[+ThisCan <: OpticCan, -S, +T, +A, -B]:
+sealed trait SetterImpl[+ThisCan <: OpticCan, -S, +T, +A, -B]:
 
-  def preComposeReplace[S0, T0](impl1: ReplaceImpl[S0, T0, S, T]): SetImpl[ThisCan | Replace, S0, T0, A, B]
-  def preComposeReplaceAll[S0, T0](impl1: ReplaceAllImpl[S0, T0, S, T]): SetImpl[ThisCan | ReplaceAll, S0, T0, A, B]
+  def preComposeModify[S0, T0](impl1: ModifyImpl[S0, T0, S, T]): SetterImpl[ThisCan | Modify, S0, T0, A, B]
+  def preComposeReverseGet[S0, T0](impl1: ReverseGetImpl[S0, T0, S, T]): SetterImpl[ThisCan | ReverseGet, S0, T0, A, B]
 
-  def andThen[ThatCan <: OpticCan, C, D](impl2: SetImpl[ThatCan, A, B, C, D]): SetImpl[ThisCan | ThatCan, S, T, C, D]
+  def andThen[ThatCan <: OpticCan, C, D](impl2: SetterImpl[ThatCan, A, B, C, D]): SetterImpl[ThisCan | ThatCan, S, T, C, D]
 
-  def doModify(f: A => B)(using ThisCan <:< Replace): S => T = sys.error("This optic does not support 'modify'")
-  def doReplace(b: B)(using ThisCan <:< Replace): S => T = sys.error("This optic does not support 'replace'")
-  def doReplaceAll(b: B)(using ThisCan <:< ReplaceAll): T = sys.error("This optic does not support 'replaceAll'")
+  def doModify(f: A => B)(using ThisCan <:< Modify): S => T = sys.error("This optic does not support 'modify'")
+  def doReverseGet(using ThisCan <:< ReverseGet): B => T = sys.error("This optic does not support 'replaceAll'")
 
-end SetImpl
-
-
-object ReplaceNoneImpl extends SetImpl[Nothing, Any, Nothing, Nothing, Any]:
-  override def preComposeReplace[S0, T0](impl1: ReplaceImpl[S0, T0, Any, Nothing]) = ReplaceNoneImpl
-  override def preComposeReplaceAll[S0, T0](impl1: ReplaceAllImpl[S0, T0, Any, Nothing]) = ReplaceNoneImpl
-  override def andThen[ThatCan <: OpticCan, C, D](impl2: SetImpl[ThatCan, Nothing, Any, C, D]) = ReplaceNoneImpl
-end ReplaceNoneImpl
+end SetterImpl
 
 
-class ReplaceImpl[-S, +T, +A, -B](val modify: (A => B) => S => T) extends SetImpl[Replace, S, T, A, B]:
-
-  // def replace(b: B): S => T
-
-  def preComposeReplace[S0, T0](impl1: ReplaceImpl[S0, T0, S, T]): ReplaceImpl[S0, T0, A, B] = 
-    ReplaceImpl(f => s0 => impl1.modify(s => modify(f)(s))(s0))
-
-  def preComposeReplaceAll[S0, T0](impl1: ReplaceAllImpl[S0, T0, S, T]): ReplaceImpl[S0, T0, A, B] = ???
-    //ReplaceImpl(f => s0 => impl1.modify(s => modify(f)(s))(s0))
-
-  def andThen[ThatCan <: OpticCan, C, D](impl2: SetImpl[ThatCan, A, B, C, D]): SetImpl[Replace | ThatCan, S, T, C, D] = 
-    impl2.preComposeReplace(this)
-
-  override def doModify(f: A => B)(using Replace <:< Replace): S => T = modify(f)
-  override def doReplace(b: B)(using Replace <:< Replace): S => T = modify(_ => b)
-
-end ReplaceImpl
+object NoSetter extends SetterImpl[Nothing, Any, Nothing, Nothing, Any]:
+  override def preComposeModify[S0, T0](impl1: ModifyImpl[S0, T0, Any, Nothing]) = NoSetter
+  override def preComposeReverseGet[S0, T0](impl1: ReverseGetImpl[S0, T0, Any, Nothing]) = NoSetter
+  override def andThen[ThatCan <: OpticCan, C, D](impl2: SetterImpl[ThatCan, Nothing, Any, C, D]) = NoSetter
+end NoSetter
 
 
-class ReplaceAllImpl[-S, +T, +A, -B](val replaceAll: B => T) extends SetImpl[ReplaceAll, S, T, A, B]:
+class ModifyImpl[-S, +T, +A, -B](val modify: (A => B) => S => T) extends SetterImpl[Modify, S, T, A, B]:
 
-  final def replace(b: B): S => T = 
-    _ => replaceAll(b)
+  override def preComposeModify[S0, T0](impl1: ModifyImpl[S0, T0, S, T]): ModifyImpl[S0, T0, A, B] = 
+    ModifyImpl(f => s0 => impl1.modify(s => modify(f)(s))(s0))
 
-  final def modify(f: A => B): S => T = ???
-    //s => 
+  override def preComposeReverseGet[S0, T0](impl1: ReverseGetImpl[S0, T0, S, T]): ModifyImpl[S0, T0, A, B] = 
+    ModifyImpl(f => s0 => impl1.modify(s => modify(f)(s))(s0))
 
-  override def preComposeReplace[S0, T0](impl1: ReplaceImpl[S0, T0, S, T]): ReplaceImpl[S0, T0, A, B] = ???
-  override def preComposeReplaceAll[S0, T0](impl1: ReplaceAllImpl[S0, T0, S, T]): ReplaceAllImpl[S0, T0, A, B] = ???
+  override def andThen[ThatCan <: OpticCan, C, D](impl2: SetterImpl[ThatCan, A, B, C, D]): SetterImpl[Modify | ThatCan, S, T, C, D] = 
+    impl2.preComposeModify(this)
 
-  def andThen[ThatCan <: OpticCan, C, D](impl2: SetImpl[ThatCan, A, B, C, D]): SetImpl[ReplaceAll | ThatCan, S, T, C, D] = 
-    impl2.preComposeReplaceAll(this)
+  override def doModify(f: A => B)(using Modify <:< Modify): S => T = modify(f)
 
-  override def doModify(f: A => B)(using ReplaceAll <:< Replace): S => T = sys.error("This optic does not support 'modify'")
-  override def doReplace(b: B)(using ReplaceAll <:< Replace): S => T = sys.error("This optic does not support 'replace'")
-  override def doReplaceAll(b: B)(using ReplaceAll <:< ReplaceAll): T = replaceAll(b)
+end ModifyImpl
 
-end ReplaceAllImpl
+
+class ReverseGetImpl[-S, +T, +A, -B](val modify: (A => B) => S => T, val reverseGet: B => T) extends SetterImpl[ReverseGet, S, T, A, B]:
+
+  override def preComposeModify[S0, T0](impl1: ModifyImpl[S0, T0, S, T]): ModifyImpl[S0, T0, A, B] = 
+    ModifyImpl(f => s0 => impl1.modify(s => modify(f)(s))(s0))
+
+  override def preComposeReverseGet[S0, T0](impl1: ReverseGetImpl[S0, T0, S, T]): ReverseGetImpl[S0, T0, A, B] = 
+    ReverseGetImpl(
+      f => s0 => impl1.modify(s => modify(f)(s))(s0), 
+      b => impl1.reverseGet(reverseGet(b)))
+
+  override def andThen[ThatCan <: OpticCan, C, D](impl2: SetterImpl[ThatCan, A, B, C, D]): SetterImpl[ReverseGet | ThatCan, S, T, C, D] = 
+    impl2.preComposeReverseGet(this)
+
+  override def doModify(f: A => B)(using ReverseGet <:< Modify): S => T = modify(f)
+  override def doReverseGet(using ReverseGet <:< ReverseGet): B => T = reverseGet
+
+end ReverseGetImpl
