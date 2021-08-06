@@ -18,7 +18,7 @@ type Iso[From, To]       = PIso[From, From, To, To]
 sealed trait OpticCan
 trait GetMany extends OpticCan
 trait GetOption extends GetMany
-//trait GetOneOrMore extends GetMany
+trait GetOneOrMore extends OpticCan
 trait GetOne extends GetOption //with GetOneOrMore 
 trait Modify extends OpticCan
 trait ReverseGet extends Modify
