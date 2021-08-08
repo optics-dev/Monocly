@@ -4,10 +4,13 @@ import optics.internal.NonEmptyList
 
 trait GetterImpl[+ThisCan <: OpticCan, -S, +A]:
 
-  def preComposeGetMany[S0](impl1: GetManyImpl[S0,S]): GetterImpl[ThisCan | GetMany, S0, A]
+  def cast[NewCan <: OpticCan]: GetterImpl[NewCan, S, A] = 
+    asInstanceOf[GetterImpl[NewCan, S, A]]
+
+  def preComposeGetMany[ThatCan <: GetMany, S0](impl1: GetManyImpl[ThatCan, S0,S]): GetterImpl[ThisCan | ThatCan, S0, A]
   //def preComposeGetOneOrMore[AllowedByBoth >: (ThisCan | GetOneOrMore) <: OpticCan, S0](impl1: GetOneOrMoreImpl[S0,S]): GetterImpl[AllowedByBoth, S0, A]
-  def preComposeGetOption[AllowedByBoth >: (ThisCan | GetOption) <: OpticCan, S0](impl1: GetOptionImpl[S0,S]): GetterImpl[AllowedByBoth, S0, A]
-  def preComposeGetOne[S0](impl1: GetOneImpl[S0,S]): GetterImpl[ThisCan | GetOne, S0, A]
+  def preComposeGetOption[ThatCan <: GetOption, S0](impl1: GetOptionImpl[ThatCan, S0,S]): GetterImpl[ThisCan | ThatCan, S0, A]
+  def preComposeGetOne[ThatCan <: GetOne, S0](impl1: GetOneImpl[ThatCan, S0,S]): GetterImpl[ThisCan | ThatCan, S0, A]
 
   def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A,C]): GetterImpl[ThisCan | ThatCan, S, C]
 
