@@ -1,5 +1,6 @@
 package optics.poly
 
+import optics.internal.NonEmptyList
 import functions.Index
 
 class NewOpticsTest extends munit.FunSuite {
@@ -12,10 +13,10 @@ class NewOpticsTest extends munit.FunSuite {
 
   test("GetOne andThen GetOne") {
     val deskOptic: Optic[GetOne, Office, Desk] = 
-      Optic.withGetOne(_.desk)
+      OpticsBuilder.withGetOne(_.desk)
 
     val pensOptic: Optic[GetOne, Desk, Int] = 
-      Optic.withGetOne(_.numPens)
+      OpticsBuilder.withGetOne(_.numPens)
 
     val composed: Optic[GetOne, Office, Int] = 
       deskOptic.andThen(pensOptic)
@@ -26,10 +27,10 @@ class NewOpticsTest extends munit.FunSuite {
 
   test("GetOption andThen GetOne") {
     val printerOptic: Optic[GetOption, Desk, Printer] = 
-      Optic.withGetOption(_.printer)
+      OpticsBuilder.withGetOption(_.printer)
 
     val pcLoadLetterOptic: Optic[GetOne, Printer, Boolean] = 
-      Optic.withGetOne(_.pcLoadLetter)
+      OpticsBuilder.withGetOne(_.pcLoadLetter)
 
     val composed: Optic[GetOption, Desk, Boolean] = 
       printerOptic.andThen(pcLoadLetterOptic)
@@ -40,10 +41,10 @@ class NewOpticsTest extends munit.FunSuite {
 
   test("GetMany andThen GetOne") {
     val pensOptic: Optic[GetMany, Office, Pen] = 
-      Optic.withGetMany(_.pens)
+      OpticsBuilder.withGetMany(_.pens)
 
     val colorOptic: Optic[GetOne, Pen, String] = 
-      Optic.withGetOne(_.color)
+      OpticsBuilder.withGetOne(_.color)
 
     val composed: Optic[GetMany, Office, String] = 
       pensOptic.andThen(colorOptic)
@@ -55,10 +56,10 @@ class NewOpticsTest extends munit.FunSuite {
   test("Modify andThen Modify") {
 
     val modifyPrinter: Optic[Modify, Desk, Printer] = 
-      Optic.withModify(f => desk => desk.copy(printer = desk.printer.map(f)))
+      OpticsBuilder.withModify(f => desk => desk.copy(printer = desk.printer.map(f)))
 
     val modifyPcLoadLetter: Optic[Modify, Printer, Boolean] = 
-      Optic.withModify(f => printer => printer.copy(pcLoadLetter = f(printer.pcLoadLetter)))
+      OpticsBuilder.withModify(f => printer => printer.copy(pcLoadLetter = f(printer.pcLoadLetter)))
 
     val composed: Optic[Modify, Desk, Boolean] = 
       modifyPrinter.andThen(modifyPcLoadLetter)
@@ -72,10 +73,10 @@ class NewOpticsTest extends munit.FunSuite {
   test("ReverseGet andThen Modify") {
 
     val modifyPens: Optic[Modify, Office, Pen] = 
-      Optic.withModify(f => office => office.copy(pens = office.pens.map(f)))
+      OpticsBuilder.withModify(f => office => office.copy(pens = office.pens.map(f)))
 
     val reverseGetColor: Optic[ReverseGet, Pen, String] = 
-      Optic.withReverseGet[Pen, Pen, String, String](f => pen => pen.copy(color = f(pen.color)), Pen(_))
+      OpticsBuilder.withReverseGet[Pen, Pen, String, String](f => pen => pen.copy(color = f(pen.color)), Pen(_))
 
     val composed: Optic[Modify, Office, String] = 
       modifyPens.andThen(reverseGetColor)
@@ -88,10 +89,10 @@ class NewOpticsTest extends munit.FunSuite {
 
   test("Lens andThen GetOne") {
     val deskOptic: Optic[GetOne & Modify, Office, Desk] = 
-      Optic.withLens[Office, Desk](_.desk)(d => _.copy(desk = d))
+      OpticsBuilder.withLens[Office, Desk](_.desk)(d => _.copy(desk = d))
 
     val pensOptic: Optic[GetOne, Desk, Int] = 
-      Optic.withGetOne(_.numPens)
+      OpticsBuilder.withGetOne(_.numPens)
 
     val composed: Optic[GetOne, Office, Int] = 
       deskOptic.andThen(pensOptic)
@@ -102,10 +103,10 @@ class NewOpticsTest extends munit.FunSuite {
 
   test("Lens andThen Lens") {
     val deskOptic: Optic[GetOne & Modify, Office, Desk] = 
-      Optic.withLens[Office, Desk](_.desk)(d => _.copy(desk = d))
+      OpticsBuilder.withLens[Office, Desk](_.desk)(d => _.copy(desk = d))
 
     val pensOptic: Optic[GetOne & Modify, Desk, Int] = 
-      Optic.withLens[Desk, Int](_.numPens)(n => _.copy(numPens = n))
+      OpticsBuilder.withLens[Desk, Int](_.numPens)(n => _.copy(numPens = n))
 
     val composed: Optic[GetOne & Modify, Office, Int] = 
       deskOptic.andThen(pensOptic)
@@ -117,4 +118,17 @@ class NewOpticsTest extends munit.FunSuite {
     assertEquals(office2.desk.numPens, 56)
   }
 
+  test("GetOneOrMore andThen GetOne") {
+    val pensOptic: Optic[GetOneOrMore, Office, Pen] = 
+      OpticsBuilder.withGetOneOrMore(o => NonEmptyList(Pen("rainbow"), o.pens))
+
+    val colorOptic: Optic[GetOne, Pen, String] = 
+      OpticsBuilder.withGetOne(_.color)
+
+    val composed: Optic[GetMany, Office, String] = 
+      pensOptic.andThen(colorOptic)
+
+    val office = Office(Desk(5, None), List(Pen("red"), Pen("green"), Pen("blue")))
+    assertEquals(composed.getAll(office), List("rainbow", "red", "green", "blue"))
+  }
 }
