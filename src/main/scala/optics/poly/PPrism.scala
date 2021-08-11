@@ -45,10 +45,6 @@ trait PPrism[S, T, A, B]  { self =>
 
 
 object PPrism {
-  extension [From, To, Key, T] (self: Prism[From, To]) {
-    def index(key: Key)(using idx: Index[To, Key] { type To = T}): Optional[From, idx.To] =
-      self.andThen(idx.index(key))
-  }
 
   def apply[S, T, A, B](_getOrModify: S => Either[T, A], _reverseGet: B => T): PPrism[S, T, A, B] =
     new PPrism[S, T, A, B] {

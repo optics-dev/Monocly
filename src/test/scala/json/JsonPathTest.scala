@@ -2,7 +2,7 @@ package json
 
 import json.Json.{JsonArray, JsonNumber, JsonObject, JsonString}
 import json.PathElement.{Field, Index}
-
+/*
 class JsonPathTest extends munit.FunSuite {
 
   val json: Json = JsonObject(Map(
@@ -63,3 +63,4 @@ class JsonPathTest extends munit.FunSuite {
   }
 
 }
+*/

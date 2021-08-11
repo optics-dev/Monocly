@@ -15,21 +15,21 @@ case class JsonPath(path: List[PathElement], json: Optional[Json, Json]) extends
   val int: Optional[Json, Int] =
     json.andThen(jsonInt)
 
-  def selectDynamic(field: String): JsonPath = {
-    val newPath = Field(field) :: path
-    JsonPath(
-      newPath,
-      json.andThen(jsonObject).index(field)
-    )
-  }
+  // def selectDynamic(field: String): JsonPath = {
+  //   val newPath = Field(field) :: path
+  //   JsonPath(
+  //     newPath,
+  //     json.andThen(jsonObject).index(field)
+  //   )
+  // }
 
-  def index(key: Int): JsonPath = {
-    val newPath = Index(key) :: path
-    JsonPath(
-      newPath,
-      json.andThen(jsonArray).index(key)
-    )
-  }
+  // def index(key: Int): JsonPath = {
+  //   val newPath = Index(key) :: path
+  //   JsonPath(
+  //     newPath,
+  //     json.andThen(jsonArray).index(key)
+  //   )
+  // }
 }
 
 object JsonPath {

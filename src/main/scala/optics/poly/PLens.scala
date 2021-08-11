@@ -39,10 +39,6 @@ trait PLens[S, T, A, B] { self =>
 }
 
 object PLens {
-  extension [From, To, Key,  T] (self: Lens[From, To]) {
-    def index(key: Key)(using idx: Index[To, Key] { type To = T}): Optional[From, idx.To] =
-      self.andThen(idx.index(key))
-  }
 
   def apply[S, T, A, B](_get: S => A, _replace: B => S => T): PLens[S, T, A, B] = new PLens[S, T, A, B] {
     def get(from: S): A = _get(from)

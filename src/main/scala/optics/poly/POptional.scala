@@ -54,10 +54,6 @@ trait POptional[S, T, A, B]  { self =>
 
 
 object POptional {
-  extension [From, To, Key,  T] (self: Optional[From, To]) {
-    def index(key: Key)(using idx: Index[To, Key] { type To = T}): Optional[From, idx.To] =
-      self.andThen(idx.index(key))
-  }
 
   def apply[S, T, A, B](_getOrModify: S => Either[T, A], _replace: B => S => T): POptional[S, T, A, B] =
     new POptional[S, T, A, B] {

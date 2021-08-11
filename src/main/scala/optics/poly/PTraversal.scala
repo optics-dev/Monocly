@@ -57,11 +57,6 @@ object PTraversal {
         )(_.reverse)
     }
 
-  extension [From, To, Key, T] (self: Traversal[From, To]) {
-    def index(key: Key)(using idx: Index[To, Key] { type To = T}): Traversal[From, idx.To] =
-      self.andThen(idx.index(key))
-  }
-
 }
 
 object Traversal {

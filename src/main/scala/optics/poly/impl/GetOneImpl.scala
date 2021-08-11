@@ -2,8 +2,7 @@ package optics.poly
 
 import optics.internal.NonEmptyList
 
-class GetOneImpl[+ThisCan <: GetOne, -S, +A](_get: S => A) extends GetterImpl[ThisCan, S, A]: 
-  self => 
+class GetOneImpl[+ThisCan <: GetOne, -S, +A](_get: S => A) extends GetterImpl[ThisCan, S, Nothing, A]: 
 
   override def preComposeGetMany[ThatCan <: GetMany, S0](impl1: GetManyImpl[ThatCan, S0, S]): GetManyImpl[ThisCan | ThatCan, S0, A] = 
     GetManyImpl(s0 => impl1.getAll(s0).map(get))
@@ -11,13 +10,13 @@ class GetOneImpl[+ThisCan <: GetOne, -S, +A](_get: S => A) extends GetterImpl[Th
   override def preComposeGetOneOrMore[ThatCan <: GetOneOrMore, S0](impl1: GetOneOrMoreImpl[ThatCan, S0, S]): GetOneOrMoreImpl[ThisCan | ThatCan, S0, A] = 
     GetOneOrMoreImpl(s0 => impl1.getOneOrMore(s0).map(get))
 
-  override def preComposeGetOption[ThatCan <: GetOption, S0](impl1: GetOptionImpl[ThatCan, S0, S]): GetOptionImpl[ThisCan | ThatCan, S0, A] = 
-    GetOptionImpl(s0 => impl1.getOption(s0).map(get))
+  override def preComposeGetOption[ThatCan <: GetOption, S0, T0](impl1: GetOptionImpl[ThatCan, S0, T0, S]): GetOptionImpl[ThisCan | ThatCan, S0, T0, A] = 
+    GetOptionImpl(s0 => impl1.getOption(s0).map(get), impl1.returnUnmatched)
 
   override def preComposeGetOne[ThatCan <: GetOne, S0](impl1: GetOneImpl[ThatCan, S0, S]): GetOneImpl[ThisCan | ThatCan, S0, A] = 
     GetOneImpl(s0 => get(impl1.get(s0)))
 
-  def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] = 
+  def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A, _, C]): GetterImpl[ThisCan | ThatCan, S, Nothing, C] = 
     impl2.preComposeGetOne(this)
 
   override def get(using ThisCan <:< GetOne): S => A = _get

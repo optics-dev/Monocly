@@ -34,13 +34,13 @@ class OptionalTest extends munit.FunSuite {
     assertEquals(optLens.some.getOption(neg), None)
   }
 
-  test("map") {
-    val map = Map("foo" -> Map(1 -> true, 2 -> false), "bar" -> Map(0 -> true))
+  // test("map") {
+  //   val map = Map("foo" -> Map(1 -> true, 2 -> false), "bar" -> Map(0 -> true))
 
-    assertEquals(Index.map("foo").andThen(Index.map(1)).getOption(map), Some(true))
-    assertEquals(Index.map("foo").andThen(Index.map(0)).getOption(map), None)
-    assertEquals(Index.map("zzz").andThen(Index.map(1)).getOption(map), None)
-    assertEquals(Index.map("foo").andThen(Index.map(1)).replace(false)(map),  Map("foo" -> Map(1 -> false, 2 -> false), "bar" -> Map(0 -> true)))
-  }
+  //   assertEquals(Index.map("foo").andThen(Index.map(1)).getOption(map), Some(true))
+  //   assertEquals(Index.map("foo").andThen(Index.map(0)).getOption(map), None)
+  //   assertEquals(Index.map("zzz").andThen(Index.map(1)).getOption(map), None)
+  //   assertEquals(Index.map("foo").andThen(Index.map(1)).replace(false)(map),  Map("foo" -> Map(1 -> false, 2 -> false), "bar" -> Map(0 -> true)))
+  // }
 
 }
