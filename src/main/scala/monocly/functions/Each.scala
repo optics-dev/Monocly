@@ -1,6 +1,6 @@
-package optics.poly.functions
+package monocly.functions
 
-import optics.poly._
+import monocly._
 
 abstract class Each[S, A]:
   def each: Optic[GetMany & Modify, S, A]

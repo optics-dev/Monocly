@@ -1,5 +1,6 @@
-package optics.poly
+package monocly.impl
 
+import monocly._
 
 class GetManyImpl[+ThisCan <: GetMany, -S,+A](_getAll: S => List[A]) extends GetterImpl[ThisCan, S, Nothing, A]: 
 

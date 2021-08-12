@@ -1,6 +1,6 @@
-package optics.poly
+package monocly
 
-import optics.internal.NonEmptyList
+import monocly.internal.NonEmptyList
 import functions.Index
 
 class NewOpticsTest extends munit.FunSuite {

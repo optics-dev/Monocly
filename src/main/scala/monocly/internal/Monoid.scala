@@ -1,4 +1,4 @@
-package optics.internal
+package monocly.internal
 
 trait Monoid[A]:
   def combine(x: A, y: A): A

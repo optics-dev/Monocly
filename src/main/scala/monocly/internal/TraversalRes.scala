@@ -1,4 +1,4 @@
-package optics.internal
+package monocly.internal
 
 enum TraversalRes[F[+ _], +E, +A] {
   case Success(effect: F[A])

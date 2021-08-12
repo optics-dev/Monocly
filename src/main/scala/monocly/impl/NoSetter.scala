@@ -1,6 +1,6 @@
-package optics.poly
+package monocly.impl
 
-type NoSetter = NoSetter.type
+import monocly._
 
 object NoSetter extends SetterImpl[Nothing, Any, Nothing, Nothing, Any]:
   override def preComposeModify[ThatCan <: Modify, S0, T0](impl1: ModifyImpl[ThatCan, S0, T0, Any, Nothing]) = NoSetter

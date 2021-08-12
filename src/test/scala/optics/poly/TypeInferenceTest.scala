@@ -1,4 +1,4 @@
-package optics.poly
+package monocly
 
 import scala.language.implicitConversions
 

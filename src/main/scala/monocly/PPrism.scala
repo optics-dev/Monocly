@@ -1,7 +1,7 @@
-package optics.poly
+package monocly
 
-import optics.internal.Applicative
-import optics.poly.functions.Index
+import monocly.internal.Applicative
+import monocly.functions.Index
 
 trait PPrism[S, T, A, B]  { self =>
   def reverseGet(to: B): T

@@ -1,7 +1,7 @@
-package optics.poly
+package monocly
 
-import optics.internal.Applicative
-import optics.poly.functions.Index
+import monocly.internal.Applicative
+import monocly.functions.Index
 
 trait PIso[S, T, A, B] { self =>
   def get(from: S): A

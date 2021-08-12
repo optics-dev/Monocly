@@ -1,6 +1,6 @@
-package optics.poly
+package monocly.impl
 
-type NoGetter = NoGetter.type
+import monocly._
 
 object NoGetter extends GetterImpl[Nothing, Any, Nothing, Nothing]:
   override def preComposeGetMany[ThatCan <: GetMany, S0](impl1: GetManyImpl[ThatCan, S0, Any]) = NoGetter

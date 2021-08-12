@@ -1,7 +1,7 @@
-package optics.poly
+package monocly.impl
 
-import optics.internal.NonEmptyList
-
+import monocly.internal.NonEmptyList
+import monocly._
 
 trait GetterImpl[+ThisCan <: OpticCan, -S, +T, +A]:
 

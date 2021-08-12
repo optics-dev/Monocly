@@ -1,7 +1,8 @@
-package optics.poly
+package monocly
 
-import optics.poly.functions.{Each, Index}
-import optics.internal.{NonEmptyList, Applicative, Monoid}
+import monocly.impl._
+import monocly.functions.{Each, Index}
+import monocly.internal.{NonEmptyList, Applicative, Monoid}
 
 // type Getter[-S, +A]             = POptic[GetOne, S, Nothing, A, Any]
 // type Fold[-S, +A]               = POptic[GetMany, S, Nothing, A, Any]
@@ -44,9 +45,9 @@ trait ReverseGet extends Modify
 type Optic[+ThisCan <: OpticCan, S, A] = POptic[ThisCan, S, S, A, A]
 
 
-final class POptic[+ThisCan <: OpticCan, -S, +T, +A, -B] private[optics](
-    protected[optics] val getter: GetterImpl[ThisCan, S, T, A],
-    protected[optics] val setter: SetterImpl[ThisCan, S, T, A, B]):
+final class POptic[+ThisCan <: OpticCan, -S, +T, +A, -B] private[monocly](
+    protected[monocly] val getter: GetterImpl[ThisCan, S, T, A],
+    protected[monocly] val setter: SetterImpl[ThisCan, S, T, A, B]):
 
   def andThen[ThatCan <: OpticCan, BothCan >: (ThisCan | ThatCan) <: OpticCan, C, D](o: POptic[ThatCan, A, B, C, D]): POptic[BothCan, S, T, C, D] = 
     POptic(getter.andThen(o.getter), setter.andThen(o.setter))

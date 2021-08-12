@@ -1,6 +1,4 @@
-package optics.internal
-
-
+package monocly.internal
 
 case class NonEmptyList[+A](head: A, tail: List[A]):
   def toList: List[A] = 

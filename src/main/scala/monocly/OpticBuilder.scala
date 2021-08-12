@@ -1,6 +1,7 @@
-package optics.poly
+package monocly
 
-import optics.internal.NonEmptyList
+import monocly.internal.NonEmptyList
+import monocly.impl._
 
 object OpticsBuilder:
   type OnlyHasSetter[Can <: OpticCan] = ReverseGet <:< Can

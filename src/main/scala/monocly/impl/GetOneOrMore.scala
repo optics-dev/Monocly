@@ -1,6 +1,7 @@
-package optics.poly
+package monocly.impl
 
-import optics.internal.NonEmptyList
+import monocly.internal.NonEmptyList
+import monocly._
 
 class GetOneOrMoreImpl[+ThisCan <: GetOneOrMore, -S, +A](_getOneOrMore: S => NonEmptyList[A]) extends GetterImpl[ThisCan, S, Nothing, A]: 
 

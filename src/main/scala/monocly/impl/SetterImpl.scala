@@ -1,5 +1,6 @@
-package optics.poly
+package monocly.impl
 
+import monocly._
 
 trait SetterImpl[+ThisCan <: OpticCan, -S, +T, +A, -B]:
 

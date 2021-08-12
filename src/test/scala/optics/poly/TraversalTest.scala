@@ -1,6 +1,5 @@
-package optics.poly
+package monocly
 
-import optics.poly.Traversal
 import scala.language.implicitConversions
 
 class TraversalTest extends munit.FunSuite {

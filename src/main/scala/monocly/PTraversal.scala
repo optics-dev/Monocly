@@ -1,7 +1,7 @@
-package optics.poly
+package monocly
 
-import optics.internal.{Applicative, Id, Proxy}
-import optics.poly.functions.Index
+import monocly.internal.{Applicative, Id, Proxy}
+import monocly.functions.Index
 
 trait PTraversal[S, T, A, B] { self =>
   def modifyF[F[_]: Applicative](f: A => F[B])(from: S): F[T]

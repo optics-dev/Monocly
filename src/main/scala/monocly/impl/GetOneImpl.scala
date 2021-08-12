@@ -1,6 +1,7 @@
-package optics.poly
+package monocly.impl
 
-import optics.internal.NonEmptyList
+import monocly.internal.NonEmptyList
+import monocly._
 
 class GetOneImpl[+ThisCan <: GetOne, -S, +A](_get: S => A) extends GetterImpl[ThisCan, S, Nothing, A]: 
 

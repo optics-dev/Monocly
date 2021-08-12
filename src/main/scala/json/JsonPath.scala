@@ -2,8 +2,8 @@ package json
 
 import json.Json._
 import json.PathElement.{Field, Index}
-import optics.poly.{Iso, Optional}
-import optics.poly.functions.{Index => FIndex}
+import monocly.{Iso, Optional}
+import monocly.functions.{Index => FIndex}
 
 import scala.language.dynamics
 

@@ -1,4 +1,4 @@
-package optics.internal
+package monocly.internal
 
 type Id[A] = A
 

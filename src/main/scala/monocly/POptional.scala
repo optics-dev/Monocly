@@ -1,7 +1,7 @@
-package optics.poly
+package monocly
 
-import optics.internal.{Applicative, Id}
-import optics.poly.functions.Index
+import monocly.internal.{Applicative, Id}
+import monocly.functions.Index
 
 trait POptional[S, T, A, B]  { self =>
   def getOrModify(from: S): Either[T, A]

@@ -1,4 +1,4 @@
-package optics.internal
+package monocly.internal
 
 case class Proxy[+A]()
 

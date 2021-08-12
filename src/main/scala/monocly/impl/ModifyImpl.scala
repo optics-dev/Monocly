@@ -1,5 +1,6 @@
-package optics.poly
+package monocly.impl
 
+import monocly._
 
 class ModifyImpl[ThisCan <: Modify, -S, +T, +A, -B](_modify: (A => B) => S => T) extends SetterImpl[ThisCan, S, T, A, B]:
 
