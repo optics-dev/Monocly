@@ -3,21 +3,20 @@ package monocly.impl
 import monocly.internal.NonEmptyList
 import monocly._
 
-trait GetterImpl[+ThisCan <: OpticCan, -S, +T, +A]:
+trait GetterImpl[+ThisCan <: OpticCan, -S, +A]:
 
-  def canAlso[NewCan <: OpticCan]: GetterImpl[NewCan, S, T, A] = 
-    asInstanceOf[GetterImpl[NewCan, S, T, A]]
+  def canAlso[NewCan <: OpticCan]: GetterImpl[NewCan, S, A] = 
+    asInstanceOf[GetterImpl[NewCan, S, A]]
 
-  def preComposeGetMany[ThatCan <: GetMany, S0](impl1: GetManyImpl[ThatCan, S0, S]): GetterImpl[ThisCan | ThatCan, S0, Nothing, A]
-  def preComposeGetOneOrMore[ThatCan <: GetOneOrMore, S0](impl1: GetOneOrMoreImpl[ThatCan, S0, S]): GetterImpl[ThisCan | ThatCan, S0, Nothing, A]
-  def preComposeGetOption[ThatCan <: GetOption, S0, T0](impl1: GetOptionImpl[ThatCan, S0, T0, S]): GetterImpl[ThisCan | ThatCan, S0, T0, A]
-  def preComposeGetOne[ThatCan <: GetOne, S0](impl1: GetOneImpl[ThatCan, S0, S]): GetterImpl[ThisCan | ThatCan, S0, Nothing, A]
+  def preComposeGetMany[ThatCan <: GetMany, S0](impl1: GetManyImpl[ThatCan, S0, S]): GetterImpl[ThisCan | ThatCan, S0, A]
+  def preComposeGetOneOrMore[ThatCan <: GetOneOrMore, S0](impl1: GetOneOrMoreImpl[ThatCan, S0, S]): GetterImpl[ThisCan | ThatCan, S0, A]
+  def preComposeGetOption[ThatCan <: GetOption, S0](impl1: GetOptionImpl[ThatCan, S0, S]): GetterImpl[ThisCan | ThatCan, S0, A]
+  def preComposeGetOne[ThatCan <: GetOne, S0](impl1: GetOneImpl[ThatCan, S0, S]): GetterImpl[ThisCan | ThatCan, S0, A]
 
-  def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A, _, C]): GetterImpl[ThisCan | ThatCan, S, T, C]
+  def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C]
 
   def get(using ThisCan <:< GetOne): S => A = sys.error("This optic does not support 'get'")
   def getOption(using ThisCan <:< GetOption): S => Option[A] = sys.error("This optic does not support 'getOption'")
-  def returnUnmatched(using ThisCan <:< GetOption): S => T = sys.error("This optic does not support 'returnUnmatched'")
   def getOneOrMore(using ThisCan <:< GetOneOrMore): S => NonEmptyList[A] = sys.error("This optic does not support 'getOneOrMore'")
   def getAll(using ThisCan <:< GetMany): S => List[A] = sys.error("This optic does not support 'getAll'")
 

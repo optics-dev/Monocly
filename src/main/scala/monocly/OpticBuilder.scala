@@ -12,8 +12,8 @@ object OpticsBuilder:
       POptic(GetOneImpl(_getOne), optic.setter.canAlso[ThisCan & GetOne])
 
   extension [ThisCan <: Modify, S, T, A, B](optic: POptic[ThisCan, S, T, A, B])(using OnlyHasSetter[ThisCan])
-    def withGetOption(_getOption: S => Option[A], _returnUnmatched: S => T): POptic[ThisCan & GetOption, S, T, A, B] = 
-      POptic(GetOptionImpl(_getOption, _returnUnmatched), optic.setter.canAlso[ThisCan & GetOption])
+    def withGetOption(_getOption: S => Option[A]): POptic[ThisCan & GetOption, S, T, A, B] = 
+      POptic(GetOptionImpl(_getOption), optic.setter.canAlso[ThisCan & GetOption])
 
   extension [ThisCan <: Modify, S, T, A, B](optic: POptic[ThisCan, S, T, A, B])(using OnlyHasSetter[ThisCan])
     def withGetOneOrMore(_getOneOrMore: S => NonEmptyList[A]): POptic[ThisCan & GetOneOrMore, S, T, A, B] = 
@@ -27,17 +27,17 @@ object OpticsBuilder:
     def withModify(_modify: (A => B) => S => T): POptic[ThisCan & Modify, S, T, A, B] = 
       POptic(optic.getter.canAlso[ThisCan & Modify], ModifyImpl(_modify))
 
-  extension [ThisCan <: GetOption, S, T, A, B](optic: POptic[ThisCan, S, T, A, B])(using OnlyHasGetter[ThisCan])
-    def withReverseGet(_reverseGet: B => T): POptic[ThisCan & ReverseGet, S, T, A, B] = 
-      POptic(optic.getter.canAlso[ThisCan & ReverseGet], 
-             ReverseGetImpl(f => s => optic.getter.getOption(s).fold(optic.getter.returnUnmatched(s))
-                                                                    (_reverseGet.compose(f)), _reverseGet))
+  // extension [ThisCan <: GetOption, S, T, A, B](optic: POptic[ThisCan, S, T, A, B])(using OnlyHasGetter[ThisCan])
+  //   def withReverseGet(_reverseGet: B => T): POptic[ThisCan & ReverseGet, S, T, A, B] = 
+  //     POptic(optic.getter.canAlso[ThisCan & ReverseGet], 
+  //            ReverseGetImpl(f => s => optic.getter.getOption(s).fold(optic.getter.returnUnmatched(s))
+  //                                                                   (_reverseGet.compose(f)), _reverseGet))
 
   def withGetOne[S, A](_get: S => A): Optic[GetOne, S, A] = 
     POptic(GetOneImpl(_get), NoSetter)
 
   def withGetOption[S, A](_getOption: S => Option[A]): Optic[GetOption, S, A] = 
-    POptic(GetOptionImpl(_getOption, identity), NoSetter)
+    POptic(GetOptionImpl(_getOption), NoSetter)
 
   def withGetOneOrMore[S, A](_getOneOrMore: S => NonEmptyList[A]): Optic[GetOneOrMore, S, A] = 
     POptic(GetOneOrMoreImpl(_getOneOrMore), NoSetter)

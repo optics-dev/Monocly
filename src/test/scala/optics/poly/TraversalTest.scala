@@ -6,7 +6,7 @@ class TraversalTest extends munit.FunSuite {
 
 //  test("toListOrError") {
 //    assertEquals(Traversal.pair.toListOrError((5, 6)), Right(List(5, 6)))
-//
+
 //    assertEquals(EPTraversal.list.toListOrError(List(1,2,3)), Right(List(1,2,3)))
 //    assertEquals(EPTraversal.list.toListOrError(Nil), Left("List is empty"))
 //  }

@@ -1,7 +1,7 @@
 package monocly
 
 import functions.Index
-/*
+
 class IndexTest extends munit.FunSuite {
 
   case class Foo(i: Int)
@@ -24,4 +24,3 @@ class IndexTest extends munit.FunSuite {
   }
 
 }
-*/
