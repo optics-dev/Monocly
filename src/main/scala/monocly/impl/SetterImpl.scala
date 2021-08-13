@@ -12,7 +12,6 @@ trait SetterImpl[+ThisCan <: OpticCan, -S, +T, +A, -B]:
 
   def andThen[ThatCan <: OpticCan, C, D](impl2: SetterImpl[ThatCan, A, B, C, D]): SetterImpl[ThisCan | ThatCan, S, T, C, D]
 
-  def getOrModify(using ThisCan <:< (GetOption & Modify)): S => Either[T, A] = sys.error("This optic does not support 'getOrModify'")
   def modify(f: A => B)(using ThisCan <:< Modify): S => T = sys.error("This optic does not support 'modify'")
   def reverseGet(using ThisCan <:< ReverseGet): B => T = sys.error("This optic does not support 'replaceAll'")
 

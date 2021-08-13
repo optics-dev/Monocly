@@ -1,6 +1,6 @@
 package monocly.impl
 
-import monocly.internal.NonEmptyList
+import monocly.internal._
 import monocly._
 
 class GetOneOrMoreImpl[+ThisCan <: GetOneOrMore, -S, +A](_getOneOrMore: S => NonEmptyList[A]) extends GetterImpl[ThisCan, S, A]: 
@@ -20,7 +20,16 @@ class GetOneOrMoreImpl[+ThisCan <: GetOneOrMore, -S, +A](_getOneOrMore: S => Non
   override def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] = 
     impl2.preComposeGetOneOrMore(this)
 
+  override def foldMap1[M: Semigroup](f: A => M)(using ThisCan <:< GetMany): S => M = s => 
+    val NonEmptyList(head, tail) = _getOneOrMore(s)
+    tail.map(f).foldLeft(f(head))(Semigroup[M].combine)
+
   override def getOneOrMore(using ThisCan <:< GetOneOrMore): S => NonEmptyList[A] = _getOneOrMore
+
+  override def foldMap[M: Monoid](f: A => M)(using ThisCan <:< GetMany): S => M = 
+    s => _getOneOrMore(s).map(f).toList.foldLeft(Monoid[M].empty)(Monoid[M].combine)
+    
   override def getAll(using ThisCan <:< GetMany): S => List[A] = s => _getOneOrMore(s).toList
+  
 
 end GetOneOrMoreImpl

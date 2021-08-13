@@ -1,7 +1,8 @@
 package monocly.impl
 
-import monocly.internal.NonEmptyList
+import monocly.internal._
 import monocly._
+
 
 trait GetterImpl[+ThisCan <: OpticCan, -S, +A]:
 
@@ -17,7 +18,11 @@ trait GetterImpl[+ThisCan <: OpticCan, -S, +A]:
 
   def get(using ThisCan <:< GetOne): S => A = sys.error("This optic does not support 'get'")
   def getOption(using ThisCan <:< GetOption): S => Option[A] = sys.error("This optic does not support 'getOption'")
+
+  def foldMap1[M: Semigroup](f: A => M)(using ThisCan <:< GetMany): S => M = sys.error("This optic does not support 'foldMap1'")
   def getOneOrMore(using ThisCan <:< GetOneOrMore): S => NonEmptyList[A] = sys.error("This optic does not support 'getOneOrMore'")
+
+  def foldMap[M: Monoid](f: A => M)(using ThisCan <:< GetMany): S => M = sys.error("This optic does not support 'foldMap'")
   def getAll(using ThisCan <:< GetMany): S => List[A] = sys.error("This optic does not support 'getAll'")
 
 end GetterImpl

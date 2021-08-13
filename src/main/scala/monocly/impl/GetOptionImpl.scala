@@ -1,6 +1,7 @@
 package monocly.impl
 
 import monocly._
+import monocly.internal._
 
 class GetOptionImpl[+ThisCan <: GetOption, -S, +A](_getOption: S => Option[A]) extends GetterImpl[ThisCan, S, A]: 
 
@@ -22,6 +23,10 @@ class GetOptionImpl[+ThisCan <: GetOption, -S, +A](_getOption: S => Option[A]) e
 
 
   override def getOption(using ThisCan <:< GetOption): S => Option[A] = _getOption
+
+  override def foldMap[M: Monoid](f: A => M)(using ThisCan <:< GetMany): S => M = 
+    s => _getOption(s).fold(Monoid[M].empty)(f)
+    
   override def getAll(using ThisCan <:< GetMany): S => List[A] = s => getOption(s).toList
 
 end GetOptionImpl

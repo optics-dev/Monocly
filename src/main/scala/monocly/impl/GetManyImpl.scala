@@ -1,6 +1,7 @@
 package monocly.impl
 
 import monocly._
+import monocly.internal._
 
 class GetManyImpl[+ThisCan <: GetMany, -S, +A](_getAll: S => List[A]) extends GetterImpl[ThisCan, S, A]: 
 
@@ -18,6 +19,9 @@ class GetManyImpl[+ThisCan <: GetMany, -S, +A](_getAll: S => List[A]) extends Ge
 
   override def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] = 
     impl2.preComposeGetMany(this)
+
+  override def foldMap[M: Monoid](f: A => M)(using ThisCan <:< GetMany): S => M = 
+    s => _getAll(s).map(f).foldLeft(Monoid[M].empty)(Monoid[M].combine)
 
   override def getAll(using ThisCan <:< GetMany): S => List[A] = _getAll
 

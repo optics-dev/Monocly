@@ -1,6 +1,6 @@
 package monocly.impl
 
-import monocly.internal.NonEmptyList
+import monocly.internal._
 import monocly._
 
 class GetOneImpl[+ThisCan <: GetOne, -S, +A](_get: S => A) extends GetterImpl[ThisCan, S, A]: 
@@ -22,7 +22,11 @@ class GetOneImpl[+ThisCan <: GetOne, -S, +A](_get: S => A) extends GetterImpl[Th
 
   override def get(using ThisCan <:< GetOne): S => A = _get
   override def getOption(using ThisCan <:< GetOption): S => Option[A] = s => Some(_get(s))
+
+  override def foldMap1[M: Semigroup](f: A => M)(using ThisCan <:< GetMany): S => M = s => f(_get(s))
   override def getOneOrMore(using ThisCan <:< GetOneOrMore): S => NonEmptyList[A] = s => NonEmptyList(_get(s), Nil)
+
+  override def foldMap[M: Monoid](f: A => M)(using ThisCan <:< GetMany): S => M = s => f(_get(s))
   override def getAll(using ThisCan <:< GetMany): S => List[A] = s => List(_get(s))
 
 end GetOneImpl
