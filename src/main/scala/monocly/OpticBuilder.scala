@@ -1,6 +1,6 @@
 package monocly
 
-import monocly.internal.NonEmptyList
+import monocly.internal._
 import monocly.impl._
 
 object OpticsBuilder:

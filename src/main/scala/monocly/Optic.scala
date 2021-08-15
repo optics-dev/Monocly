@@ -50,10 +50,10 @@ extension [S, T, A, B] (optic: POptic[GetOne, S, T, A, B])
   inline def get: S => A = optic.getter.get
 
 extension [S, T, A, B] (optic: POptic[GetMany, S, T, A, B])
-  inline def getAll: S => List[A] = optic.getter.getAll
+  inline def getAll: S => List[A] = optic.getter.foldMap[List[A]](List(_))
 
 extension [S, T, A, B] (optic: POptic[GetOneOrMore, S, T, A, B])
-  inline def getOneOrMore: S => NonEmptyList[A] = optic.getter.getOneOrMore
+  inline def getOneOrMore: S => NonEmptyList[A] = optic.getter.foldMap1[NonEmptyList[A]](NonEmptyList(_, Nil))
 
 extension [S, T, A, B] (optic: POptic[GetOption, S, T, A, B])
   inline def getOption: S => Option[A] = optic.getter.getOption

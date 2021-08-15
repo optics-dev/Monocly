@@ -18,11 +18,8 @@ trait GetterImpl[+ThisCan <: OpticCan, -S, +A]:
 
   def get(using ThisCan <:< GetOne): S => A = sys.error("This optic does not support 'get'")
   def getOption(using ThisCan <:< GetOption): S => Option[A] = sys.error("This optic does not support 'getOption'")
+  def foldMap1[M](f: A => M)(using Semigroup[M], ThisCan <:< GetOneOrMore): S => M = sys.error("This optic does not support 'foldMap1'")
+  def foldMap[M](f: A => M)(using Monoid[M], ThisCan <:< GetMany): S => M = sys.error("This optic does not support 'foldMap'")
 
-  def foldMap1[M: Semigroup](f: A => M)(using ThisCan <:< GetMany): S => M = sys.error("This optic does not support 'foldMap1'")
-  def getOneOrMore(using ThisCan <:< GetOneOrMore): S => NonEmptyList[A] = sys.error("This optic does not support 'getOneOrMore'")
-
-  def foldMap[M: Monoid](f: A => M)(using ThisCan <:< GetMany): S => M = sys.error("This optic does not support 'foldMap'")
-  def getAll(using ThisCan <:< GetMany): S => List[A] = sys.error("This optic does not support 'getAll'")
 
 end GetterImpl

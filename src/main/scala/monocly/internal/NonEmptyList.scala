@@ -14,4 +14,7 @@ case class NonEmptyList[+A](head: A, tail: List[A]):
     val headList = f(head)
     NonEmptyList(headList.head, headList.tail ++ tail.flatMap(a => f(a).toList))
 
+  def foldLeft[B](b: B)(f: (B, A) => B): B =
+      tail.foldLeft(f(b, head))(f)
+
 end NonEmptyList
