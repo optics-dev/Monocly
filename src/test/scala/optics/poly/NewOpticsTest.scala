@@ -5,7 +5,8 @@ import functions.Index
 
 class NewOpticsTest extends munit.FunSuite {
 
-  case class Pen(color: String)
+  case class Company(name: String)
+  case class Pen(color: String, manufacturer: Option[Company] = None)
   case class Office(desk: Desk, pens: List[Pen])
   case class Printer(pcLoadLetter: Boolean)
   case class Desk(numPens: Int, printer: Option[Printer])
@@ -57,7 +58,6 @@ class NewOpticsTest extends munit.FunSuite {
 
     val modifyPrinter: Optic[Modify, Desk, Printer] = 
       OpticsBuilder.withModify(f => desk => desk.copy(printer = desk.printer.map(f)))
-
     val modifyPcLoadLetter: Optic[Modify, Printer, Boolean] = 
       OpticsBuilder.withModify(f => printer => printer.copy(pcLoadLetter = f(printer.pcLoadLetter)))
 
@@ -125,10 +125,24 @@ class NewOpticsTest extends munit.FunSuite {
     val colorOptic: Optic[GetOne, Pen, String] = 
       OpticsBuilder.withGetOne(_.color)
 
-    val composed: Optic[GetMany, Office, String] = 
+    val composed: Optic[GetOneOrMore, Office, String] = 
       pensOptic.andThen(colorOptic)
 
     val office = Office(Desk(5, None), List(Pen("red"), Pen("green"), Pen("blue")))
     assertEquals(composed.getAll(office), List("rainbow", "red", "green", "blue"))
+  }
+
+  test("GetOneOrMore andThen GetOption") {
+    val pensOptic: Optic[GetOneOrMore, Office, Pen] = 
+      OpticsBuilder.withGetOneOrMore(o => NonEmptyList(Pen("rainbow", Some(Company("Hemingsworth"))), o.pens))
+
+    val manufacturerOptic: Optic[GetOption, Pen, Company] = 
+      OpticsBuilder.withGetOption(_.manufacturer)
+
+    val composed: Optic[GetMany, Office, Company] = 
+      pensOptic.andThen(manufacturerOptic)
+
+    val office = Office(Desk(5, None), List(Pen("red", Some(Company("Pencorp"))), Pen("green"), Pen("blue")))
+    assertEquals(composed.getAll(office), List(Company("Hemingsworth"), Company("Pencorp")))
   }
 }
