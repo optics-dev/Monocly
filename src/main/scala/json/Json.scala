@@ -1,6 +1,6 @@
 package json
 
-import optics.poly.Prism
+import monocly.Prism
 
 sealed trait Json
 

@@ -2,15 +2,15 @@ package json
 
 import json.Json._
 import json.PathElement.{Field, Index}
-import optics.poly.{Iso, Optional}
-import optics.poly.functions.{Index => FIndex}
+import monocly._
+import monocly.functions.{Index => FIndex}
 
 import scala.language.dynamics
 
 case class JsonPath(path: List[PathElement], json: Optional[Json, Json]) extends Dynamic {
 
   val string: Optional[Json, String] =
-    json.andThen(jsonString)
+    json.andThen(Json.jsonString)
 
   val int: Optional[Json, Int] =
     json.andThen(jsonInt)
@@ -33,5 +33,5 @@ case class JsonPath(path: List[PathElement], json: Optional[Json, Json]) extends
 }
 
 object JsonPath {
-  val root: JsonPath = JsonPath(Nil, Iso.id[Json].asOptional)
+  val root: JsonPath = JsonPath(Nil, Iso.id[Json])
 }
