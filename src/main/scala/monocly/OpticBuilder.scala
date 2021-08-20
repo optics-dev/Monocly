@@ -4,8 +4,8 @@ import monocly.internal._
 import monocly.impl._
 
 object OpticsBuilder:
-  type OnlyHasSetter[Can <: OpticCan] = ReverseGet <:< Can
-  type OnlyHasGetter[Can <: OpticCan] = GetOne <:< Can
+  type OnlyHasSetter[Can] = ReverseGet <:< Can
+  type OnlyHasGetter[Can] = GetOne <:< Can
 
   extension [ThisCan <: Modify, S, T, A, B](optic: POptic[ThisCan, S, T, A, B])(using OnlyHasSetter[ThisCan])
     def withGetOne(_getOne: S => A): POptic[ThisCan & GetOne, S, T, A, B] = 

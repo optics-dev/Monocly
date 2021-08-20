@@ -4,42 +4,19 @@ import monocly.impl._
 import monocly.functions.{Each, Index}
 import monocly.internal.{NonEmptyList, Applicative, Monoid}
 
+type Optic[+ThisCan, S, A] = POptic[ThisCan, S, S, A, A]
 
-sealed trait OpticCan
-
-//        GetMany
-//          /\
-//         /  \
-// GetOption  GetOneOrMore
-//         \  /
-//          \/
-//        GetOne
-trait GetMany extends OpticCan
-trait GetOption extends GetMany
-trait GetOneOrMore extends GetMany
-trait GetOne extends GetOption with GetOneOrMore 
-
-//    Modify
-//      ^
-//      |
-//  ReverseGet
-trait Modify extends OpticCan
-trait ReverseGet extends Modify
-
-type Optic[+ThisCan <: OpticCan, S, A] = POptic[ThisCan, S, S, A, A]
-
-
-final class POptic[+ThisCan <: OpticCan, -S, +T, +A, -B] private[monocly](
+final class POptic[+ThisCan, -S, +T, +A, -B] private[monocly](
     protected[monocly] val getter: GetterImpl[ThisCan, S, A],
     protected[monocly] val setter: SetterImpl[ThisCan, S, T, A, B]):
 
-  def andThen[ThatCan <: OpticCan, BothCan >: (ThisCan | ThatCan) <: OpticCan, C, D](o: POptic[ThatCan, A, B, C, D]): POptic[BothCan, S, T, C, D] = 
+  def andThen[ThatCan, BothCan >: (ThisCan | ThatCan), C, D](o: POptic[ThatCan, A, B, C, D]): POptic[BothCan, S, T, C, D] =
     POptic(getter.andThen(o.getter), setter.andThen(o.setter))
 
 end POptic
 
 
-extension [ThisCan <: OpticCan, S, A] (optic: Optic[ThisCan, S, A])
+extension [ThisCan, S, A] (optic: Optic[ThisCan, S, A])
   def each[C](using evEach: Each[A, C]): Optic[ThisCan | (GetMany & Modify), S, C] = 
     optic.andThen(evEach.each)
 
@@ -62,7 +39,7 @@ extension [S, T, A, B] (optic: POptic[GetOption & Modify, S, T, A, B])
   inline def getOrModify: S => Either[T, A] = 
     s => optic.getter.getOption(s).fold(Left(???))(Right.apply) 
 
-extension [ThisCan <: OpticCan, S, A] (optic: Optic[ThisCan, S, A])
+extension [ThisCan, S, A] (optic: Optic[ThisCan, S, A])
   def index[I, A1](i: I)(using evIndex: Index[A, I, A1]): Optic[ThisCan | (GetOption & Modify), S, A1] = 
     optic.andThen(evIndex.index(i))
 
@@ -78,10 +55,10 @@ extension [S, T, A, B] (optic: POptic[Modify, S, T, A, B])
 extension [S, T, A, B] (optic: POptic[ReverseGet, S, T, A, B])
   inline def reverseGet: B => T = optic.setter.reverseGet
 
-extension [ThisCan <: OpticCan, S, T, A, B] (optic: POptic[ThisCan, S, T, Option[A], Option[B]])
+extension [ThisCan, S, T, A, B] (optic: POptic[ThisCan, S, T, Option[A], Option[B]])
   def some: POptic[ThisCan | GetOption, S, T, A, B] = optic.andThen(std.option.pSome)
 
-extension [ThisCan <: OpticCan, S, A] (optic: Optic[ThisCan, S, Option[A]])
+extension [ThisCan, S, A] (optic: Optic[ThisCan, S, Option[A]])
   def withDefault(defaultValue: A): Optic[ThisCan | (GetOne & ReverseGet), S, A] = 
     val iso: Optic[GetOne & ReverseGet, Option[A], A] = POptic(
       GetOneImpl(_.getOrElse(defaultValue)), 
