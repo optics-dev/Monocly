@@ -6,7 +6,7 @@ import monocly._
 
 trait GetterImpl[+ThisCan, -S, +A]:
 
-  def canAlso[NewCan <: OpticCan]: GetterImpl[NewCan, S, A] =
+  def canAlso[NewCan]: GetterImpl[NewCan, S, A] =
     asInstanceOf[GetterImpl[NewCan, S, A]]
 
   def preComposeGetMany[ThatCan <: GetMany, S0](impl1: GetManyImpl[ThatCan, S0, S]): GetterImpl[ThisCan | ThatCan, S0, A]

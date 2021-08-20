@@ -4,7 +4,7 @@ import monocly._
 
 trait SetterImpl[+ThisCan, -S, +T, +A, -B]:
 
-  def canAlso[NewCan <: OpticCan]: SetterImpl[NewCan, S, T, A, B] =
+  def canAlso[NewCan]: SetterImpl[NewCan, S, T, A, B] =
     asInstanceOf[SetterImpl[NewCan, S, T, A, B]]
 
   def preComposeModify[ThatCan <: Modify, S0, T0](impl1: ModifyImpl[ThatCan, S0, T0, S, T]): SetterImpl[ThisCan | ThatCan, S0, T0, A, B]

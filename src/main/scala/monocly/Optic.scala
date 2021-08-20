@@ -10,7 +10,7 @@ final class POptic[+ThisCan, -S, +T, +A, -B] private[monocly](
     protected[monocly] val getter: GetterImpl[ThisCan, S, A],
     protected[monocly] val setter: SetterImpl[ThisCan, S, T, A, B]):
 
-  def andThen[ThatCan, BothCan >: (ThisCan | ThatCan), C, D](o: POptic[ThatCan, A, B, C, D]): POptic[BothCan, S, T, C, D] =
+  def andThen[ThatCan, C, D](o: POptic[ThatCan, A, B, C, D]): POptic[ThisCan | ThatCan, S, T, C, D] =
     POptic(getter.andThen(o.getter), setter.andThen(o.setter))
 
 end POptic
