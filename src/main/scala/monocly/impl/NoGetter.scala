@@ -2,7 +2,7 @@ package monocly.impl
 
 import monocly._
 
-object NoGetter extends GetterImpl[Nothing, Any, Nothing]:
+object NoGetter extends GetterImpl[Any, Any, Nothing]:
   override def preComposeGetMany[ThatCan <: GetMany, S0](impl1: GetManyImpl[ThatCan, S0, Any]) = NoGetter
   override def preComposeGetOneOrMore[ThatCan <: GetOneOrMore, S0](impl1: GetOneOrMoreImpl[ThatCan, S0, Any]) = NoGetter
   override def preComposeGetOption[ThatCan <: GetOption, S0](impl1: GetOptionImpl[ThatCan, S0, Any]) = NoGetter

@@ -1,7 +1,5 @@
 package monocly
 
-sealed trait OpticCan
-
 //        GetMany
 //          /\
 //         /  \
@@ -9,7 +7,8 @@ sealed trait OpticCan
 //         \  /
 //          \/
 //        GetOne
-trait GetMany extends OpticCan
+sealed trait GetteCan
+trait GetMany extends GetteCan
 trait GetOption extends GetMany
 trait GetOneOrMore extends GetMany
 trait GetOne extends GetOption with GetOneOrMore
@@ -18,5 +17,6 @@ trait GetOne extends GetOption with GetOneOrMore
 //      ^
 //      |
 //  ReverseGet
-trait Modify extends OpticCan
+sealed trait SetterCan
+trait Modify extends SetterCan
 trait ReverseGet extends Modify

@@ -4,7 +4,7 @@ import monocly.internal.Applicative
 import monocly.functions.Index
 import monocly.impl._
 
-type PLens[-S, +T, +A, -B] = POptic[GetOne & Modify, S, T, A, B]
+type PLens[-S, +T, +A, -B] = POptic[GetOne, Modify, S, T, A, B]
 type Lens[S, A] = PLens[S, S, A, A]
 
 object PLens:
