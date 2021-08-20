@@ -12,7 +12,7 @@ class ReverseGetImpl[ThisCan <: ReverseGet, -S, +T, +A, -B](_modify: (A => B) =>
       f => s0 => impl1.modify(s => modify(f)(s))(s0), 
       b => impl1.reverseGet(reverseGet(b)))
 
-  override def andThen[ThatCan <: OpticCan, C, D](impl2: SetterImpl[ThatCan, A, B, C, D]): SetterImpl[ThisCan | ThatCan, S, T, C, D] = 
+  override def andThen[ThatCan, C, D](impl2: SetterImpl[ThatCan, A, B, C, D]): SetterImpl[ThisCan | ThatCan, S, T, C, D] =
     impl2.preComposeReverseGet(this)
 
   override def modify(f: A => B)(using ThisCan <:< Modify): S => T = _modify(f)

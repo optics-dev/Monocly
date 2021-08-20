@@ -22,7 +22,7 @@ class GetOptionImpl[+ThisCan <: GetOption, -S, +A](_getOption: S => Option[A]) e
   override def preComposeGetOne[ThatCan <: GetOne, S0](impl1: GetOneImpl[ThatCan, S0, S]): GetOptionImpl[ThisCan | ThatCan, S0, A] = 
     GetOptionImpl(s0 => impl1.getOption(s0).flatMap(getOption))
 
-  def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] = 
+  def andThen[ThatCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] =
     impl2.preComposeGetOption(this)
 
   override def getOption(using ThisCan <:< GetOption): S => Option[A] = _getOption

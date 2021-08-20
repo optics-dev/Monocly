@@ -21,7 +21,7 @@ class GetOneImpl[+ThisCan <: GetOne, -S, +A](_get: S => A) extends GetterImpl[Th
   override def preComposeGetOne[ThatCan <: GetOne, S0](impl1: GetOneImpl[ThatCan, S0, S]): GetOneImpl[ThisCan | ThatCan, S0, A] = 
     GetOneImpl(s0 => get(impl1.get(s0)))
 
-  def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] = 
+  def andThen[ThatCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] =
     impl2.preComposeGetOne(this)
 
   override def get(using ThisCan <:< GetOne): S => A = _get

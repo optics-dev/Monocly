@@ -33,7 +33,7 @@ trait GetManyImpl[+ThisCan <: GetMany, -S, +A] extends GetterImpl[ThisCan, S, A]
       override def _foldMap[M: Monoid](f: A => M): S0 => M = 
         s0 => self.foldMap(f)(impl1.get(s0))
 
-  override def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] = 
+  override def andThen[ThatCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] =
     impl2.preComposeGetMany(this)
 
   override def foldMap[M](f: A => M)(using Monoid[M], ThisCan <:< GetMany): S => M = _foldMap(f)

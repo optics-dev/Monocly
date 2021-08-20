@@ -35,7 +35,7 @@ trait GetOneOrMoreImpl[+ThisCan <: GetOneOrMore, -S, +A] extends GetterImpl[This
       override def _foldMap1[M: Semigroup](f: A => M): S0 => M = 
         s0 => self.foldMap1(f)(impl1.get(s0))
 
-  override def andThen[ThatCan <: OpticCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] = 
+  override def andThen[ThatCan, C](impl2: GetterImpl[ThatCan, A, C]): GetterImpl[ThisCan | ThatCan, S, C] =
     impl2.preComposeGetOneOrMore(this)
 
   override def foldMap1[M](f: A => M)(using Semigroup[M], ThisCan <:< GetOneOrMore): S => M = _foldMap1(f)
