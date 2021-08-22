@@ -20,4 +20,11 @@ class GetterImplTest extends munit.FunSuite {
     )
   }
 
+  test("NoGetter getOne doesn't compile") {
+    assertNoDiff(
+      compileErrors("NoGetter.get(1)"),
+      "Error: ..."
+    )
+  }
+
 }
