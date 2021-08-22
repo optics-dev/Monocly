@@ -10,11 +10,10 @@ final class POptic[+ThisCan, -S, +T, +A, -B] private[monocly](
     protected[monocly] val getter: GetterImpl[ThisCan, S, A],
     protected[monocly] val setter: SetterImpl[ThisCan, S, T, A, B]):
 
-  def andThen[ThatCan, BothCan >: (ThisCan | ThatCan), C, D](o: POptic[ThatCan, A, B, C, D]): POptic[BothCan, S, T, C, D] =
+  def andThen[ThatCan >: ThisCan, C, D](o: POptic[ThatCan, A, B, C, D]): POptic[ThatCan, S, T, C, D] =
     POptic(getter.andThen(o.getter), setter.andThen(o.setter))
 
 end POptic
-
 
 extension [ThisCan, S, A] (optic: Optic[ThisCan, S, A])
   def each[C](using evEach: Each[A, C]): Optic[ThisCan | (GetMany & Modify), S, C] = 
@@ -64,8 +63,3 @@ extension [ThisCan, S, A] (optic: Optic[ThisCan, S, Option[A]])
       GetOneImpl(_.getOrElse(defaultValue)), 
       ReverseGetImpl(f => _.map(f), Some.apply))
     optic.andThen(iso)
-
-object Optic:
-  val NullOptic = POptic(NoGetter, NoSetter)
-
-end Optic
