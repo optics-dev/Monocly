@@ -1,0 +1,22 @@
+package monocly.internal
+
+trait Monad[F[_]]:
+  def pure[A](value: A): F[A]
+  def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B]
+
+object Monad: 
+  def apply[F[_]](using ev: Monad[F]): Monad[F] = ev
+
+  given id: Monad[Id] with
+    def pure[A](value: A): Id[A] = value
+    def flatMap[A, B](fa: Id[A])(f: A => Id[B]): Id[B] = f(fa)
+
+  given list: Monad[List] with
+    def pure[A](value: A): List[A] = List(value)
+    def flatMap[A, B](fa: List[A])(f: A => List[B]): List[B] = fa.flatMap(f)
+
+  given option: Monad[Option] with
+    def pure[A](value: A): Option[A] = Some(value)
+    def flatMap[A, B](fa: Option[A])(f: A => Option[B]): Option[B] = fa.flatMap(f)
+    
+end Monad
