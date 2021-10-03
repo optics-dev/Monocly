@@ -1,20 +1,22 @@
 package monocly
 
-//        GetMany
-//          /\
-//         /  \
-// GetOption  GetOneOrMore
-//         \  /
-//          \/
-//        GetOne
-trait GetMany
-trait GetOption extends GetMany
-trait GetOneOrMore extends GetMany
-trait GetOne extends GetOption with GetOneOrMore
+object OpticCan:
 
-//    Modify
-//      ^
-//      |
-//  ReverseGet
-trait Modify
-trait ReverseGet extends Modify
+  //        GetMany
+  //          /\
+  //         /  \
+  // GetOption  GetOneOrMore
+  //         \  /
+  //          \/
+  //          Get 
+  trait GetMany
+  trait GetOption extends GetMany
+  trait GetOneOrMore extends GetMany
+  trait Get extends GetOption with GetOneOrMore
+
+  //    Modify
+  //      ^
+  //      |
+  //  ReverseGet
+  trait Modify
+  trait ReverseGet extends Modify

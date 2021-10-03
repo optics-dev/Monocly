@@ -1,6 +1,7 @@
 package monocly.functions
 
-import monocly._
+import monocly.*
+import OpticCan.*
 
 
 abstract class Index[S, -I, A]:
@@ -10,7 +11,7 @@ object Index:
   def apply[I, S, A](i: I)(using idx: Index[S, I, A]): Optional[S, A] =
       idx.index(i)
 
-  def map[K, V](key: K): Optional[Map[K, V], V] =
+  def map[K, V](key: K): Optional[Map[K, V], V] = 
     apply(key)
 
   given [K, V]: Index[Map[K,V], K, V] with

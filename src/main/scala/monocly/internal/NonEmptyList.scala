@@ -4,6 +4,9 @@ case class NonEmptyList[+A](head: A, tail: List[A]):
   def toList: List[A] = 
     head :: tail
 
+  def ::[A1 >: A](a: A1): NonEmptyList[A1] = 
+    NonEmptyList(a, toList)
+
   def ++[B >: A](other: NonEmptyList[B]): NonEmptyList[B] = 
     NonEmptyList(head, tail ++ other.toList)
 
@@ -16,5 +19,11 @@ case class NonEmptyList[+A](head: A, tail: List[A]):
 
   def foldLeft[B](b: B)(f: (B, A) => B): B =
       tail.foldLeft(f(b, head))(f)
+
+  def foldRight[B](b: B)(f: (A, B) => B): B =
+      tail.foldRight(f(head, b))(f)
+
+  def reduceRight[B >: A](f: (A, B) => B): B =
+      (head :: tail).reduceRight[B](f)
 
 end NonEmptyList
