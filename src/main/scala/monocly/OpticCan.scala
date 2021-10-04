@@ -1,16 +1,17 @@
 package monocly
 
+
 //        GetMany
 //          /\
 //         /  \
 // GetOption  GetOneOrMore
 //         \  /
 //          \/
-//        GetOne
+//          Get 
 trait GetMany
 trait GetOption extends GetMany
 trait GetOneOrMore extends GetMany
-trait GetOne extends GetOption with GetOneOrMore
+trait Get extends GetOption with GetOneOrMore
 
 //    Modify
 //      ^

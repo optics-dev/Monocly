@@ -2,6 +2,7 @@ package monocly
 
 import scala.language.implicitConversions
 import functions.Index
+import monocly.classic.*
 
 class OptionalTest extends munit.FunSuite {
 

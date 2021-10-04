@@ -1,6 +1,7 @@
 package monocly.std
 
 import monocly._
+import monocly.classic.{PPrism, Prism}
 
 object either:
   final def pStdLeft[A, B, C]: PPrism[Either[A, B], Either[C, B], A, C] =

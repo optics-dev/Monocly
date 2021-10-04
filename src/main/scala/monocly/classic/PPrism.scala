@@ -1,5 +1,6 @@
-package monocly
+package monocly.classic
 
+import monocly.*
 import monocly.internal.Applicative
 import monocly.functions.Index
 import monocly.impl._
@@ -10,9 +11,7 @@ type Prism[S, A] = PPrism[S, S, A, A]
 
 object PPrism:
   def apply[S, T, A, B](_getOrModify: S => Either[T, A])(_reverseGet: B => T): PPrism[S, T, A, B] =
-    POptic(
-      GetOptionImpl(s => _getOrModify(s).toOption), 
-      ReverseGetImpl(f => s => _getOrModify(s).fold(identity, a => _reverseGet(f(a))), _reverseGet))
+    POptic.thatCan.selectBranch(_getOrModify)(_reverseGet)
   
   export std.option.{pSome, some}
 

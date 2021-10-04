@@ -1,6 +1,7 @@
 package example
 
 import monocly._
+import monocly.classic.*
 
 case class Mono(i: Int, foo: Foo, optI: Option[Int], listI: List[Int], mapI: Map[Int, Int])
 

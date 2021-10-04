@@ -1,5 +1,6 @@
-package monocly
+package monocly.classic
 
+import monocly.*
 import monocly.internal.{Applicative, Id}
 import monocly.functions.Index
 import monocly.impl._
@@ -10,9 +11,7 @@ type Optional[S, A] = POptional[S, S, A, A]
 
 object POptional:
   def apply[S, T, A, B](_getOrModify: S => Either[T, A], _replace: B => S => T): POptional[S, T, A, B] =
-    POptic(
-      GetOptionImpl(s => _getOrModify(s).toOption), 
-      ModifyImpl(f => s => _getOrModify(s).fold(identity, a => _replace(f(a))(s))))
+    POptic.thatCan.editOption(_getOrModify)(_replace)
 
 
 object Optional:
