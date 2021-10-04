@@ -1,6 +1,6 @@
 package json
 
-import monocly.Prism
+import monocly.classic.*
 
 sealed trait Json
 

@@ -1,10 +1,11 @@
-package monocly
+package monocly.classic
 
+import monocly.*
 import monocly.internal.{Applicative, Id, Proxy}
 import monocly.functions.Index
 import monocly.impl._
 
-type PTraversal[-S, +T, +A, -B] = POptic[OpticCan.GetMany & OpticCan.Modify, S, T, A, B]
+type PTraversal[-S, +T, +A, -B] = POptic[GetMany & Modify, S, T, A, B]
 type Traversal[From, To] = PTraversal[From, From, To, To]
 
 object PTraversal:

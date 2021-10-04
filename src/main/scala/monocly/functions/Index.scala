@@ -1,8 +1,7 @@
 package monocly.functions
 
 import monocly.*
-import OpticCan.*
-
+import monocly.classic.Optional
 
 abstract class Index[S, -I, A]:
   def index(i: I): Optional[S, A]

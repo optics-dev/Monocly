@@ -2,7 +2,6 @@ package monocly
 
 import monocly.internal.NonEmptyList
 import functions.Index
-import OpticCan.*
 
 class NewOpticsTest extends munit.FunSuite {
 

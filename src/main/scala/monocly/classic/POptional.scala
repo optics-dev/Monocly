@@ -1,10 +1,11 @@
-package monocly
+package monocly.classic
 
+import monocly.*
 import monocly.internal.{Applicative, Id}
 import monocly.functions.Index
 import monocly.impl._
 
-type POptional[-S, +T, +A, -B] = POptic[OpticCan.GetOption & OpticCan.Modify, S, T, A, B]
+type POptional[-S, +T, +A, -B] = POptic[GetOption & Modify, S, T, A, B]
 type Optional[S, A] = POptional[S, S, A, A]
 
 

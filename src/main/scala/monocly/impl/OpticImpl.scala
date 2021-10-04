@@ -77,7 +77,7 @@ object OpticImpl:
 
 end OpticImpl
 
-trait OpticImpl[-S, +T, +A, -B]:
+sealed trait OpticImpl[-S, +T, +A, -B]:
   def andThen[C, D](optic2: OpticImpl[A, B, C, D]): OpticImpl[S, T, C, D]
 
   def foldMap[M: Monoid](f: A => M)(s: S): M = sys.error("This optic does not support `foldMap`")

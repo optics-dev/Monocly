@@ -1,10 +1,11 @@
-package monocly
+package monocly.classic
 
+import monocly.*
 import monocly.internal.Applicative
 import monocly.functions.Index
 import monocly.impl._
 
-type PPrism[-S, +T, +A, -B] = POptic[OpticCan.GetOption & OpticCan.ReverseGet, S, T, A, B]
+type PPrism[-S, +T, +A, -B] = POptic[GetOption & ReverseGet, S, T, A, B]
 type Prism[S, A] = PPrism[S, S, A, A] 
 
 

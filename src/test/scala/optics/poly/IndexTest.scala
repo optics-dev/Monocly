@@ -1,6 +1,7 @@
 package monocly
 
 import functions.Index
+import monocly.classic.*
 
 class IndexTest extends munit.FunSuite {
 

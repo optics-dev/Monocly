@@ -1,10 +1,11 @@
-package monocly
+package monocly.classic
 
+import monocly.*
 import monocly.internal.Applicative
 import monocly.functions.Index
 import monocly.impl._
 
-type PLens[-S, +T, +A, -B] = POptic[OpticCan.Get & OpticCan.Modify, S, T, A, B]
+type PLens[-S, +T, +A, -B] = POptic[Get & Modify, S, T, A, B]
 type Lens[S, A] = PLens[S, S, A, A]
 
 object PLens:

@@ -2,7 +2,6 @@ package monocly.std
 
 import monocly.*
 import monocly.impl.*
-import OpticCan.*
 
 object option:
   def pSome[A, B]: POptic[GetOption & ReverseGet, Option[A], Option[B], A, B] =

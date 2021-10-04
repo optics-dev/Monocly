@@ -3,7 +3,6 @@ package monocly
 import monocly.impl._
 import monocly.functions.*
 import monocly.internal.*
-import OpticCan.*
 
 type Optic[+ThisCan, S, A] = POptic[ThisCan, S, S, A, A]
 

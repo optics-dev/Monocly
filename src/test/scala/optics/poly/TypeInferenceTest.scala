@@ -1,6 +1,7 @@
 package monocly
 
 import scala.language.implicitConversions
+import monocly.classic.*
 
 class TypeInferenceTest extends munit.FunSuite {
 

@@ -1,11 +1,11 @@
-package monocly
+package monocly.classic
 
 import monocly._
 import monocly.impl._
 import monocly.internal.Applicative
 import monocly.functions.Index
 
-type PIso[-S, +T, +A, -B] = POptic[OpticCan.Get & OpticCan.ReverseGet, S, T, A, B]
+type PIso[-S, +T, +A, -B] = POptic[Get & ReverseGet, S, T, A, B]
 type Iso[S, A] = PIso[S, S, A, A]
 
 object PIso:
