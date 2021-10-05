@@ -1,6 +1,6 @@
 package json
 
-import monocly.classic.*
+import monocle.classic.*
 
 sealed trait Json
 
