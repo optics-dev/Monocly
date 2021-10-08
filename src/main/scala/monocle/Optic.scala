@@ -14,7 +14,8 @@ final class POptic[+ThisCan, -S, +T, +A, -B] private[monocle](protected[monocle]
   def index[I, S1 <: S, A1 >: A, V](i: I)(using evIndex: Index[A1, I, V])(using T <:< S1, A1 <:< B): Optic[ThisCan | (GetOption & Modify), S1, V] = 
     asInstanceOf[Optic[ThisCan, S1, A1]].andThen(evIndex.index(i))
 
-  override def toString() = s"POptic(${impl})"
+  override def toString() = 
+    s"POptic(${impl})"
 
 end POptic
 
@@ -116,24 +117,21 @@ extension [S, T, A, B] (self: POptic[GetOption & Modify, S, T, A, B])
   def modifyOption(f: A => B): S => Option[T] =
     s => self.impl.safe.getOption(s).map(a => self.impl.safe.replace(f(a))(s))
 
-
 extension [S, T, A, B] (self: POptic[GetOption & Modify, S, T, A, B])
   def orElse(other: POptic[GetOption & Modify, S, T, A, B]): POptic[GetOption & Modify, S, T, A, B] =
     POptic.thatCan.editOption[S, T, A, B]
       (s => self.getOrModify(s).orElse(other.getOrModify(s)))
       (b => s => self.replaceOption(b)(s).getOrElse(other.replace(b)(s)))
 
-// extension [S, T, A, B] (self: POptic[GetMany & Modify, S, T, A, B])
-//   def parModifyF[G[_]](f: A => G[B])(s: S)(using par: Parallel[G]): G[T] =
-//     par.sequential(
-//       self.modifyA(a => par.parallel(f(a)))(s)(par.applicative)
-//     )
+extension [S, T, A, B] (self: POptic[GetMany & Modify, S, T, A, B])
+  def parModifyF[G[+_]](f: A => G[B])(s: S)(using par: Parallel[G]): G[T] =
+    par.sequential(
+      self.modifyA(a => par.parallel(f(a)))(s)(par.applicative))
 
-// extension [S, T, A, B] (self: POptic[GetOneOrMore & Modify, S, T, A, B])
-//   def parNonEmptyModifyF[F[_]](f: A => F[B])(s: S)(using par: NonEmptyParallel[F]): F[T] =
-//     par.sequential(
-//       self.nonEmptyModifyA(a => par.parallel(f(a)))(s)(par.apply)
-//     )
+extension [S, T, A, B] (self: POptic[GetOneOrMore & Modify, S, T, A, B])
+  def parNonEmptyModifyF[F[+_]](f: A => F[B])(s: S)(using par: NonEmptyParallel[F]): F[T] =
+    par.sequential(
+      self.nonEmptyModifyA(a => par.parallel(f(a)))(s)(par.apply))
 
 extension [S, T, A, B] (self: POptic[ReverseGet, S, T, A, B])
   def re: Optic[Get, B, T] = 
