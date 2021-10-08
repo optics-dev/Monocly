@@ -1,8 +1,8 @@
 package monocle.internal
 
 trait Monad[F[_]] extends Applicative[F] with FlatMap[F]:
-  final def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] = flatMap(fa)(a => map(fb)(b => f(a,b)))
-  final def map[A, B](fa: F[A])(f: A => B): F[B] = flatMap(fa)(a => pure(f(a)))
+  final override def map2[A, B, C](fa: F[A], fb: F[B])(f: (A, B) => C): F[C] = flatMap(fa)(a => map(fb)(b => f(a,b)))
+  final override def map[A, B](fa: F[A])(f: A => B): F[B] = flatMap(fa)(a => pure(f(a)))
 
 object Monad: 
   def apply[F[_]](using ev: Monad[F]): Monad[F] = ev
