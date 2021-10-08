@@ -176,10 +176,9 @@ extension [ThisCan, S, T, A, B] (self: POptic[ThisCan, S, T, Option[A], Option[B
   def some: POptic[ThisCan | GetOption, S, T, A, B] = 
     self.andThen(std.option.pSome)
 
-extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
- def to[C](f: A => C) = 
-   val g = POptic.thatCan.edit(f)(???)
-   self.andThen(g)
+// extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
+//   def to[C](f: A => C): POptic[GetMany, S, Any, C, Nothing] = 
+//     self.andThen(Optic.thatCan.get(f))
 
 extension [ThisCan, S, T, A, B] (self: POptic[ThisCan, S, T, Option[A], Option[B]])
   def withDefault(defaultValue: A): POptic[ThisCan | (Get & ReverseGet), S, T, A, B] = 
