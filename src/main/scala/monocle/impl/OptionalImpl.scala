@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-trait OptionalImpl[+ThisCan <: GetOption & Modify, -S, +T, +A, -B] 
+private[monocle] trait OptionalImpl[+ThisCan <: GetOption & Modify, -S, +T, +A, -B] 
     extends TraversalImpl[ThisCan, S, T, A, B] 
     with OptionalGetterImpl[ThisCan, S, T, A, B]:
 

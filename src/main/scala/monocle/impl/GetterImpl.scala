@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-trait GetterImpl[+ThisCan <: Get, -S, +T, +A, -B] extends OptionalGetterImpl[ThisCan, S, T, A, B] with NonEmptyFoldImpl[ThisCan, S, T, A, B]:
+private[monocle] trait GetterImpl[+ThisCan <: Get, -S, +T, +A, -B] extends OptionalGetterImpl[ThisCan, S, T, A, B] with NonEmptyFoldImpl[ThisCan, S, T, A, B]:
   optic1 => 
 
   protected[impl] def get(s: S): A

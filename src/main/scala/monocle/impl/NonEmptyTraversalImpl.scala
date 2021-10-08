@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-trait NonEmptyTraversalImpl[+ThisCan <: GetOneOrMore & Modify, -S, +T, +A, -B] 
+private[monocle] trait NonEmptyTraversalImpl[+ThisCan <: GetOneOrMore & Modify, -S, +T, +A, -B] 
     extends NonEmptyFoldImpl[ThisCan, S, T, A, B] 
     with TraversalImpl[ThisCan, S, T, A, B]:
 

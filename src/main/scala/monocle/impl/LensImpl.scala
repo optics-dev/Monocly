@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-trait LensImpl[+ThisCan <: Get & Modify, -S, +T, +A, -B] 
+private[monocle] trait LensImpl[+ThisCan <: Get & Modify, -S, +T, +A, -B] 
     extends OptionalImpl[ThisCan, S, T, A, B] 
     with NonEmptyTraversalImpl[ThisCan, S, T, A, B] 
     with GetterImpl[ThisCan, S, T, A, B]:

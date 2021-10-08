@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-trait OptionalGetterImpl[+ThisCan <: GetOption, -S, +T, +A, -B] extends FoldImpl[ThisCan, S, T, A, B]:
+private[monocle] trait OptionalGetterImpl[+ThisCan <: GetOption, -S, +T, +A, -B] extends FoldImpl[ThisCan, S, T, A, B]:
   optic1 => 
 
   protected[impl] def getOption(s: S): Option[A]

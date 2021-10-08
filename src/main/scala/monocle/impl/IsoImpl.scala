@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-trait IsoImpl[-S, +T, +A, -B] 
+private[monocle] trait IsoImpl[-S, +T, +A, -B] 
     extends LensImpl[Get & ReverseGet, S, T, A, B] 
     with PrismImpl[Get & ReverseGet, S, T, A, B]:
 

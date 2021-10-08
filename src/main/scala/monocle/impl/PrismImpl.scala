@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-trait PrismImpl[+ThisCan <: GetOption & ReverseGet, -S, +T, +A, -B] extends OptionalImpl[ThisCan, S, T, A, B]:
+private[monocle] trait PrismImpl[+ThisCan <: GetOption & ReverseGet, -S, +T, +A, -B] extends OptionalImpl[ThisCan, S, T, A, B]:
   optic1 => 
 
   protected[impl] def reverseGet(b: B): T

@@ -2,7 +2,7 @@ package monocle.impl
 
 import monocle._
 
-trait SetterImpl[+ThisCan <: Modify, -S, +T, +A, -B] extends OpticImpl[ThisCan, S, T, A, B]:
+private[monocle] trait SetterImpl[+ThisCan <: Modify, -S, +T, +A, -B] extends OpticImpl[ThisCan, S, T, A, B]:
   optic1 => 
 
   protected[impl] def modify(f: A => B): S => T

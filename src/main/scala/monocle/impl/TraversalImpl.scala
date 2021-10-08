@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-trait TraversalImpl[+ThisCan <: GetMany & Modify, -S, +T, +A, -B] extends FoldImpl[ThisCan, S, T, A, B] with SetterImpl[ThisCan, S, T, A, B]:
+private[monocle] trait TraversalImpl[+ThisCan <: GetMany & Modify, -S, +T, +A, -B] extends FoldImpl[ThisCan, S, T, A, B] with SetterImpl[ThisCan, S, T, A, B]:
   optic1 =>   
 
   protected[impl] def modifyA[F[+_]: Applicative](f: A => F[B])(s: S): F[T]

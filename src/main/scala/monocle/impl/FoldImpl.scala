@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-trait FoldImpl[+ThisCan <: GetMany, -S, +T, +A, -B] extends OpticImpl[ThisCan, S, T, A, B]:
+private[monocle] trait FoldImpl[+ThisCan <: GetMany, -S, +T, +A, -B] extends OpticImpl[ThisCan, S, T, A, B]:
   optic1 => 
 
   protected[impl] def foldMap[M: Monoid](f: A => M)(s: S): M
