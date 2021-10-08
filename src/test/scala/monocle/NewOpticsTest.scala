@@ -2,15 +2,10 @@ package monocle
 
 import monocle.internal.NonEmptyList
 import functions.Index
+import Fixtures._
+
 
 class NewOpticsTest extends munit.FunSuite {
-
-  case class Company(name: String)
-  case class Pen(color: String, manufacturer: Option[Company] = None)
-  case class Office(desk: Desk, pens: List[Pen])
-  case class Printer(pcLoadLetter: Boolean)
-  case class Desk(numPens: Int, printer: Option[Printer])
-
 
   test("GetOne andThen GetOne") {
     val deskOptic: Optic[Get, Office, Desk] = 
@@ -30,11 +25,11 @@ class NewOpticsTest extends munit.FunSuite {
     val printerOptic: Optic[GetOption, Desk, Printer] = 
       Optic.thatCan.getOption(_.printer)
 
-    val pcLoadLetterOptic: Optic[Get, Printer, Boolean] = 
-      Optic.thatCan.get(_.pcLoadLetter)
+    val paperJamOptic: Optic[Get, Printer, Boolean] = 
+      Optic.thatCan.get(_.paperJam)
 
     val composed: Optic[GetOption, Desk, Boolean] = 
-      printerOptic.andThen(pcLoadLetterOptic)
+      printerOptic.andThen(paperJamOptic)
 
     val desk = Desk(5, Some(Printer(true)))
     assertEquals(composed.getOption(desk), Some(true))
@@ -59,16 +54,16 @@ class NewOpticsTest extends munit.FunSuite {
     val modifyPrinter: Optic[Modify, Desk, Printer] = 
       Optic.thatCan.modify(f => desk => desk.copy(printer = desk.printer.map(f)))
 
-    val modifyPcLoadLetter: Optic[Modify, Printer, Boolean] = 
-      Optic.thatCan.modify(f => printer => printer.copy(pcLoadLetter = f(printer.pcLoadLetter)))
+    val modifyPaperJam: Optic[Modify, Printer, Boolean] = 
+      Optic.thatCan.modify(f => printer => printer.copy(paperJam = f(printer.paperJam)))
 
     val composed: Optic[Modify, Desk, Boolean] = 
-      modifyPrinter.andThen(modifyPcLoadLetter)
+      modifyPrinter.andThen(modifyPaperJam)
 
     val desk = Desk(5, Some(Printer(true)))
     val desk2 = composed.modify(b => !b)(desk)
 
-    assertEquals(desk2.printer.map(_.pcLoadLetter), Some(false))
+    assertEquals(desk2.printer.map(_.paperJam), Some(false))
   }
 
   test("ReverseGet andThen Modify") {
