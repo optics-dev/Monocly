@@ -2,9 +2,9 @@ package json
 
 import json.Json._
 import json.PathElement.{Field, Index}
-import monocly._
-import monocly.functions.{Index => FIndex}
-import monocly.classic.{Iso, Optional}
+import monocle._
+import monocle.functions.{Index => FIndex}
+import monocle.classic.{Iso, Optional}
 
 import scala.language.dynamics
 

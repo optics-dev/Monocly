@@ -1,7 +1,7 @@
 import example.Foo.{FooI, FooIS, FooList, FooS}
 import example.{Foo, Mono, Poly}
 
-import monocly._
+import monocle._
 
 object Main {
 
