@@ -8,8 +8,8 @@ private[monocle] trait OptionalGetterImpl[+ThisCan <: GetOption, -S, +T, +A, -B]
 
   protected[impl] def getOption(s: S): Option[A]
 
-  override protected[impl] def foldMap[M](f: A => M)(s: S)(using m: Monoid[M]): M = 
-    getOption(s).fold(m.empty)(f)
+  override protected[impl] def toIterator(s: S): Iterator[A] =
+    getOption(s).iterator
 
   protected def composeOptionalGetter[ThatCan >: ThisCan <: GetOption, C, D](optic2: OptionalGetterImpl[ThatCan, A, B, C, D]): OptionalGetterImpl[ThatCan, S, T, C, D] = 
     new OptionalGetterImpl:

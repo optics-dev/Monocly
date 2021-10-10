@@ -8,12 +8,10 @@ private[monocle] trait NonEmptyFoldImpl[+ThisCan <: GetOneOrMore, -S, +T, +A, -B
 
   protected[impl] def nonEmptyFoldMap[M: Semigroup](f: A => M)(s: S): M
 
-  override protected[impl] def foldMap[M: Monoid](f: A => M)(s: S): M = 
-    nonEmptyFoldMap(f)(s)
-
   protected def composeNonEmptyFold[ThatCan >: ThisCan <: GetOneOrMore, C, D](optic2: NonEmptyFoldImpl[ThatCan, A, B, C, D]): NonEmptyFoldImpl[ThatCan, S, T, C, D] = 
     new NonEmptyFoldImpl:
       override def nonEmptyFoldMap[M: Semigroup](f: C => M)(s: S): M = optic1.nonEmptyFoldMap(a => optic2.nonEmptyFoldMap(f)(a))(s)
+      override def toIterator(s: S): Iterator[C] = optic1.toIterator(s).flatMap(optic2.toIterator)
 
   override def andThen[ThatCan >: ThisCan, C, D](optic2: OpticImpl[ThatCan, A, B, C, D]): OpticImpl[ThatCan, S, T, C, D] = 
     optic2 match 

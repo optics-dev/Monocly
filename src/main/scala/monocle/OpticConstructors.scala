@@ -6,34 +6,35 @@ import monocle.internal.*
 
 trait OpticConstructors(polyConstructors: POpticConstructors):
 
-  def get[S, A](_get: S => A): OpticGet[Get, S, A] = 
+  def get[S, A](_get: S => A): OpticGet[Get, S, A] =
     POptic(
       new GetterImpl:
         override def get(s: S): A = _get(s))
         
-  def get2[S, A](_get1: S => A, _get2: S => A): OpticGet[GetOneOrMore, S, A] = 
-    POptic(
-      new NonEmptyFoldImpl:
-        override def nonEmptyFoldMap[M: Semigroup](f: A => M)(s: S): M = 
-          Semigroup[M].combine(f(_get1(s)), f(_get2(s))))
+  def get2[S, A](_get1: S => A, _get2: S => A): OpticGet[GetOneOrMore, S, A] =
+    getOneOrMore(s => NonEmptyList.of(_get1(s), _get2(s)))
 
-  def getOption[S, A](_getOption: S => Option[A]): OpticGet[GetOption, S, A] = 
+  def getOption[S, A](_getOption: S => Option[A]): OpticGet[GetOption, S, A] =
     POptic(
       new OptionalGetterImpl:
         override def getOption(s: S): Option[A] = _getOption(s))
 
-  def getOneOrMore[S, A](_getOneOrMore: S => NonEmptyList[A]): OpticGet[GetOneOrMore, S, A] = 
+  def getOneOrMore[S, A](_getOneOrMore: S => NonEmptyList[A]): OpticGet[GetOneOrMore, S, A] =
     POptic(
       new NonEmptyFoldImpl:
         override def nonEmptyFoldMap[M](f: A => M)(s: S)(using sem: Semigroup[M]): M = 
           val NonEmptyList(head, tail) = _getOneOrMore(s)
-          tail.foldLeft(f(head))((m, a) => sem.combine(m, f(a))))
+          tail.foldLeft(f(head))((m, a) => sem.combine(m, f(a)))
 
-  def getMany[S, A](_getAll: S => List[A]): OpticGet[GetMany, S, A] = 
+        override def toIterator(s: S): Iterator[A] =
+          _getOneOrMore(s).iterator
+    )
+
+  def getMany[S, A](_getAll: S => List[A]): OpticGet[GetMany, S, A] =
     POptic(
       new FoldImpl:
-        override def foldMap[M](f: A => M)(s: S)(using mon: Monoid[M]): M = 
-          _getAll(s).foldLeft(mon.empty)((m, a) => mon.combine(m, f(a))))
+        override def toIterator(s: S): Iterator[A] =
+          _getAll(s).iterator)
 
   def modify[S, A](_modify: (A => A) => S => S): Optic[Modify, S, A] = 
     polyConstructors.modify(_modify)

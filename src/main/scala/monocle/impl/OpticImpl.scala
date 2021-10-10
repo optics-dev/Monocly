@@ -20,7 +20,7 @@ private[monocle] trait OpticImpl[+ThisCan, -S, +T, +A, -B]:
   protected[impl] def getOrModify(s: S): Either[T, A] = 
     unsupported("getOrModify")
 
-  protected[impl] def foldMap[M: Monoid](f: A => M)(s: S): M = 
+  protected[impl] def toIterator(s: S): Iterator[A] =
     unsupported("foldMap")
 
   protected[impl] def nonEmptyFoldMap[M: Semigroup](f: A => M)(s: S): M = 
@@ -57,8 +57,8 @@ private[monocle] trait OpticImpl[+ThisCan, -S, +T, +A, -B]:
     inline def getOrModify(s: S)(using ThisCan <:< (GetOption & Modify)): Either[T, A] = 
       self.getOrModify(s)
 
-    inline def foldMap[M](f: A => M)(s: S)(using Monoid[M])(using ThisCan <:< GetMany): M = 
-      self.foldMap(f)(s)
+    inline def toIterator(s: S): Iterator[A] =
+      self.toIterator(s)
 
     inline def nonEmptyFoldMap[M](f: A => M)(s: S)(using Semigroup[M])(using ThisCan <:< GetOneOrMore): M = 
       self.nonEmptyFoldMap(f)(s)
