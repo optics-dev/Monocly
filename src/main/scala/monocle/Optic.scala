@@ -3,8 +3,14 @@ package monocle
 import monocle.impl._
 import monocle.functions.*
 import monocle.internal.*
+ 
 
 type Optic[+ThisCan, S, A] = POptic[ThisCan, S, S, A, A]
+type OpticGet[ThisCan >: Get, -S, +A] = POptic[ThisCan, S, Nothing, A, Any]
+
+object GetOptic:
+  def id[A]: OpticGet[Get, A, A] = 
+    Optic.thatCan.get[A, A](identity)
 
 object Optic:
   def id[A]: Optic[Get & ReverseGet, A, A] = 
@@ -25,8 +31,8 @@ end POptic
 
 final class POptic[+ThisCan, -S, +T, +A, -B] private[monocle](protected[monocle] val impl: OpticImpl[ThisCan, S, T, A, B]):
 
-  def andThen[ThatCan >: ThisCan, C, D](o: POptic[ThatCan, A, B, C, D]): POptic[ThatCan, S, T, C, D] =
-    POptic(impl.andThen(o.impl))
+  def andThen[ThatCan >: ThisCan, C, D](that: POptic[ThatCan, A, B, C, D]): POptic[ThatCan, S, T, C, D] =
+    POptic(impl.andThen(that.impl))
 
   def index[I, S1 <: S, A1 >: A, V](i: I)
       (using evIndex: Index[A1, I, V])
@@ -176,9 +182,9 @@ extension [ThisCan, S, T, A, B] (self: POptic[ThisCan, S, T, Option[A], Option[B
   def some: POptic[ThisCan | GetOption, S, T, A, B] = 
     self.andThen(std.option.pSome)
 
-// extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
-//   def to[C](f: A => C): POptic[GetMany, S, Any, C, Nothing] = 
-//     self.andThen(Optic.thatCan.get(f))
+extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
+  def to[C](f: A => C): POptic[GetMany, S, Any, C, Nothing] = 
+    self.andThen(Optic.thatCan.get(f))
 
 extension [ThisCan, S, T, A, B] (self: POptic[ThisCan, S, T, Option[A], Option[B]])
   def withDefault(defaultValue: A): POptic[ThisCan | (Get & ReverseGet), S, T, A, B] = 

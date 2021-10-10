@@ -1,6 +1,20 @@
 package monocle
 
 object Fixtures:
+
+  trait Animal
+  case class Tiger(stripes: Int) extends Animal
+  case class Zoo(tiger: Tiger)
+  case class Photo(animal: Animal)
+
+  val tigerStripes = Optic.thatCan.edit[Tiger, Int](_.stripes)(s => _.copy(stripes = s))
+  val zooTiger = Optic.thatCan.edit[Zoo, Tiger](_.tiger)(t => _.copy(tiger = t))
+  val getZooTiger = Optic.thatCan.get[Zoo, Tiger](_.tiger)
+  val animalPhoto = Optic.thatCan.get[Animal, Photo](Photo.apply)
+  val tigerPhoto = Optic.thatCan.get[Tiger, Photo](Photo.apply)
+
+
+
   case class Company(name: String)
   case class Pen(color: String, manufacturer: Option[Company] = None)
   case class Office(desk: Desk, pens: List[Pen])
