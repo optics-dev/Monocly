@@ -6,7 +6,7 @@ import monocle.internal.*
  
 
 type Optic[+ThisCan, S, A] = POptic[ThisCan, S, S, A, A]
-type OpticGet[ThisCan >: Get, -S, +A] = POptic[ThisCan, S, Nothing, A, Any]
+type OpticGet[+ThisCan, -S, +A] = POptic[ThisCan, S, Nothing, A, Any]
 
 object GetOptic:
   def id[A]: OpticGet[Get, A, A] = 
@@ -182,8 +182,8 @@ extension [ThisCan, S, T, A, B] (self: POptic[ThisCan, S, T, Option[A], Option[B
   def some: POptic[ThisCan | GetOption, S, T, A, B] = 
     self.andThen(std.option.pSome)
 
-extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
-  def to[C](f: A => C): POptic[GetMany, S, Any, C, Nothing] = 
+extension [ThisCan <: GetMany, NewCan >: ThisCan | Get, S, T, A, B] (self: POptic[ThisCan, S, T, A, B])
+  def to[C](f: A => C): POptic[NewCan, S, Any, C, Nothing] = 
     self.andThen(Optic.thatCan.get(f))
 
 extension [ThisCan, S, T, A, B] (self: POptic[ThisCan, S, T, Option[A], Option[B]])
