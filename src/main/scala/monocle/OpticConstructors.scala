@@ -30,7 +30,7 @@ trait OpticConstructors(polyConstructors: POpticConstructors):
           _getOneOrMore(s).iterator
     )
 
-  def getMany[S, A](_getAll: S => List[A]): OpticGet[GetMany, S, A] =
+  def getMany[S, A](_getAll: S => IterableOnce[A]): OpticGet[GetMany, S, A] =
     POptic(
       new FoldImpl:
         override def toIterator(s: S): Iterator[A] =
