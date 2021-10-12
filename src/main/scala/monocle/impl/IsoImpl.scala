@@ -11,8 +11,8 @@ private[monocle] trait IsoImpl[-S, +T, +A, -B]
 
   protected[impl] def reverse: IsoImpl[B, A, T, S]
 
-  override protected[impl] def foldMap[M: Monoid](f: A => M)(s: S): M = 
-    f(get(s))
+  override protected[impl] def toIterator(s: S): Iterator[A] =
+    Iterator.single(get(s))
 
   override protected[impl] def modifyF[F[+_]: Functor](f: A => F[B])(s: S): F[T] = 
     Functor[F].map(f(get(s)))(reverseGet)

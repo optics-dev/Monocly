@@ -46,7 +46,7 @@ end POptic
 
 extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
   def all(p: A => Boolean): S => Boolean =
-    s => self.impl.safe.foldMap(p)(s)(using Monoids.all)
+    self.impl.safe.toIterator(_).forall(p)
 
 extension [S, A] (self: Optic[Get, S, A])
   def choice[S1](other: Optic[Get, S1, A]): Optic[Get, Either[S, S1], A] =
@@ -58,19 +58,22 @@ extension [ThisCan, S, A] (self: Optic[ThisCan, S, A])
 
 extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
   def exist(p: A => Boolean): S => Boolean =
-    s => self.impl.safe.foldMap(p)(s)(using Monoids.any)
+    self.impl.safe.toIterator(_).exists(p)
 
 extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
   def find(p: A => Boolean): S => Option[A] =
-    s => self.impl.safe.foldMap(a => Some(a).filter(p))(s)(using Monoids.firstOption)
+    self.impl.safe.toIterator(_).find(p)
 
 extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
   def fold(s: S)(using Monoid[A]): A =
-    self.impl.safe.foldMap(identity)(s)
+    foldMap(identity)(s)
 
-extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
-  def foldMap[M: Monoid](f: A => M)(s: S): M = 
-    self.impl.safe.foldMap(f)(s)
+  def foldMap[M: Monoid](f: A => M)(s: S): M = {
+    var result: M = Monoid[M].empty
+    val it = self.impl.safe.toIterator(s)
+    while (it.hasNext) result = Monoid[M].combine(result, f(it.next()))
+    result
+  }
 
 extension [S, T, A, B] (self: POptic[Get, S, T, A, B])
   def get(s: S): A = 
@@ -78,7 +81,7 @@ extension [S, T, A, B] (self: POptic[Get, S, T, A, B])
 
 extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
   def getAll(s: S): List[A] = 
-    self.impl.safe.foldMap[List[A]](List(_))(s)
+    self.impl.safe.toIterator(s).toList
 
 extension [S, T, A, B] (self: POptic[GetOneOrMore, S, T, A, B])
   def getOneOrMore(s: S): NonEmptyList[A] = 
@@ -93,20 +96,25 @@ extension [S, T, A, B] (self: POptic[GetOption & Modify, S, T, A, B])
     self.impl.safe.getOrModify(s)
 
 extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
-  def headOption(s: S): Option[A] =
-    self.impl.safe.foldMap(Option.apply)(s)(using Monoids.firstOption)
+  def headOption(s: S): Option[A] = {
+    val it = self.impl.safe.toIterator(s)
+    if(it.hasNext) Some(it.next()) else None
+  }
 
 extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
   def isEmpty(s: S): Boolean =
-    self.impl.safe.foldMap(_ => false)(s)(using Monoids.all)
+    self.impl.safe.toIterator(s).isEmpty
 
 extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
-  def lastOption(s: S): Option[A] =
-    self.impl.safe.foldMap(Option.apply)(s)(using Monoids.lastOption)
+  def lastOption(s: S): Option[A] = {
+    var result: Option[A] = None
+    for (value <- self.impl.safe.toIterator(s)) result = Some(value)
+    result
+  }
 
 extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
   def length(s: S): Int =
-    self.impl.safe.foldMap(_ => 1)(s)
+    self.impl.safe.toIterator(s).length
 
 extension [S, T, A, B] (self: POptic[GetMany, S, T, A, B])
   def nonEmpty(s: S): Boolean =

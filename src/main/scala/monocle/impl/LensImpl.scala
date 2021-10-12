@@ -27,8 +27,8 @@ private[monocle] trait LensImpl[+ThisCan <: Get & Modify, -S, +T, +A, -B]
   override protected[impl] def nonEmptyModifyA[F[+_]: Apply](f: A => F[B])(s: S): F[T] = 
     modifyF(f)(s)
 
-  override protected[impl] def foldMap[M: Monoid](f: A => M)(s: S): M = 
-    f(get(s))
+  override protected[impl] def toIterator(s: S): Iterator[A] =
+    Iterator.single(get(s))
 
   override protected[impl] def nonEmptyFoldMap[M: Semigroup](f: A => M)(s: S): M = 
     f(get(s))

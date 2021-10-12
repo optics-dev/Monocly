@@ -1,17 +1,23 @@
 package monocle.impl
 
-import monocle._
-import monocle.internal._
+import monocle.*
+import monocle.internal.*
+
+import scala.collection.mutable.ListBuffer
 
 private[monocle] trait TraversalImpl[+ThisCan <: GetMany & Modify, -S, +T, +A, -B] extends FoldImpl[ThisCan, S, T, A, B] with SetterImpl[ThisCan, S, T, A, B]:
   optic1 =>   
 
   protected[impl] def modifyA[F[+_]: Applicative](f: A => F[B])(s: S): F[T]
 
-  override protected[impl] def foldMap[M: Monoid](f: A => M)(s: S): M = 
-    modifyA[[x] =>> Const[M, x]](a => Const(f(a)))(s).getConst
+  override protected[impl] def toIterator(s: S): Iterator[A] = {
+    val buffer = ListBuffer.empty[A]
+    modifyA{ value => buffer += value ; Proxy.nothing }(s)
+    buffer.iterator
+  }
 
-  override protected[impl] def modify(f: A => B): S => T = 
+
+  override protected[impl] def modify(f: A => B): S => T =
     modifyA[Id](f)
 
   override protected[impl] def replace(b: B): S => T = 

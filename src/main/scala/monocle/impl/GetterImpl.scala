@@ -11,10 +11,10 @@ private[monocle] trait GetterImpl[+ThisCan <: Get, -S, +T, +A, -B] extends Optio
   override protected[impl] def getOption(s: S): Option[A] = 
     Some(get(s))
 
-  override protected[impl] def foldMap[M: Monoid](f: A => M)(s: S): M = 
-    f(get(s))
+  override protected[impl] def toIterator(s: S): Iterator[A] =
+    Iterator.single(get(s))
 
-  override protected[impl] def nonEmptyFoldMap[M: Semigroup](f: A => M)(s: S): M = 
+  override protected[impl] def nonEmptyFoldMap[M: Semigroup](f: A => M)(s: S): M =
     f(get(s))
 
   protected def composeGetter[ThatCan >: ThisCan <: Get, C, D](optic2: GetterImpl[ThatCan, A, B, C, D]): GetterImpl[ThatCan, S, T, C, D] = 

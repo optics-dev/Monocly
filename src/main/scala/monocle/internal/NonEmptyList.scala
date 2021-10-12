@@ -25,5 +25,13 @@ case class NonEmptyList[+A](head: A, tail: List[A]):
 
   def reduceRight[B >: A](f: (A, B) => B): B =
       (head :: tail).reduceRight[B](f)
+      
+  def iterator: Iterator[A] =
+    toList.iterator  
 
 end NonEmptyList
+
+object NonEmptyList {
+  def of[A](head: A, tail: A*): NonEmptyList[A] =
+    NonEmptyList(head, tail.toList)
+}
