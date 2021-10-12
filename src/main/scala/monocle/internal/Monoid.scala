@@ -1,6 +1,6 @@
 package monocle.internal
 
-trait Semigroup[A]: 
+trait Semigroup[A]:
   def combine(x: A, y: A): A
 
 object Semigroup:
@@ -13,19 +13,18 @@ end Semigroup
 trait Monoid[A] extends Semigroup[A]:
   def empty: A
 
-object Monoid: 
+object Monoid:
   given Monoid[Int] with
     def combine(x: Int, y: Int): Int = x + y
-    def empty: Int = 0
+    def empty: Int                   = 0
 
   given [A]: Monoid[List[A]] with
     def combine(x: List[A], y: List[A]): List[A] = x ++ y
-    def empty: List[A] = Nil
+    def empty: List[A]                           = Nil
 
   given Monoid[String] with
     def combine(x: String, y: String): String = x + y
-    def empty: String = ""
+    def empty: String                         = ""
 
   def apply[M](using m: Monoid[M]) = m
 end Monoid
-  

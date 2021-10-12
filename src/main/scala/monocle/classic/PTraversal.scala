@@ -6,7 +6,7 @@ import monocle.functions.Index
 import monocle.impl._
 
 type PTraversal[-S, +T, +A, -B] = POptic[GetMany & Modify, S, T, A, B]
-type Traversal[From, To] = PTraversal[From, From, To, To]
+type Traversal[From, To]        = PTraversal[From, From, To, To]
 
 object PTraversal:
   def field2[S, T, A, B](get1: S => A, get2: S => A)(_replace: (B, B) => S => T): PTraversal[S, T, A, B] =
@@ -24,7 +24,7 @@ object Traversal:
   def field2[From, To](get1: From => To, get2: From => To)(_replace: (To, To) => From => From): Traversal[From, To] =
     PTraversal.field2(get1, get2)(_replace)
 
-  def pair[A]: Traversal[(A, A), A] = PTraversal.pair
-  def list[A]: Traversal[List[A],  A] =  PTraversal.list
+  def pair[A]: Traversal[(A, A), A]  = PTraversal.pair
+  def list[A]: Traversal[List[A], A] = PTraversal.list
 
 end Traversal

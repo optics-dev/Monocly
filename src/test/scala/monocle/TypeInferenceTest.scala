@@ -24,7 +24,10 @@ class TypeInferenceTest extends munit.FunSuite {
   }
 
   test("compose Lens and Prism") {
-    assertEquals(PLens._1.andThen(PPrism.some).andThen(PLens._2).replace(0)((Some((true, "foo")), 10L)), (Some((true, 0)), 10L))
+    assertEquals(
+      PLens._1.andThen(PPrism.some).andThen(PLens._2).replace(0)((Some((true, "foo")), 10L)),
+      (Some((true, 0)), 10L)
+    )
   }
 
 }
