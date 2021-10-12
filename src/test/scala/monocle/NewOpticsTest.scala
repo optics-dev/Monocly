@@ -141,4 +141,20 @@ class NewOpticsTest extends munit.FunSuite {
     val office = Office(Desk(5, None), List(Pen("red", Some(Company("Pencorp"))), Pen("green"), Pen("blue")))
     assertEquals(composed.getAll(office), List(Company("Hemingsworth"), Company("Pencorp")))
   }
+
+  test("Get & Modify andThen Get (where the second one accepts wider input than the first one produces as output)") {
+    
+    val zooPhoto = Fixtures.zooTiger.andThen(Fixtures.animalPhoto)
+    val zoo = Zoo(Tiger(stripes = 5))
+
+    assertEquals(zooPhoto.get(zoo), Photo(Tiger(5)))
+  }
+
+  test("Get andThen Get (where the second one accepts wider input than the first one produces as output)") {
+    
+    val zooPhoto = Fixtures.getZooTiger.andThen(Fixtures.animalPhoto)
+    val zoo = Zoo(Tiger(stripes = 7))
+
+    assertEquals(zooPhoto.get(zoo), Photo(Tiger(7)))
+  }
 }
