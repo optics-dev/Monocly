@@ -1,6 +1,6 @@
 package monocle.internal
 
-enum TraversalRes[F[+ _], +E, +A] {
+enum TraversalRes[F[+_], +E, +A] {
   case Success(effect: F[A])
   case Failure(error: E, effect: F[A])
 
@@ -14,27 +14,32 @@ enum TraversalRes[F[+ _], +E, +A] {
 
   def flatten[G[+_], E1 >: E, B](implicit ev: F[A] <:< TraversalRes[G, E1, B]): TraversalRes[G, E1, B] =
     this match {
-      case Failure(e, x) => ev(x) match {
-        case Failure(_, x) => Failure(e, x)
-        case Success(x)    => Failure(e, x)
-      }
-      case Success(x)    => ev(x)
+      case Failure(e, x) =>
+        ev(x) match {
+          case Failure(_, x) => Failure(e, x)
+          case Success(x)    => Failure(e, x)
+        }
+      case Success(x) => ev(x)
     }
 
-  def map2[G[+x] >: F[x] : Applicative, E1 >: E, B, C](other: TraversalRes[G, E1, B])(f: (A, B) => C): TraversalRes[G, E1, C] =
+  def map2[G[+x] >: F[x]: Applicative, E1 >: E, B, C](
+    other: TraversalRes[G, E1, B]
+  )(f: (A, B) => C): TraversalRes[G, E1, C] =
     (this, other) match {
       case (Failure(e, fa), Failure(_, fb)) => Failure(e, Applicative[G].map2(fa, fb)(f))
-      case (Failure(e, fa), Success(fb)   ) => Failure(e, Applicative[G].map2(fa, fb)(f))
-      case (Success(fa)   , Failure(e, fb)) => Failure(e, Applicative[G].map2(fa, fb)(f))
-      case (Success(fa)   , Success(fb)   ) => Success(Applicative[G].map2(fa, fb)(f))
+      case (Failure(e, fa), Success(fb))    => Failure(e, Applicative[G].map2(fa, fb)(f))
+      case (Success(fa), Failure(e, fb))    => Failure(e, Applicative[G].map2(fa, fb)(f))
+      case (Success(fa), Success(fb))       => Success(Applicative[G].map2(fa, fb)(f))
     }
 
-  def map2Permissive[G[+x] >: F[x] : Applicative, E1 >: E, B, C](other: TraversalRes[G, E1, B])(f: (A, B) => C): TraversalRes[G, E1, C] =
+  def map2Permissive[G[+x] >: F[x]: Applicative, E1 >: E, B, C](
+    other: TraversalRes[G, E1, B]
+  )(f: (A, B) => C): TraversalRes[G, E1, C] =
     (this, other) match {
       case (Failure(e, fa), Failure(_, fb)) => Failure(e, Applicative[G].map2(fa, fb)(f))
-      case (Failure(e, fa), Success(fb)   ) => Success(Applicative[G].map2(fa, fb)(f))
-      case (Success(fa)   , Failure(e, fb)) => Success(Applicative[G].map2(fa, fb)(f))
-      case (Success(fa)   , Success(fb)   ) => Success(Applicative[G].map2(fa, fb)(f))
+      case (Failure(e, fa), Success(fb))    => Success(Applicative[G].map2(fa, fb)(f))
+      case (Success(fa), Failure(e, fb))    => Success(Applicative[G].map2(fa, fb)(f))
+      case (Success(fa), Success(fb))       => Success(Applicative[G].map2(fa, fb)(f))
     }
 
 }
@@ -44,7 +49,7 @@ object TraversalRes {
     TraversalRes.Success(Applicative[F].pure(value))
 
   implicit def applicative[F[+_]: Applicative, E]: Applicative[[X] =>> TraversalRes[F, E, X]] =
-    new Applicative[[X] =>> TraversalRes[F, E, X]]{
+    new Applicative[[X] =>> TraversalRes[F, E, X]] {
       def pure[A](value: A): TraversalRes[F, E, A] =
         TraversalRes.pure(value)
 

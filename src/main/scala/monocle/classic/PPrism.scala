@@ -6,15 +6,13 @@ import monocle.functions.Index
 import monocle.impl._
 
 type PPrism[-S, +T, +A, -B] = POptic[GetOption & ReverseGet, S, T, A, B]
-type Prism[S, A] = PPrism[S, S, A, A] 
-
+type Prism[S, A]            = PPrism[S, S, A, A]
 
 object PPrism:
   def apply[S, T, A, B](_getOrModify: S => Either[T, A])(_reverseGet: B => T): PPrism[S, T, A, B] =
     POptic.thatCan.selectBranch(_getOrModify)(_reverseGet)
-  
-  export std.option.{pSome, some}
 
+  export std.option.{pSome, some}
 
 object Prism:
   def apply[From, To](_getOption: From => Option[To])(_reverseGet: To => From): Prism[From, To] =

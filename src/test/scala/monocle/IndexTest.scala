@@ -12,7 +12,6 @@ class IndexTest extends munit.FunSuite {
   val mLens = Lens[Bar, Map[String, Foo]](_.m, mm => _.copy(m = mm))
   val iLens = Lens[Foo, Int](_.i, ii => _.copy(i = ii))
 
-
   test("inference") {
     assertEquals(
       lLens.index(0).andThen(iLens).getOption(Bar(List(Foo(1)), Map())),
