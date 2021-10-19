@@ -34,10 +34,8 @@ final class POptic[+ThisCan, -S, +T, +A, -B] private[monocle] (
   def andThen[ThatCan >: ThisCan, C, D](that: POptic[ThatCan, A, B, C, D]): POptic[ThatCan, S, T, C, D] =
     POptic(impl.andThen(that.impl))
 
-  def index[I, S1 <: S, A1 >: A, V](i: I)(using
-    evIndex: Index[A1, I, V]
-  )(using T <:< S1, A1 <:< B): Optic[ThisCan | (GetOption & Modify), S1, V] =
-    asInstanceOf[Optic[ThisCan, S1, A1]].andThen(evIndex.index(i))
+  def index[UnifiedS >: T <: S, UnifiedA >: A <: B, I, V](i: I)(using evIndex: Index[UnifiedA, I, V]): Optic[ThisCan | (GetOption & Modify), UnifiedS, V] =
+    andThen(evIndex.index(i))
 
   override def toString() =
     s"POptic(${impl})"
