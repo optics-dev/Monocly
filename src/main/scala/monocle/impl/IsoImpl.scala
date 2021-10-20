@@ -50,22 +50,22 @@ private[monocle] trait IsoImpl[-S, +T, +A, -B]
 
   end composeIso
 
-  override def andThen[ThatCan >: Get & ReverseGet, C, D](
-    optic2: OpticImpl[ThatCan, A, B, C, D]
-  ): OpticImpl[ThatCan, S, T, C, D] =
+  override def andThen[Can2 >: Get & ReverseGet, C, D](
+    optic2: OpticImpl[Can2, A, B, C, D]
+  ): OpticImpl[Can2, S, T, C, D] =
     optic2 match
       case iso: IsoImpl[A, B, C, D]                                         => composeIso(iso)
-      case lens: LensImpl[ThatCan & Get & Modify, A, B, C, D]               => composeLens(lens)
-      case prism: PrismImpl[ThatCan & GetOption & ReverseGet, A, B, C, D]   => composePrism(prism)
-      case optional: OptionalImpl[ThatCan & GetOption & Modify, A, B, C, D] => composeOptional(optional)
-      case neTraversal: NonEmptyTraversalImpl[ThatCan & GetOneOrMore & Modify, A, B, C, D] =>
+      case lens: LensImpl[Can2 & Get & Modify, A, B, C, D]               => composeLens(lens)
+      case prism: PrismImpl[Can2 & GetOption & ReverseGet, A, B, C, D]   => composePrism(prism)
+      case optional: OptionalImpl[Can2 & GetOption & Modify, A, B, C, D] => composeOptional(optional)
+      case neTraversal: NonEmptyTraversalImpl[Can2 & GetOneOrMore & Modify, A, B, C, D] =>
         composeNonEmptyTraversal(neTraversal)
-      case getter: GetterImpl[ThatCan & Get, A, B, C, D]                    => composeGetter(getter)
-      case getOpt: OptionalGetterImpl[ThatCan & GetOption, A, B, C, D]      => composeOptionalGetter(getOpt)
-      case neFold: NonEmptyFoldImpl[ThatCan & GetOneOrMore, A, B, C, D]     => composeNonEmptyFold(neFold)
-      case traversal: TraversalImpl[ThatCan & GetMany & Modify, A, B, C, D] => composeTraversal(traversal)
-      case fold: FoldImpl[ThatCan & GetMany, A, B, C, D]                    => composeFold(fold)
-      case setter: SetterImpl[ThatCan & Modify, A, B, C, D]                 => composeSetter(setter)
+      case getter: GetterImpl[Can2 & Get, A, B, C, D]                    => composeGetter(getter)
+      case getOpt: OptionalGetterImpl[Can2 & GetOption, A, B, C, D]      => composeOptionalGetter(getOpt)
+      case neFold: NonEmptyFoldImpl[Can2 & GetOneOrMore, A, B, C, D]     => composeNonEmptyFold(neFold)
+      case traversal: TraversalImpl[Can2 & GetMany & Modify, A, B, C, D] => composeTraversal(traversal)
+      case fold: FoldImpl[Can2 & GetMany, A, B, C, D]                    => composeFold(fold)
+      case setter: SetterImpl[Can2 & Modify, A, B, C, D]                 => composeSetter(setter)
       case _                                                                => NullOpticImpl
 
   override def toString: String =

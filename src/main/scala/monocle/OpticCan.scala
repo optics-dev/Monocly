@@ -24,5 +24,5 @@ type Edit = Get & Modify
 type EditOption = GetOption & Modify
 type EditOneOrMore = GetOneOrMore & Modify
 type EditMany = GetMany & Modify
-type ChooseBetween = Get & ReverseGet
+type ConvertBetween = Get & ReverseGet
 type SelectBranch = GetOption & ReverseGet
