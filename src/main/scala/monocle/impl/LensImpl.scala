@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-private[monocle] trait LensImpl[+Can <: Get & Modify, -S, +T, +A, -B]
+private[monocle] trait LensImpl[+Can <: Edit, -S, +T, +A, -B]
     extends OptionalImpl[Can, S, T, A, B]
     with NonEmptyTraversalImpl[Can, S, T, A, B]
     with GetterImpl[Can, S, T, A, B]:
@@ -33,7 +33,7 @@ private[monocle] trait LensImpl[+Can <: Get & Modify, -S, +T, +A, -B]
   override protected[impl] def nonEmptyFoldMap[M: Semigroup](f: A => M)(s: S): M =
     f(get(s))
 
-  protected def composeLens[Can2 >: Can <: Get & Modify, C, D](
+  protected def composeLens[Can2 >: Can <: Edit, C, D](
     optic2: LensImpl[Can2, A, B, C, D]
   ): LensImpl[Can2, S, T, C, D] =
     new LensImpl:
@@ -55,14 +55,14 @@ private[monocle] trait LensImpl[+Can <: Get & Modify, -S, +T, +A, -B]
     optic2: OpticImpl[Can2, A, B, C, D]
   ): OpticImpl[Can2, S, T, C, D] =
     optic2 match
-      case lens: LensImpl[Can2 & Get & Modify, A, B, C, D]               => composeLens(lens)
-      case optional: OptionalImpl[Can2 & GetOption & Modify, A, B, C, D] => composeOptional(optional)
-      case neTraversal: NonEmptyTraversalImpl[Can2 & GetOneOrMore & Modify, A, B, C, D] =>
+      case lens: LensImpl[Can2 & Edit, A, B, C, D]               => composeLens(lens)
+      case optional: OptionalImpl[Can2 & EditOption, A, B, C, D] => composeOptional(optional)
+      case neTraversal: NonEmptyTraversalImpl[Can2 & EditOneOrMore, A, B, C, D] =>
         composeNonEmptyTraversal(neTraversal)
       case getter: GetterImpl[Can2 & Get, A, B, C, D]                    => composeGetter(getter)
       case getOpt: OptionalGetterImpl[Can2 & GetOption, A, B, C, D]      => composeOptionalGetter(getOpt)
       case neFold: NonEmptyFoldImpl[Can2 & GetOneOrMore, A, B, C, D]     => composeNonEmptyFold(neFold)
-      case traversal: TraversalImpl[Can2 & GetMany & Modify, A, B, C, D] => composeTraversal(traversal)
+      case traversal: TraversalImpl[Can2 & EditMany, A, B, C, D] => composeTraversal(traversal)
       case fold: FoldImpl[Can2 & GetMany, A, B, C, D]                    => composeFold(fold)
       case setter: SetterImpl[Can2 & Modify, A, B, C, D]                 => composeSetter(setter)
       case _                                                                => NullOpticImpl

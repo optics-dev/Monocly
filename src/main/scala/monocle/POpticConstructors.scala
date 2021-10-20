@@ -11,7 +11,7 @@ trait POpticConstructors:
       override def replace(b: B): S => T = _modify(_ => b)
     )
 
-  def edit[S, T, A, B](_get: S => A)(_replace: B => S => T): POptic[Get & Modify, S, T, A, B] =
+  def edit[S, T, A, B](_get: S => A)(_replace: B => S => T): POptic[Edit, S, T, A, B] =
     POptic(new LensImpl:
       override def get(s: S): A          = _get(s)
       override def replace(b: B): S => T = _replace(b)
@@ -22,7 +22,7 @@ trait POpticConstructors:
 
   def editOption[S, T, A, B](_getOrModify: S => Either[T, A])(
     _replace: B => S => T
-  ): POptic[GetOption & Modify, S, T, A, B] =
+  ): POptic[EditOption, S, T, A, B] =
     POptic(new OptionalImpl:
       override def getOrModify(s: S): Either[T, A] = _getOrModify(s)
       override def replace(b: B): S => T           = _replace(b)
@@ -31,7 +31,7 @@ trait POpticConstructors:
 
   def edit2[S, T, A, B](_get1: S => A, _get2: S => A)(
     _replace2: (B, B) => S => T
-  ): POptic[GetOneOrMore & Modify, S, T, A, B] =
+  ): POptic[EditOneOrMore, S, T, A, B] =
     POptic(
       new NonEmptyTraversalImpl:
         override def nonEmptyModifyA[F[+_]: Apply](f: A => F[B])(s: S): F[T] =
@@ -40,15 +40,15 @@ trait POpticConstructors:
 
   def editOneOrMore[S, T, A, B, G[_]: NonEmptyTraverse](_getOneOrMore: S => G[A])(
     _replaceOneOrMore: G[B] => S => T
-  ): POptic[GetOneOrMore & Modify, S, T, A, B] =
+  ): POptic[EditOneOrMore, S, T, A, B] =
     edit(_getOneOrMore)(_replaceOneOrMore).andThen(nonEmptyTraverse)
 
   def editMany[S, T, A, B, G[_]: Traverse](_getMany: S => G[A])(
     _replaceMany: G[B] => S => T
-  ): POptic[GetMany & Modify, S, T, A, B] =
+  ): POptic[EditMany, S, T, A, B] =
     edit(_getMany)(_replaceMany).andThen(traverse)
 
-  def convertBetween[S, T, A, B](_get: S => A)(_reverseGet: B => T): POptic[Get & ReverseGet, S, T, A, B] =
+  def convertBetween[S, T, A, B](_get: S => A)(_reverseGet: B => T): POptic[ConvertBetween, S, T, A, B] =
     POptic(new IsoImpl:
       self =>
       override def get(s: S): A        = _get(s)
@@ -61,21 +61,21 @@ trait POpticConstructors:
 
   def selectBranch[S, T, A, B](_getOrModify: S => Either[T, A])(
     _reverseGet: B => T
-  ): POptic[GetOption & ReverseGet, S, T, A, B] =
+  ): POptic[SelectBranch, S, T, A, B] =
     POptic(new PrismImpl:
       override def reverseGet(b: B): T             = _reverseGet(b)
       override def getOrModify(s: S): Either[T, A] = _getOrModify(s)
       override def getOption(s: S): Option[A]      = _getOrModify(s).toOption
     )
 
-  def traverse[Tr[_]: Traverse, A, B]: POptic[GetMany & Modify, Tr[A], Tr[B], A, B] =
+  def traverse[Tr[_]: Traverse, A, B]: POptic[EditMany, Tr[A], Tr[B], A, B] =
     POptic(
       new TraversalImpl:
         override def modifyA[F[+_]: Applicative](f: A => F[B])(s: Tr[A]): F[Tr[B]] =
           Traverse[Tr].traverse(s)(f)
     )
 
-  def nonEmptyTraverse[Tr[_]: NonEmptyTraverse, A, B]: POptic[GetOneOrMore & Modify, Tr[A], Tr[B], A, B] =
+  def nonEmptyTraverse[Tr[_]: NonEmptyTraverse, A, B]: POptic[EditOneOrMore, Tr[A], Tr[B], A, B] =
     POptic(
       new NonEmptyTraversalImpl:
         override def nonEmptyModifyA[F[+_]: Apply](f: A => F[B])(s: Tr[A]): F[Tr[B]] =
