@@ -12,7 +12,7 @@ object OpticGet:
     Optic.thatCan.get[A, A](identity)
 
 object Optic:
-  def id[A]: Optic[ConvertBetween, A, A] =
+  def id[A]: Optic[Get & ReverseGet, A, A] =
     POptic.id
 
   object thatCan extends OpticConstructors(POptic.thatCan)
@@ -20,7 +20,7 @@ object Optic:
 end Optic
 
 object POptic:
-  def id[A, B]: POptic[ConvertBetween, A, B, A, B] =
+  def id[A, B]: POptic[Get & ReverseGet, A, B, A, B] =
     thatCan.convertBetween[A, B, A, B](identity)(identity)
 
   object thatCan extends POpticConstructors
@@ -37,10 +37,10 @@ final class POptic[+Can, -S, +T, +A, -B] private[monocle] (
   def all(p: A => Boolean)(using Can <:< GetMany): S => Boolean =
     impl.safe.toIterator(_).forall(p)
 
-  def choice[S1 >: T <: S, A1 >: A <: B, S2](other: Optic[Get, S2, A1])(using Can <:< Get): Optic[Get, Either[S1, S2], A1] =
+  def choice[UnifiedS >: T <: S, UnifiedA >: A <: B, S1](other: Optic[Get, S1, UnifiedA])(using Can <:< Get): Optic[Get, Either[UnifiedS, S1], UnifiedA] =
     Optic.thatCan.get(_.fold(this.get, other.get))
 
-  def each[S1 >: T <: S, A1 >: A <: B, C](using evEach: Each[A1, C]): Optic[Can | EditMany, S1, C] =
+  def each[UnifiedS >: T <: S, UnifiedA >: A <: B, C](using evEach: Each[UnifiedA, C]): Optic[Can | (GetMany & Modify), UnifiedS, C] =
     andThen(evEach.each)
 
   def exist(p: A => Boolean)(using Can <:< GetMany): S => Boolean =
@@ -71,7 +71,7 @@ final class POptic[+Can, -S, +T, +A, -B] private[monocle] (
   def getOption(s: S)(using Can <:< GetOption): Option[A] =
     impl.safe.getOption(s)
 
-  def getOrModify(s: S)(using Can <:< EditOption): Either[T, A] =
+  def getOrModify(s: S)(using Can <:< (GetOption & Modify)): Either[T, A] =
     impl.safe.getOrModify(s)
 
   def head(s: S)(using Can <:< GetOneOrMore): A = {
@@ -84,7 +84,7 @@ final class POptic[+Can, -S, +T, +A, -B] private[monocle] (
     if (it.hasNext) Some(it.next()) else None
   }
 
-  def index[S1 >: T <: S, A1 >: A <: B, I, V](i: I)(using evIndex: Index[A1, I, V]): Optic[Can | EditOption, S1, V] =
+  def index[UnifiedS >: T <: S, UnifiedA >: A <: B, I, V](i: I)(using evIndex: Index[UnifiedA, I, V]): Optic[Can | (GetOption & Modify), UnifiedS, V] =
     andThen(evIndex.index(i))
 
   def isEmpty(s: S)(using Can <:< GetMany): Boolean =
@@ -99,7 +99,7 @@ final class POptic[+Can, -S, +T, +A, -B] private[monocle] (
   def length(s: S)(using Can <:< GetMany): Int =
     impl.safe.toIterator(s).length
 
-  def mapping[F[+_]: Functor](using Can <:< ConvertBetween): POptic[ConvertBetween, F[S], F[T], F[A], F[B]] =
+  def mapping[F[+_]: Functor](using Can <:< (Get & ReverseGet)): POptic[Get & ReverseGet, F[S], F[T], F[A], F[B]] =
     POptic.thatCan.convertBetween[F[S], F[T], F[A], F[B]](fs => Functor[F].map(fs)(get))(fb =>
       Functor[F].map(fb)(this.reverseGet)
     )
@@ -107,13 +107,13 @@ final class POptic[+Can, -S, +T, +A, -B] private[monocle] (
   def modify(f: A => B)(using Can <:< Modify): S => T =
     impl.safe.modify(f)
 
-  def modifyA[F[+_]](f: A => F[B])(s: S)(using Applicative[F])(using Can <:< EditMany): F[T] =
+  def modifyA[F[+_]](f: A => F[B])(s: S)(using Applicative[F])(using Can <:< (GetMany & Modify)): F[T] =
     impl.safe.modifyA(f)(s)
 
-  def modifyF[F[+_]: Functor](f: A => F[B])(s: S)(using Can <:< Edit): F[T] =
+  def modifyF[F[+_]: Functor](f: A => F[B])(s: S)(using Can <:< (Get & Modify)): F[T] =
     impl.safe.modifyF(f)(s)
 
-  def modifyOption(f: A => B)(using Can <:< EditOption): S => Option[T] =
+  def modifyOption(f: A => B)(using Can <:< (GetOption & Modify)): S => Option[T] =
     s => impl.safe.getOption(s).map(a => impl.safe.replace(f(a))(s))
 
   def nonEmpty(s: S)(using Can <:< GetMany): Boolean =
@@ -122,18 +122,18 @@ final class POptic[+Can, -S, +T, +A, -B] private[monocle] (
   def nonEmptyFoldMap[M: Semigroup](f: A => M)(s: S)(using Can <:< GetOneOrMore): M =
     impl.safe.nonEmptyFoldMap(f)(s)
 
-  def nonEmptyModifyA[F[+_]](f: A => F[B])(s: S)(using Apply[F])(using Can <:< EditOneOrMore): F[T] =
+  def nonEmptyModifyA[F[+_]](f: A => F[B])(s: S)(using Apply[F])(using Can <:< (GetOneOrMore & Modify)): F[T] =
     impl.safe.nonEmptyModifyA(f)(s)
   
-  def orElse[S1 <: S, T1 >: T, A1 >: A, B1 <: B](other: POptic[EditOption, S1, T1, A1, B1])(using Can <:< EditOption): POptic[EditOption, S1, T1, A1, B1] =
+  def orElse[S1 <: S, T1 >: T, A1 >: A, B1 <: B](other: POptic[GetOption & Modify, S1, T1, A1, B1])(using Can <:< (GetOption & Modify)): POptic[GetOption & Modify, S1, T1, A1, B1] =
     POptic.thatCan.editOption[S1, T1, A1, B1](s => this.getOrModify(s).orElse(other.getOrModify(s)))(b =>
       s => this.replaceOption(b)(s).getOrElse(other.replace(b)(s))
     )
 
-  def parModifyF[G[+_]](f: A => G[B])(s: S)(using p: Parallel[G])(using Can <:< EditMany): G[T] =
+  def parModifyF[G[+_]](f: A => G[B])(s: S)(using p: Parallel[G])(using Can <:< (GetMany & Modify)): G[T] =
     p.sequential(this.modifyA(a => p.parallel(f(a)))(s)(using p.applicative))
 
-  def parNonEmptyModifyF[F[+_]](f: A => F[B])(s: S)(using p: NonEmptyParallel[F])(using Can <:< EditOneOrMore): F[T] =
+  def parNonEmptyModifyF[F[+_]](f: A => F[B])(s: S)(using p: NonEmptyParallel[F])(using Can <:< (GetOneOrMore & Modify)): F[T] =
     p.sequential(this.nonEmptyModifyA(a => p.parallel(f(a)))(s)(using p.apply))
 
   def re[T1 >: T, B1 <: B](using Can <:< ReverseGet): Optic[Get, B1, T1] =
@@ -142,7 +142,7 @@ final class POptic[+Can, -S, +T, +A, -B] private[monocle] (
   def replace(b: B)(using Can <:< Modify): S => T =
     impl.safe.modify(_ => b)
 
-  def replaceOption(b: B)(using Can <:< EditOption): S => Option[T] =
+  def replaceOption(b: B)(using Can <:< (GetOption & Modify)): S => Option[T] =
     this.modifyOption(_ => b)
 
   def reverseGet(b: B)(using Can <:< ReverseGet): T =
@@ -160,7 +160,7 @@ final class POptic[+Can, -S, +T, +A, -B] private[monocle] (
   override def toString() =
     s"POptic(${impl})"
 
-  def withDefault[A1 >: A, B1 <: B](defaultValue: A1)(using A <:< Option[A1]): POptic[Can | ConvertBetween, S, T, A1, B1] = 
+  def withDefault[A1 >: A, B1 <: B](defaultValue: A1)(using A <:< Option[A1]): POptic[Can | (Get & ReverseGet), S, T, A1, B1] = 
     val iso = POptic.thatCan.convertBetween[Option[A1], Option[B1], A1, B1](_.getOrElse(defaultValue))(Some.apply)
     asInstanceOf[POptic[Can, S, T, Option[A1], Option[B1]]].andThen(iso)
 

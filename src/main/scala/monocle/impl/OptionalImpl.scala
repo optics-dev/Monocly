@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-private[monocle] trait OptionalImpl[+Can <: EditOption, -S, +T, +A, -B]
+private[monocle] trait OptionalImpl[+Can <: GetOption & Modify, -S, +T, +A, -B]
     extends TraversalImpl[Can, S, T, A, B]
     with OptionalGetterImpl[Can, S, T, A, B]:
 
@@ -19,7 +19,7 @@ private[monocle] trait OptionalImpl[+Can <: EditOption, -S, +T, +A, -B]
   override protected[impl] def modify(f: A => B): S => T =
     s => getOrModify(s).fold(identity, a => replace(f(a))(s))
 
-  protected def composeOptional[Can2 >: Can <: EditOption, C, D](
+  protected def composeOptional[Can2 >: Can <: GetOption & Modify, C, D](
     optic2: OptionalImpl[Can2, A, B, C, D]
   ): OptionalImpl[Can2, S, T, C, D] =
     new OptionalImpl:
@@ -46,8 +46,8 @@ private[monocle] trait OptionalImpl[+Can <: EditOption, -S, +T, +A, -B]
     optic2: OpticImpl[Can2, A, B, C, D]
   ): OpticImpl[Can2, S, T, C, D] =
     optic2 match
-      case optional: OptionalImpl[Can2 & EditOption, A, B, C, D] => composeOptional(optional)
-      case traversal: TraversalImpl[Can2 & EditMany, A, B, C, D] => composeTraversal(traversal)
+      case optional: OptionalImpl[Can2 & GetOption & Modify, A, B, C, D] => composeOptional(optional)
+      case traversal: TraversalImpl[Can2 & GetMany & Modify, A, B, C, D] => composeTraversal(traversal)
       case getOpt: OptionalGetterImpl[Can2 & GetOption, A, B, C, D]      => composeOptionalGetter(getOpt)
       case fold: FoldImpl[Can2 & GetMany, A, B, C, D]                    => composeFold(fold)
       case setter: SetterImpl[Can2 & Modify, A, B, C, D]                 => composeSetter(setter)

@@ -5,7 +5,7 @@ import monocle.internal.*
 
 import scala.collection.mutable.ListBuffer
 
-private[monocle] trait TraversalImpl[+Can <: EditMany, -S, +T, +A, -B]
+private[monocle] trait TraversalImpl[+Can <: GetMany & Modify, -S, +T, +A, -B]
     extends FoldImpl[Can, S, T, A, B]
     with SetterImpl[Can, S, T, A, B]:
   optic1 =>
@@ -26,7 +26,7 @@ private[monocle] trait TraversalImpl[+Can <: EditMany, -S, +T, +A, -B]
   override protected[impl] def replace(b: B): S => T =
     modify(_ => b)
 
-  protected def composeTraversal[Can2 >: Can <: EditMany, C, D](
+  protected def composeTraversal[Can2 >: Can <: GetMany & Modify, C, D](
     optic2: TraversalImpl[Can2, A, B, C, D]
   ): TraversalImpl[Can2, S, T, C, D] =
     new TraversalImpl:
@@ -37,7 +37,7 @@ private[monocle] trait TraversalImpl[+Can <: EditMany, -S, +T, +A, -B]
     optic2: OpticImpl[Can2, A, B, C, D]
   ): OpticImpl[Can2, S, T, C, D] =
     optic2 match
-      case traversal: TraversalImpl[Can2 & EditMany, A, B, C, D] => composeTraversal(traversal)
+      case traversal: TraversalImpl[Can2 & GetMany & Modify, A, B, C, D] => composeTraversal(traversal)
       case fold: FoldImpl[Can2 & GetMany, A, B, C, D]                    => composeFold(fold)
       case setter: SetterImpl[Can2 & Modify, A, B, C, D]                 => composeSetter(setter)
       case _                                                                => NullOpticImpl

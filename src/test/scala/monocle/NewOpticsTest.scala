@@ -83,7 +83,7 @@ class NewOpticsTest extends munit.FunSuite {
   }
 
   test("Lens andThen GetOne") {
-    val deskOptic: Optic[Edit, Office, Desk] =
+    val deskOptic: Optic[Get & Modify, Office, Desk] =
       Optic.thatCan.edit[Office, Desk](_.desk)(d => _.copy(desk = d))
 
     val pensOptic: Optic[Get, Desk, Int] =
@@ -97,13 +97,13 @@ class NewOpticsTest extends munit.FunSuite {
   }
 
   test("Lens andThen Lens") {
-    val deskOptic: Optic[Edit, Office, Desk] =
+    val deskOptic: Optic[Get & Modify, Office, Desk] =
       Optic.thatCan.edit[Office, Desk](_.desk)(d => _.copy(desk = d))
 
-    val pensOptic: Optic[Edit, Desk, Int] =
+    val pensOptic: Optic[Get & Modify, Desk, Int] =
       Optic.thatCan.edit[Desk, Int](_.numPens)(n => _.copy(numPens = n))
 
-    val composed: Optic[Edit, Office, Int] =
+    val composed: Optic[Get & Modify, Office, Int] =
       deskOptic.andThen(pensOptic)
 
     val office  = Office(Desk(55, None), Nil)
@@ -141,7 +141,7 @@ class NewOpticsTest extends munit.FunSuite {
     assertEquals(composed.getAll(office), List(Company("Hemingsworth"), Company("Pencorp")))
   }
 
-  test("Edit andThen Get (where the second one accepts wider input than the first one produces as output)") {
+  test("Get & Modify andThen Get (where the second one accepts wider input than the first one produces as output)") {
 
     val zooPhoto = Fixtures.zooTiger.andThen(Fixtures.animalPhoto)
     val zoo      = Zoo(Tiger(stripes = 5))

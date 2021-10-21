@@ -42,35 +42,35 @@ trait OpticConstructors(polyConstructors: POpticConstructors):
   def modify[S, A](_modify: (A => A) => S => S): Optic[Modify, S, A] =
     polyConstructors.modify(_modify)
 
-  def edit[S, A](_get: S => A)(_replace: A => S => S): Optic[Edit, S, A] =
+  def edit[S, A](_get: S => A)(_replace: A => S => S): Optic[Get & Modify, S, A] =
     polyConstructors.edit(_get)(_replace)
 
-  def editOption[S, A](_getOption: S => Option[A])(_replace: A => S => S): Optic[EditOption, S, A] =
+  def editOption[S, A](_getOption: S => Option[A])(_replace: A => S => S): Optic[GetOption & Modify, S, A] =
     polyConstructors.editOption[S, S, A, A](s => _getOption(s).fold(Left(s))(Right.apply))(_replace)
 
-  def edit2[S, A](_get1: S => A, _get2: S => A)(_replace2: (A, A) => S => S): Optic[EditOneOrMore, S, A] =
+  def edit2[S, A](_get1: S => A, _get2: S => A)(_replace2: (A, A) => S => S): Optic[GetOneOrMore & Modify, S, A] =
     polyConstructors.edit2(_get1, _get2)(_replace2)
 
   def editOneOrMore[S, A, G[_]: NonEmptyTraverse](_getOneOrMore: S => G[A])(
     _replaceOneOrMore: G[A] => S => S
-  ): Optic[EditOneOrMore, S, A] =
+  ): Optic[GetOneOrMore & Modify, S, A] =
     polyConstructors.editOneOrMore(_getOneOrMore)(_replaceOneOrMore)
 
-  def editMany[S, A, G[_]: Traverse](_getMany: S => G[A])(_replaceMany: G[A] => S => S): Optic[EditMany, S, A] =
+  def editMany[S, A, G[_]: Traverse](_getMany: S => G[A])(_replaceMany: G[A] => S => S): Optic[GetMany & Modify, S, A] =
     polyConstructors.editMany(_getMany)(_replaceMany)
 
-  def convertBetween[S, A](_get: S => A)(_reverseGet: A => S): Optic[ConvertBetween, S, A] =
+  def convertBetween[S, A](_get: S => A)(_reverseGet: A => S): Optic[Get & ReverseGet, S, A] =
     polyConstructors.convertBetween(_get)(_reverseGet)
 
-  def selectBranch[S, A](_getOption: PartialFunction[S, A])(_reverseGet: A => S): Optic[SelectBranch, S, A] =
+  def selectBranch[S, A](_getOption: PartialFunction[S, A])(_reverseGet: A => S): Optic[GetOption & ReverseGet, S, A] =
     POptic(new PrismImpl:
       override def reverseGet(a: A): S             = _reverseGet(a)
       override def getOrModify(s: S): Either[S, A] = _getOption.lift(s).fold(Left(s))(Right.apply)
       override def getOption(s: S): Option[A]      = _getOption.lift(s)
     )
 
-  def traverse[Tr[_]: Traverse, A]: Optic[EditMany, Tr[A], A] =
+  def traverse[Tr[_]: Traverse, A]: Optic[GetMany & Modify, Tr[A], A] =
     polyConstructors.traverse
 
-  def nonEmptyTraverse[Tr[_]: NonEmptyTraverse, A]: Optic[EditOneOrMore, Tr[A], A] =
+  def nonEmptyTraverse[Tr[_]: NonEmptyTraverse, A]: Optic[GetOneOrMore & Modify, Tr[A], A] =
     polyConstructors.nonEmptyTraverse

@@ -3,7 +3,7 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-private[monocle] trait PrismImpl[+Can <: SelectBranch, -S, +T, +A, -B]
+private[monocle] trait PrismImpl[+Can <: GetOption & ReverseGet, -S, +T, +A, -B]
     extends OptionalImpl[Can, S, T, A, B]:
   optic1 =>
 
@@ -17,7 +17,7 @@ private[monocle] trait PrismImpl[+Can <: SelectBranch, -S, +T, +A, -B]
   override protected[impl] def replace(b: B): S => T =
     modify(_ => b)
 
-  protected def composePrism[Can2 >: Can <: SelectBranch, C, D](
+  protected def composePrism[Can2 >: Can <: GetOption & ReverseGet, C, D](
     optic2: PrismImpl[Can2, A, B, C, D]
   ): PrismImpl[Can2, S, T, C, D] =
     new PrismImpl:
@@ -36,9 +36,9 @@ private[monocle] trait PrismImpl[+Can <: SelectBranch, -S, +T, +A, -B]
     optic2: OpticImpl[Can2, A, B, C, D]
   ): OpticImpl[Can2, S, T, C, D] =
     optic2 match
-      case prism: PrismImpl[Can2 & SelectBranch, A, B, C, D]   => composePrism(prism)
-      case optional: OptionalImpl[Can2 & EditOption, A, B, C, D] => composeOptional(optional)
-      case traversal: TraversalImpl[Can2 & EditMany, A, B, C, D] => composeTraversal(traversal)
+      case prism: PrismImpl[Can2 & GetOption & ReverseGet, A, B, C, D]   => composePrism(prism)
+      case optional: OptionalImpl[Can2 & GetOption & Modify, A, B, C, D] => composeOptional(optional)
+      case traversal: TraversalImpl[Can2 & GetMany & Modify, A, B, C, D] => composeTraversal(traversal)
       case getOpt: OptionalGetterImpl[Can2 & GetOption, A, B, C, D]      => composeOptionalGetter(getOpt)
       case fold: FoldImpl[Can2 & GetMany, A, B, C, D]                    => composeFold(fold)
       case setter: SetterImpl[Can2 & Modify, A, B, C, D]                 => composeSetter(setter)
