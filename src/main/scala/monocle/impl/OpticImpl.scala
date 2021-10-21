@@ -3,10 +3,10 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-private[monocle] trait OpticImpl[+ThisCan, -S, +T, +A, -B]:
+private[monocle] trait OpticImpl[+Can, -S, +T, +A, -B]:
   self =>
 
-  def andThen[ThatCan >: ThisCan, C, D](optic2: OpticImpl[ThatCan, A, B, C, D]): OpticImpl[ThatCan, S, T, C, D]
+  def andThen[Can2 >: Can, C, D](optic2: OpticImpl[Can2, A, B, C, D]): OpticImpl[Can2, S, T, C, D]
 
   final protected def unsupported(name: String): Nothing =
     sys.error(s"This optic does not support `$name`")
@@ -21,7 +21,7 @@ private[monocle] trait OpticImpl[+ThisCan, -S, +T, +A, -B]:
     unsupported("getOrModify")
 
   protected[impl] def toIterator(s: S): Iterator[A] =
-    unsupported("foldMap")
+    unsupported("toIterator")
 
   protected[impl] def nonEmptyFoldMap[M: Semigroup](f: A => M)(s: S): M =
     unsupported("nonEmptyFoldMap")
@@ -48,42 +48,42 @@ private[monocle] trait OpticImpl[+ThisCan, -S, +T, +A, -B]:
     unsupported("reverseGet")
 
   object safe:
-    inline def get(s: S)(using ThisCan <:< Get): A =
+    inline def get(s: S)(using Can <:< Get): A =
       self.get(s)
 
-    inline def getOption(s: S)(using ThisCan <:< GetOption): Option[A] =
+    inline def getOption(s: S)(using Can <:< GetOption): Option[A] =
       self.getOption(s)
 
-    inline def getOrModify(s: S)(using ThisCan <:< (GetOption & Modify)): Either[T, A] =
+    inline def getOrModify(s: S)(using Can <:< (GetOption & Modify)): Either[T, A] =
       self.getOrModify(s)
 
-    inline def toIterator(s: S): Iterator[A] =
+    inline def toIterator(s: S)(using Can <:< GetMany): Iterator[A] =
       self.toIterator(s)
 
-    inline def nonEmptyFoldMap[M](f: A => M)(s: S)(using Semigroup[M])(using ThisCan <:< GetOneOrMore): M =
+    inline def nonEmptyFoldMap[M](f: A => M)(s: S)(using Semigroup[M])(using Can <:< GetOneOrMore): M =
       self.nonEmptyFoldMap(f)(s)
 
     inline def nonEmptyModifyA[F[+_]](f: A => F[B])(s: S)(using Apply[F])(using
-      ThisCan <:< (GetOneOrMore & Modify)
+      Can <:< (GetOneOrMore & Modify)
     ): F[T] =
       self.nonEmptyModifyA(f)(s)
 
-    inline def modify(f: A => B)(using ThisCan <:< Modify): S => T =
+    inline def modify(f: A => B)(using Can <:< Modify): S => T =
       self.modify(f)
 
-    inline def modifyA[F[+_]](f: A => F[B])(s: S)(using Applicative[F])(using ThisCan <:< (GetMany & Modify)): F[T] =
+    inline def modifyA[F[+_]](f: A => F[B])(s: S)(using Applicative[F])(using Can <:< (GetMany & Modify)): F[T] =
       self.modifyA(f)(s)
 
-    inline def modifyF[F[+_]](f: A => F[B])(s: S)(using Functor[F])(using ThisCan <:< (Get & Modify)): F[T] =
+    inline def modifyF[F[+_]](f: A => F[B])(s: S)(using Functor[F])(using Can <:< (Get & Modify)): F[T] =
       self.modifyF(f)(s)
 
-    inline def replace(b: B)(using ThisCan <:< Modify): S => T =
+    inline def replace(b: B)(using Can <:< Modify): S => T =
       self.replace(b)
 
-    inline def reverse(using ThisCan <:< Get & ReverseGet): IsoImpl[B, A, T, S] =
+    inline def reverse(using Can <:< Get & ReverseGet): IsoImpl[B, A, T, S] =
       self.reverse
 
-    inline def reverseGet(b: B)(using ThisCan <:< ReverseGet): T =
+    inline def reverseGet(b: B)(using Can <:< ReverseGet): T =
       self.reverseGet(b)
 
 end OpticImpl
