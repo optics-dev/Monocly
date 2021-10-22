@@ -5,13 +5,13 @@ import monocle.internal.Applicative
 import monocle.functions.Index
 import monocle.impl._
 
-type PLens[-S, +T, +A, -B] = POptic[Get & Modify, S, T, A, B]
+type PLens[-S, +T, +A, -B] = FullOptic[Get & Modify, S, T, A, B]
 type Lens[S, A]            = PLens[S, S, A, A]
 
 object PLens:
 
   def apply[S, T, A, B](_get: S => A, _replace: B => S => T): PLens[S, T, A, B] =
-    POptic.thatCan.edit(_get)(_replace)
+    FullOptic.thatCan.edit(_get)(_replace)
 
   def _1[A1, A2, B]: PLens[(A1, A2), (B, A2), A1, B] =
     apply[(A1, A2), (B, A2), A1, B](_._1, newValue => _.copy(_1 = newValue))
