@@ -26,7 +26,7 @@ trait OpticConstructors(fullConstructors: FullOpticConstructors):
       new NonEmptyFoldImpl:
         override def nonEmptyFoldMap[M](f: Out => M)(s: Structure)(using sem: Semigroup[M]): M =
           val NonEmptyList(head, tail) = _getOneOrMore(s)
-          tail.foldLeft(f(head))((m, a) => sem.combine(m, f(a)))
+          tail.foldLeft(f(head))((m, out) => sem.combine(m, f(out)))
 
         override def toIterator(s: Structure): Iterator[Out] =
           _getOneOrMore(s).iterator
@@ -64,7 +64,7 @@ trait OpticConstructors(fullConstructors: FullOpticConstructors):
 
   def selectBranch[Structure, A](_getOption: PartialFunction[Structure, A])(_reverseGet: A => Structure): Optic[GetOption & ReverseGet, Structure, A] =
     FullOptic(new PrismImpl:
-      override def reverseGet(a: A): Structure             = _reverseGet(a)
+      override def reverseGet(out: A): Structure             = _reverseGet(out)
       override def getOrModify(s: Structure): Either[Structure, A] = _getOption.lift(s).fold(Left(s))(Right.apply)
       override def getOption(s: Structure): Option[A]      = _getOption.lift(s)
     )

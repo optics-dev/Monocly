@@ -8,15 +8,15 @@ trait FullOpticConstructors:
   def modify[Structure, Modified, Out, In](_modify: (Out => In) => Structure => Modified): FullOptic[Modify, Structure, Modified, Out, In] =
     FullOptic(new SetterImpl:
       override def modify(f: Out => In)     = _modify(f)
-      override def replace(b: In): Structure => Modified = _modify(_ => b)
+      override def replace(in: In): Structure => Modified = _modify(_ => in)
     )
 
   def edit[Structure, Modified, Out, In](_get: Structure => Out)(_replace: In => Structure => Modified): FullOptic[Get & Modify, Structure, Modified, Out, In] =
     FullOptic(new LensImpl:
       override def get(s: Structure): Out          = _get(s)
-      override def replace(b: In): Structure => Modified = _replace(b)
+      override def replace(in: In): Structure => Modified = _replace(in)
       override def modifyF[F[+_]](f: Out => F[In])(s: Structure)(using fun: Functor[F]): F[Modified] =
-        fun.map(f(_get(s)))(a => _replace(a)(s))
+        fun.map(f(_get(s)))(out => _replace(out)(s))
       override def modify(f: Out => In): Structure => Modified = s => _replace(f(_get(s)))(s)
     )
 
@@ -25,7 +25,7 @@ trait FullOpticConstructors:
   ): FullOptic[GetOption & Modify, Structure, Modified, Out, In] =
     FullOptic(new OptionalImpl:
       override def getOrModify(s: Structure): Either[Modified, Out] = _getOrModify(s)
-      override def replace(b: In): Structure => Modified           = _replace(b)
+      override def replace(in: In): Structure => Modified           = _replace(in)
       override def getOption(s: Structure): Option[Out]      = _getOrModify(s).toOption
     )
 
@@ -52,10 +52,10 @@ trait FullOpticConstructors:
     FullOptic(new IsoImpl:
       self =>
       override def get(s: Structure): Out        = _get(s)
-      override def reverseGet(b: In): Modified = _reverseGet(b)
+      override def reverseGet(in: In): Modified = _reverseGet(in)
       override def reverse: IsoImpl[In, Out, Modified, Structure] = new IsoImpl:
-        override def get(b: In): Modified                 = _reverseGet(b)
-        override def reverseGet(a: Structure): Out          = _get(a)
+        override def get(in: In): Modified                 = _reverseGet(in)
+        override def reverseGet(out: Structure): Out          = _get(out)
         override def reverse: IsoImpl[Structure, Modified, Out, In] = self
     )
 
@@ -63,7 +63,7 @@ trait FullOpticConstructors:
     _reverseGet: In => Modified
   ): FullOptic[GetOption & ReverseGet, Structure, Modified, Out, In] =
     FullOptic(new PrismImpl:
-      override def reverseGet(b: In): Modified             = _reverseGet(b)
+      override def reverseGet(in: In): Modified             = _reverseGet(in)
       override def getOrModify(s: Structure): Either[Modified, Out] = _getOrModify(s)
       override def getOption(s: Structure): Option[Out]      = _getOrModify(s).toOption
     )

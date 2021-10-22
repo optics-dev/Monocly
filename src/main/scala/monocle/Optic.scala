@@ -107,7 +107,7 @@ final class FullOptic[+Can, -Structure, +Modified, +Out, -In] private[monocle] (
       (using Can <:< (Get & ReverseGet)): FullOptic[Get & ReverseGet, F[Structure], F[Modified], F[Out], F[In]] =
     FullOptic.thatCan.convertBetween[F[Structure], F[Modified], F[Out], F[In]]
       (fs => Functor[F].map(fs)(get))
-      (fb => Functor[F].map(fb)(this.reverseGet))
+      (fin => Functor[F].map(fin)(this.reverseGet))
 
   def modify(f: Out => In)(using Can <:< Modify): Structure => Modified =
     impl.safe.modify(f)
@@ -125,7 +125,7 @@ final class FullOptic[+Can, -Structure, +Modified, +Out, -In] private[monocle] (
     impl.safe.modifyF(f)(s)
 
   def modifyOption(f: Out => In)(using Can <:< (GetOption & Modify)): Structure => Option[Modified] =
-    s => impl.safe.getOption(s).map(a => impl.safe.replace(f(a))(s))
+    s => impl.safe.getOption(s).map(out => impl.safe.replace(f(out))(s))
 
   def nonEmpty(s: Structure)(using Can <:< GetMany): Boolean =
     !isEmpty(s)
@@ -144,7 +144,7 @@ final class FullOptic[+Can, -Structure, +Modified, +Out, -In] private[monocle] (
       (using Can <:< (GetOption & Modify)): FullOptic[GetOption & Modify, Structure1, Modified1, Out1, In1] =
     FullOptic.thatCan.editOption[Structure1, Modified1, Out1, In1]
       (s => this.getOrModify(s).orElse(other.getOrModify(s)))
-      (b => s => this.replaceOption(b)(s).getOrElse(other.replace(b)(s)))
+      (in => s => this.replaceOption(in)(s).getOrElse(other.replace(in)(s)))
 
   def parModifyF[G[+_]]
       (f: Out => G[In])
@@ -152,7 +152,7 @@ final class FullOptic[+Can, -Structure, +Modified, +Out, -In] private[monocle] (
       (using p: Parallel[G])
       (using Can <:< (GetMany & Modify)): G[Modified] =
     given Applicative[p.F] = p.applicative
-    p.sequential(this.modifyA(a => p.parallel(f(a)))(s))
+    p.sequential(this.modifyA(out => p.parallel(f(out)))(s))
 
   def parNonEmptyModifyF[F[+_]]
       (f: Out => F[In])
@@ -160,19 +160,19 @@ final class FullOptic[+Can, -Structure, +Modified, +Out, -In] private[monocle] (
       (using p: NonEmptyParallel[F])
       (using Can <:< (GetOneOrMore & Modify)): F[Modified] =
     given Apply[p.F] = p.apply
-    p.sequential(this.nonEmptyModifyA(a => p.parallel(f(a)))(s))
+    p.sequential(this.nonEmptyModifyA(out => p.parallel(f(out)))(s))
 
   def re[T1 >: Modified, B1 <: In](using Can <:< ReverseGet): Optic[Get, B1, T1] =
     Optic.thatCan.get(this.reverseGet)
 
-  def replace(b: In)(using Can <:< Modify): Structure => Modified =
-    impl.safe.modify(_ => b)
+  def replace(in: In)(using Can <:< Modify): Structure => Modified =
+    impl.safe.modify(_ => in)
 
-  def replaceOption(b: In)(using Can <:< (GetOption & Modify)): Structure => Option[Modified] =
-    this.modifyOption(_ => b)
+  def replaceOption(in: In)(using Can <:< (GetOption & Modify)): Structure => Option[Modified] =
+    this.modifyOption(_ => in)
 
-  def reverseGet(b: In)(using Can <:< ReverseGet): Modified =
-    impl.safe.reverseGet(b)
+  def reverseGet(in: In)(using Can <:< ReverseGet): Modified =
+    impl.safe.reverseGet(in)
 
   def some[A1, B1](using Out <:< Option[A1], Option[B1] <:< In): FullOptic[Can | GetOption, Structure, Modified, A1, B1] =
     asInstanceOf[FullOptic[Can, Structure, Modified, Option[A1], Option[B1]]].andThen(std.option.pSome)
