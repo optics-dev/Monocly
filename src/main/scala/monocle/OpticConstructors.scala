@@ -4,73 +4,73 @@ import monocle.impl._
 import monocle.functions.*
 import monocle.internal.*
 
-trait OpticConstructors(polyConstructors: POpticConstructors):
+trait OpticConstructors(fullConstructors: FullOpticConstructors):
 
-  def get[S, A](_get: S => A): OpticGet[Get, S, A] =
-    POptic(
+  def get[Structure, Out](_get: Structure => Out): OpticGet[Get, Structure, Out] =
+    FullOptic(
       new GetterImpl:
-        override def get(s: S): A = _get(s)
+        override def get(s: Structure): Out = _get(s)
     )
 
-  def get2[S, A](_get1: S => A, _get2: S => A): OpticGet[GetOneOrMore, S, A] =
+  def get2[Structure, Out](_get1: Structure => Out, _get2: Structure => Out): OpticGet[GetOneOrMore, Structure, Out] =
     getOneOrMore(s => NonEmptyList.of(_get1(s), _get2(s)))
 
-  def getOption[S, A](_getOption: S => Option[A]): OpticGet[GetOption, S, A] =
-    POptic(
+  def getOption[Structure, Out](_getOption: Structure => Option[Out]): OpticGet[GetOption, Structure, Out] =
+    FullOptic(
       new OptionalGetterImpl:
-        override def getOption(s: S): Option[A] = _getOption(s)
+        override def getOption(s: Structure): Option[Out] = _getOption(s)
     )
 
-  def getOneOrMore[S, A](_getOneOrMore: S => NonEmptyList[A]): OpticGet[GetOneOrMore, S, A] =
-    POptic(
+  def getOneOrMore[Structure, Out](_getOneOrMore: Structure => NonEmptyList[Out]): OpticGet[GetOneOrMore, Structure, Out] =
+    FullOptic(
       new NonEmptyFoldImpl:
-        override def nonEmptyFoldMap[M](f: A => M)(s: S)(using sem: Semigroup[M]): M =
+        override def nonEmptyFoldMap[M](f: Out => M)(s: Structure)(using sem: Semigroup[M]): M =
           val NonEmptyList(head, tail) = _getOneOrMore(s)
           tail.foldLeft(f(head))((m, a) => sem.combine(m, f(a)))
 
-        override def toIterator(s: S): Iterator[A] =
+        override def toIterator(s: Structure): Iterator[Out] =
           _getOneOrMore(s).iterator
     )
 
-  def getMany[S, A](_getAll: S => IterableOnce[A]): OpticGet[GetMany, S, A] =
-    POptic(
+  def getMany[Structure, Out](_getAll: Structure => IterableOnce[Out]): OpticGet[GetMany, Structure, Out] =
+    FullOptic(
       new FoldImpl:
-        override def toIterator(s: S): Iterator[A] =
+        override def toIterator(s: Structure): Iterator[Out] =
           _getAll(s).iterator
     )
 
-  def modify[S, A](_modify: (A => A) => S => S): Optic[Modify, S, A] =
-    polyConstructors.modify(_modify)
+  def modify[Structure, A](_modify: (A => A) => Structure => Structure): Optic[Modify, Structure, A] =
+    fullConstructors.modify(_modify)
 
-  def edit[S, A](_get: S => A)(_replace: A => S => S): Optic[Get & Modify, S, A] =
-    polyConstructors.edit(_get)(_replace)
+  def edit[Structure, A](_get: Structure => A)(_replace: A => Structure => Structure): Optic[Get & Modify, Structure, A] =
+    fullConstructors.edit(_get)(_replace)
 
-  def editOption[S, A](_getOption: S => Option[A])(_replace: A => S => S): Optic[GetOption & Modify, S, A] =
-    polyConstructors.editOption[S, S, A, A](s => _getOption(s).fold(Left(s))(Right.apply))(_replace)
+  def editOption[Structure, A](_getOption: Structure => Option[A])(_replace: A => Structure => Structure): Optic[GetOption & Modify, Structure, A] =
+    fullConstructors.editOption[Structure, Structure, A, A](s => _getOption(s).fold(Left(s))(Right.apply))(_replace)
 
-  def edit2[S, A](_get1: S => A, _get2: S => A)(_replace2: (A, A) => S => S): Optic[GetOneOrMore & Modify, S, A] =
-    polyConstructors.edit2(_get1, _get2)(_replace2)
+  def edit2[Structure, A](_get1: Structure => A, _get2: Structure => A)(_replace2: (A, A) => Structure => Structure): Optic[GetOneOrMore & Modify, Structure, A] =
+    fullConstructors.edit2(_get1, _get2)(_replace2)
 
-  def editOneOrMore[S, A, G[_]: NonEmptyTraverse](_getOneOrMore: S => G[A])(
-    _replaceOneOrMore: G[A] => S => S
-  ): Optic[GetOneOrMore & Modify, S, A] =
-    polyConstructors.editOneOrMore(_getOneOrMore)(_replaceOneOrMore)
+  def editOneOrMore[Structure, A, G[_]: NonEmptyTraverse](_getOneOrMore: Structure => G[A])(
+    _replaceOneOrMore: G[A] => Structure => Structure
+  ): Optic[GetOneOrMore & Modify, Structure, A] =
+    fullConstructors.editOneOrMore(_getOneOrMore)(_replaceOneOrMore)
 
-  def editMany[S, A, G[_]: Traverse](_getMany: S => G[A])(_replaceMany: G[A] => S => S): Optic[GetMany & Modify, S, A] =
-    polyConstructors.editMany(_getMany)(_replaceMany)
+  def editMany[Structure, A, G[_]: Traverse](_getMany: Structure => G[A])(_replaceMany: G[A] => Structure => Structure): Optic[GetMany & Modify, Structure, A] =
+    fullConstructors.editMany(_getMany)(_replaceMany)
 
-  def convertBetween[S, A](_get: S => A)(_reverseGet: A => S): Optic[Get & ReverseGet, S, A] =
-    polyConstructors.convertBetween(_get)(_reverseGet)
+  def convertBetween[Structure, A](_get: Structure => A)(_reverseGet: A => Structure): Optic[Get & ReverseGet, Structure, A] =
+    fullConstructors.convertBetween(_get)(_reverseGet)
 
-  def selectBranch[S, A](_getOption: PartialFunction[S, A])(_reverseGet: A => S): Optic[GetOption & ReverseGet, S, A] =
-    POptic(new PrismImpl:
-      override def reverseGet(a: A): S             = _reverseGet(a)
-      override def getOrModify(s: S): Either[S, A] = _getOption.lift(s).fold(Left(s))(Right.apply)
-      override def getOption(s: S): Option[A]      = _getOption.lift(s)
+  def selectBranch[Structure, A](_getOption: PartialFunction[Structure, A])(_reverseGet: A => Structure): Optic[GetOption & ReverseGet, Structure, A] =
+    FullOptic(new PrismImpl:
+      override def reverseGet(a: A): Structure             = _reverseGet(a)
+      override def getOrModify(s: Structure): Either[Structure, A] = _getOption.lift(s).fold(Left(s))(Right.apply)
+      override def getOption(s: Structure): Option[A]      = _getOption.lift(s)
     )
 
-  def traverse[Tr[_]: Traverse, A]: Optic[GetMany & Modify, Tr[A], A] =
-    polyConstructors.traverse
+  def traverse[T[_]: Traverse, A]: Optic[GetMany & Modify, T[A], A] =
+    fullConstructors.traverse
 
-  def nonEmptyTraverse[Tr[_]: NonEmptyTraverse, A]: Optic[GetOneOrMore & Modify, Tr[A], A] =
-    polyConstructors.nonEmptyTraverse
+  def nonEmptyTraverse[T[_]: NonEmptyTraverse, A]: Optic[GetOneOrMore & Modify, T[A], A] =
+    fullConstructors.nonEmptyTraverse

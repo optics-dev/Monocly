@@ -3,27 +3,27 @@ package monocle.impl
 import monocle._
 import monocle.internal._
 
-private[monocle] trait OptionalGetterImpl[+Can <: GetOption, -S, +T, +A, -B] extends FoldImpl[Can, S, T, A, B]:
+private[monocle] trait OptionalGetterImpl[+Can <: GetOption, -Structure, +Modified, +Out, -B] extends FoldImpl[Can, Structure, Modified, Out, B]:
   optic1 =>
 
-  protected[impl] def getOption(s: S): Option[A]
+  protected[impl] def getOption(s: Structure): Option[Out]
 
-  override protected[impl] def toIterator(s: S): Iterator[A] =
+  override protected[impl] def toIterator(s: Structure): Iterator[Out] =
     getOption(s).iterator
 
-  protected def composeOptionalGetter[Can2 >: Can <: GetOption, C, D](
-    optic2: OptionalGetterImpl[Can2, A, B, C, D]
-  ): OptionalGetterImpl[Can2, S, T, C, D] =
+  protected def composeOptionalGetter[Can2 >: Can <: GetOption, Out2, In2](
+    optic2: OptionalGetterImpl[Can2, Out, B, Out2, In2]
+  ): OptionalGetterImpl[Can2, Structure, Modified, Out2, In2] =
     new OptionalGetterImpl:
-      override def getOption(s: S): Option[C] =
+      override def getOption(s: Structure): Option[Out2] =
         optic1.getOption(s).flatMap(optic2.getOption)
 
-  override def andThen[Can2 >: Can, C, D](
-    optic2: OpticImpl[Can2, A, B, C, D]
-  ): OpticImpl[Can2, S, T, C, D] =
+  override def andThen[Can2 >: Can, Out2, In2](
+    optic2: OpticImpl[Can2, Out, B, Out2, In2]
+  ): OpticImpl[Can2, Structure, Modified, Out2, In2] =
     optic2 match
-      case getOpt: OptionalGetterImpl[Can2 & GetOption, A, B, C, D] => composeOptionalGetter(getOpt)
-      case fold: FoldImpl[Can2 & GetMany, A, B, C, D]               => composeFold(fold)
+      case getOpt: OptionalGetterImpl[Can2 & GetOption, Out, B, Out2, In2] => composeOptionalGetter(getOpt)
+      case fold: FoldImpl[Can2 & GetMany, Out, B, Out2, In2]               => composeFold(fold)
       case _                                                           => NullOpticImpl
 
   override def toString: String =
